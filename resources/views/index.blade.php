@@ -36,8 +36,8 @@
   <link href="assets/css/style.css" rel="stylesheet">
   
   <!--Favicon-->
-  <link rel="shortcut icon" href="assets/img/favicon.ico" type="image/x-icon">
-  <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="assets/img/logo2.png" type="image/x-icon">
+  <link rel="icon" href="assets/img/logo2.png" type="image/x-icon">
 
 </head>
 
@@ -48,7 +48,7 @@
 <section class="fixed-top navigation">
   <div class="container">
     <nav class="navbar navbar-expand-lg navbar-light">
-      <a class="navbar-brand" href="index.html"><img src="assets/img/logo.png" alt="logo"></a>
+      <a class="navbar-brand" href="index.html"><img src="assets/img/logo2.png" alt="logo"></a>
       <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar"
         aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
