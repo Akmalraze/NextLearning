@@ -57,29 +57,22 @@
       <div class="collapse navbar-collapse text-center" id="navbar">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link" href="{{ route('welcome-page') }}">Home</a>
+            <a class="nav-link  page-scroll" href="#home">Home</a>
           </li>
           <li class="nav-item">
             <a class="nav-link page-scroll" href="#feature">Feature</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="about.html">About</a>
+            <a class="nav-link  page-scroll" href="#about">About</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="service.html">Service</a>
+            <a class="nav-link  page-scroll" href="#service">Service</a>
           </li>
           <li class="nav-item">
             <a class="nav-link page-scroll" href="#team">Team</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link page-scroll" href="#pricing">Pricing</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="contact.html">Contact</a>
-          </li>
         </ul>
-        <a href="{{ route('dashboard') }}" class="btn btn-primary ml-lg-3 primary-shadow">Try Free</a>
-
+        <a href="{{ route('dashboard') }}" class="btn btn-primary ml-lg-3 primary-shadow">Login</a>
       </div>
     </nav>
   </div>
@@ -87,14 +80,13 @@
 <!-- /navigation -->
 
 <!-- hero area -->
-<section class="hero-section hero" data-background="" style="background-image: url(img/hero-area/banner-bg.png);">
+<section class="hero-section hero" data-background="" style="background-image: url(img/hero-area/banner-bg.png);" id="home">
   <div class="container">
     <div class="row">
       <div class="col-lg-12 text-center zindex-1">
-        <h1 class="mb-3">Take Control of your<br>
-          Project and Team</h1>
-        <p class="mb-4">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum<br>
-          dolore eu fugiat nulla pariatur.</p>
+        <h1 class="mb-3">A New Era of <br>
+          Learning Starts Here</h1>
+        <p class="mb-4">Unlock a flexible, interactive, and self-paced learning experience tailored to every student's needs.</p>
         <a href="#" class="btn btn-secondary btn-lg">explore us</a>
         <!-- banner image -->
         <img class="img-fluid w-100 banner-image" src="assets/img/hero-area/banner-img.png" alt="banner-img">
@@ -121,8 +113,8 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-12 text-center">
-        <h2 class="section-title">Awesome Features</h2>
-        <p class="mb-100">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.<br>Excepteur sint occaecat cupidatat non proident</p>
+        <h2 class="section-title">Awesome Features of NextLearning</h2>
+        <p class="mb-100">A learning platform designed to bridge the gap between traditional education and digital tools. Experience personalized, engaging, and efficient learning with NextLearning.</p>
       </div>
       <!-- feature item -->
       <div class="col-md-6 mb-80">
@@ -131,9 +123,8 @@
             <i class="ti-ruler-pencil feature-icon mr-4"></i>
           </div>
           <div>
-            <h4>Awesome Design</h4>
-            <p>Consectetur adipiscing elit donec tempus
-              pellentesque dui.</p>
+            <h4>Intuitive Design</h4>
+            <p>Designed to be simple and user-friendly, ensuring students and teachers can navigate easily.</p>
           </div>
         </div>
       </div>
@@ -144,9 +135,9 @@
             <i class="ti-layout-cta-left feature-icon mr-4"></i>
           </div>
           <div>
-            <h4>Easy Customize</h4>
-            <p>Consectetur adipiscing elit donec tempus
-              pellentesque dui.</p>
+            <h4>Flexible Customization</h4>
+            <p>Allows teachers to upload and modify content easily, creating a personalized learning experience.</p>
+
           </div>
         </div>
       </div>
@@ -157,9 +148,9 @@
             <i class="ti-split-v-alt feature-icon mr-4"></i>
           </div>
           <div>
-            <h4>Bug free Code</h4>
-            <p>Consectetur adipiscing elit donec tempus
-              pellentesque dui.</p>
+            <h4>Reliable Platform</h4>
+            <p>Built with a bug-free code to provide a seamless, stable learning experience for students and teachers alike.</p>
+
           </div>
         </div>
       </div>
@@ -170,9 +161,9 @@
             <i class="ti-layers-alt feature-icon mr-4"></i>
           </div>
           <div>
-            <h4>Organized Layouts</h4>
-            <p>Consectetur adipiscing elit donec tempus
-              pellentesque dui.</p>
+            <h4>Streamlined Layout</h4>
+            <p>Organized layouts that make it easy for users to interact with materials, assessments, and progress tracking.</p>
+
           </div>
         </div>
       </div>
@@ -184,7 +175,7 @@
 <!-- /feature -->
 
 <!-- marketing -->
-<section class="section-lg seo">
+<section class="section-lg seo" id="about">
   <div class="container">
     <div class="row">
       <div class="col-md-6">
@@ -193,13 +184,9 @@
         </div>
       </div>
       <div class="col-md-5">
-        <h2 class="section-title">A Complete Range Of SEO Marketing Services!</h2>
-        <p>Far far away, behind the word mountains, far
-          from the countries Vokalia and Consonantia.<br>
-          There live the blind texts. Separated they
-          live in Bookmarksgrove right at the coast of
-          the Semantics, a large language ocean.
-        </p>
+        <h2 class="section-title">A Complete Digital Learning Experience</h2>
+        <p>NextLearning offers an intuitive and dynamic learning platform that helps secondary school students develop essential digital skills, preparing them for higher education and future careers.</p>
+
       </div>
     </div>
   </div>
@@ -213,17 +200,13 @@
 <!-- /marketing -->
 
 <!-- service -->
-<section class="section-lg service">
+<section class="section-lg service"  id="service">
   <div class="container">
     <div class="row justify-content-between">
       <div class="col-md-5 order-2 order-md-1">
-        <h2 class="section-title">Powerful Layout From Top To Bottom</h2>
-        <p class="mb-4">Far far away, behind the word mountains,
-          far from the countries Vokalia and Consonantia,
-          there live the blind texts. Separated they
-          live in Bookmarksgrove right at the coast of the
-          Semantics, a large language ocean.</p>
-        <ul class="pl-0 service-list">
+        <h2 class="section-title">Empowering Teachers and Students with Digital Tools</h2>
+        <p>NextLearning provides educators with effective tools to manage content, assess student performance, and track progress in real-time, helping create a personalized learning experience.</p>
+
           <li><i class="ti-layout-tab-window text-purple"></i>Responsive on any device</li>
           <li><i class="ti-layout-placeholder text-purple"></i>Very easy to customize</li>
           <li><i class="ti-support text-purple"></i>Effective support</li>
@@ -247,9 +230,9 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-lg-12 text-center">
-        <h2 class="section-title">Our Team</h2>
-        <p class="mb-100">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu<br>
-          fugiat nulla pariatur. Excepteur sint occaecat </p>
+        <h2 class="section-title">Meet the Team Behind NextLearning</h2>
+        <p>Our team is dedicated to creating a platform that empowers both students and teachers, combining cutting-edge technology with a user-centered design.</p>
+
       </div>
     </div>
     <div class="col-10 mx-auto">
@@ -334,63 +317,6 @@
 </section>
 <!-- /team -->
 
-<!-- pricing -->
-<section class="section-lg pb-0 pricing" id="pricing">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12 text-center">
-        <h2 class="section-title">Our Pricing</h2>
-        <p class="mb-50">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu <br>
-          fugiat nulla pariatur. Excepteur sint occaecat </p>
-      </div>
-      <div class="col-lg-10 mx-auto">
-        <div class="row justify-content-center">
-          <!-- pricing table -->
-          <div class="col-md-6 col-lg-4 mb-5 mb-lg-0">
-            <div class="rounded text-center pricing-table table-1">
-              <h3>Free</h3>
-              <h1><span>$</span>00</h1>
-              <p>Far far away, behind the
-                wordmountains, far from the
-                countries Vokalia and
-              </p>
-              <a href="#" class="btn pricing-btn px-2">Get Started</a>
-            </div>
-          </div>
-          <!-- pricing table -->
-          <div class="col-md-6 col-lg-4 mb-5 mb-lg-0">
-            <div class="rounded text-center pricing-table table-2">
-              <h3>Standard</h3>
-              <h1><span>$</span>75</h1>
-              <p>Far far away, behind the
-                wordmountains, far from the
-                countries Vokalia and
-              </p>
-              <a href="#" class="btn pricing-btn px-2">Buy Now</a>
-            </div>
-          </div>
-          <!-- pricing table -->
-          <div class="col-md-6 col-lg-4 mb-5 mb-lg-0">
-            <div class="rounded text-center pricing-table table-3">
-              <h3>Premium</h3>
-              <h1><span>$</span>99</h1>
-              <p>Far far away, behind the
-                wordmountains, far from the
-                countries Vokalia and
-              </p>
-              <a href="#" class="btn pricing-btn px-2">Buy Now</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- background shapes -->
-  <img class="pricing-bg-shape-1 up-down-animation" src="assets/img/background-shape/seo-ball-1.png" alt="background-shape">
-  <img class="pricing-bg-shape-2 up-down-animation" src="assets/img/background-shape/seo-half-cycle.png" alt="background-shape">
-  <img class="pricing-bg-shape-3 left-right-animation" src="assets/img/background-shape/team-bg-triangle.png" alt="background-shape">
-</section>
-<!-- /pricing -->
 
 <!-- client logo slider -->
 <section class="section">
@@ -411,28 +337,6 @@
 </section>
 <!-- /client logo slider -->
 
-<!-- newsletter -->
-<section class="newsletter">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12 text-center">
-        <h2>Subscribe to our newsletter</h2>
-        <p class="mb-5">Receive updates, news and deals</p>
-      </div>
-      <div class="col-lg-8 col-sm-10 col-12 mx-auto">
-        <form action="#">
-          <div class="input-wrapper position-relative">
-            <input type="email" class="newsletter-form" id="newsletter" placeholder="Enter your email">
-            <button type="submit" value="send" class="btn newsletter-btn">subscribe</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-  <!-- background shapes -->
-  <img class="newsletter-bg-shape left-right-animation" src="assets/img/background-shape/seo-ball-2.png" alt="background-shape">
-</section>
-<!-- /newsletter -->
 
 <!-- footer -->
 <footer class="footer-section footer" style="background-image: url(img/backgrounds/footer-bg.png);">
