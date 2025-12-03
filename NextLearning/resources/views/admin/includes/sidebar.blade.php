@@ -17,6 +17,46 @@
                         Dashboard
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ (request()->is('module')) ? 'active' : '' }}" aria-current="page"
+                       href="{{ route('module') }}">
+                        <span data-feather="home" class="align-text-bottom"></span>
+                        Module
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {{ (request()->is('assessment')) ? 'active' : '' }}" aria-current="page"
+                       href="{{ route('assessment') }}">
+                        <span data-feather="home" class="align-text-bottom"></span>
+                        Assessment
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ (request()->is('report')) ? 'active' : '' }}" aria-current="page"
+                       href="{{ route('report') }}">
+                        <span data-feather="home" class="align-text-bottom"></span>
+                        Report
+                    </a>
+                </li>
+                {{-- <li class="nav-item">
+                    <a class="nav-link {{ (request()->is('admin')) ? 'active' : '' }}" aria-current="page"
+                       href="{{ route('admin.index') }}">
+                        <span data-feather="home" class="align-text-bottom"></span>
+                        Inbox
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ (request()->is('admin')) ? 'active' : '' }}" aria-current="page"
+                       href="{{ route('admin.index') }}">
+                        <span data-feather="home" class="align-text-bottom"></span>
+                        Setting
+                    </a>
+                </li> --}}
+
+
+
+
                 @can('user_access')
                     <li class="nav-item">
                         <a class="nav-link {{ (request()->is('admin/users*')) ? 'active' : '' }}"
@@ -100,6 +140,7 @@
                         Change Password
                     </a>
                 </li>
+                
             </ul>
         </div>
     </div>

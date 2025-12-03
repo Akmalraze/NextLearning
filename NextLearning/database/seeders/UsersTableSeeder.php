@@ -25,6 +25,16 @@ class UsersTableSeeder extends Seeder
         $permission7 = Permission::create(['name' => 'edit materials']);
         $permission8 = Permission::create(['name' => 'delete materials']);
 
+        $permissions = [
+        'user_access',
+        'permission_access',
+        'role_access',
+        'post_access',
+        'category_access',
+        'tag_access',
+    ];
+        
+
         // Creating Roles
         $roleAdmin = Role::create(['name' => 'Admin']);
         $roleTeacher = Role::create(['name' => 'Teacher']);
@@ -32,27 +42,39 @@ class UsersTableSeeder extends Seeder
 
         // Assigning Permissions to Roles
         $roleAdmin->givePermissionTo([
-            $permission1, $permission2, $permission3, $permission4, 
+            $permissions, $permission1, $permission2, $permission3, $permission4, 
             $permission5, $permission6, $permission7, $permission8
         ]);
 
         $roleTeacher->givePermissionTo([
-            $permission1, $permission5, $permission6, $permission7
+            $permissions,$permission1, $permission5, $permission6, $permission7
         ]);
 
         $roleStudent->givePermissionTo([
-            $permission1, $permission5
+            $permissions,$permission1, $permission5
         ]);
 
         // Creating Admin User
-        $admin = User::create([
+        $admin = User::create(
+            
+        [
             'name' => 'Admin User',
             'email' => 'admin@demo.com',
             'password' => Hash::make('adminpassword'),
             'status' => 1,  // Active status
             'created_at' => now(),
             'updated_at' => now(),
-        ]);
+        ],
+        [
+            'name' => 'Akmal Razelan',
+            'email' => 'akmalraze@gmail.com',
+            'password' => Hash::make('12345678'),
+            'status' => 1,  // Active status
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]
+    
+    );
         $admin->assignRole($roleAdmin);
 
         // Creating Teacher User

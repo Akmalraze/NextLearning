@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'app_name' => 'Laravel Admin Stater',
-    'app_desc' => 'Laravel Admin Stater',
-    'author' => 'Fazle Rabbi',
+    'app_name' => 'NextLearning',
+    'app_desc' => 'Learning Management System',
+    'author' => 'BrainDev.io',
     'version' => '1.0'
 ];

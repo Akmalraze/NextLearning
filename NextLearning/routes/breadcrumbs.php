@@ -56,3 +56,28 @@ Breadcrumbs::for('admin.password.index', function (BreadcrumbTrail $trail): void
     $trail->parent('admin.index');
     $trail->push('Change Password', route('admin.password.index'));
 });
+
+Breadcrumbs::for('report', function (BreadcrumbTrail $trail): void {
+    $trail->push('Dashboard', route('home'));  // You can replace this with your dashboard route
+    $trail->push('Report', route('report'));
+});
+
+Breadcrumbs::for('subject', function (BreadcrumbTrail $trail): void {
+    $trail->push('Dashboard', route('home'));  // Replace with your dashboard route
+    $trail->push('Subject', route('subject'));
+});
+
+Breadcrumbs::for('module', function (BreadcrumbTrail $trail): void {
+    $trail->push('Dashboard', route('home'));  // Replace with your dashboard route
+    $trail->push('Module', route('module'));
+});
+
+Breadcrumbs::for('class', function (BreadcrumbTrail $trail): void {
+    $trail->push('Dashboard', route('home'));  // Replace with your dashboard route
+    $trail->push('Class', route('class'));
+});
+
+Breadcrumbs::for('assessment', function (BreadcrumbTrail $trail): void {
+    $trail->push('Dashboard', route('home'));  // Replace with your dashboard route
+    $trail->push('Assessment', route('assessment'));
+});
