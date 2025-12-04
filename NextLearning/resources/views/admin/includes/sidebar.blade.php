@@ -66,7 +66,7 @@
                         </a>
                     </li>
                 @endcan
-                @can('permission_access')
+                {{-- @can('permission_access')
                     <li class="nav-item">
                         <a class="nav-link {{ (request()->is('admin/permissions*')) ? 'active' : '' }}"
                            href="{{ route('admin.permissions.index') }}">
@@ -74,7 +74,7 @@
                             Permissions
                         </a>
                     </li>
-                @endcan
+                @endcan --}}
                 @can('role_access')
                     <li class="nav-item">
                         <a class="nav-link {{ (request()->is('admin/roles*')) ? 'active' : '' }}"
@@ -84,7 +84,7 @@
                         </a>
                     </li>
                 @endcan
-                @can('post_access')
+                {{-- @can('post_access')
                     <li class="nav-item">
                         <a class="nav-link {{ (request()->is('admin/posts*')) ? 'active' : '' }}"
                            href="{{ route('admin.posts.index') }}">
@@ -92,7 +92,7 @@
                             Posts
                         </a>
                     </li>
-                @endcan
+                @endcan --}}
                 @can('category_access')
                     <li class="nav-item">
                         <a class="nav-link {{ (request()->is('admin/categories*')) ? 'active' : '' }}"
