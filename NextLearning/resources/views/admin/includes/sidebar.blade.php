@@ -18,8 +18,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ (request()->is('module')) ? 'active' : '' }}" aria-current="page"
-                       href="{{ route('module') }}">
+                    <a class="nav-link {{ (request()->is('modules-index')) ? 'active' : '' }}" aria-current="page"
+                       href="{{ route('modules-index') }}">
                         <span data-feather="home" class="align-text-bottom"></span>
                         Module
                     </a>

@@ -9,13 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-     public function up(): void
+    public function up(): void
     {
-        // Create Class Table
-        Schema::create('class', function (Blueprint $table) {
-            $table->id('class_id');
-            $table->string('class_name');
-
+        Schema::create('modules', function (Blueprint $table) {
+            $table->id();
+            $table->string('modules_name');
+            $table->string('modules_description')->nullable();
+            $table->foreignId('subject_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('class');
+        Schema::dropIfExists('modules');
     }
 };

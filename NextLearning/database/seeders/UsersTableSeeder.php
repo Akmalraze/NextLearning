@@ -25,8 +25,6 @@ class UsersTableSeeder extends Seeder
         $permission7 = Permission::create(['name' => 'edit materials']);
         $permission8 = Permission::create(['name' => 'delete materials']);
 
-      
-
         // Creating Roles
         $roleAdmin = Role::create(['name' => 'Admin']);
         $roleTeacher = Role::create(['name' => 'Teacher']);

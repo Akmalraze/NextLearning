@@ -9,8 +9,14 @@ class ModuleController extends Controller
 {
     public function index()
     {
-        $modules = Modules::with('subject')->get();
+        
         return view('pages.ManageModule.index');
+    }
+
+    public function list()
+    {
+        
+        return view('pages.ManageModule.list');
     }
     
     public function view()
