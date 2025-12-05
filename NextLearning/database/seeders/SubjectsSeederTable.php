@@ -18,14 +18,17 @@ class SubjectsSeederTable extends Seeder
             [
                 'subjects_name' => 'Mathematics',
                 'subjects_totalStudent' => 100,
+                'subjects_code' => 'MATH101',
             ],
             [
                 'subjects_name' => 'Science',
                 'subjects_totalStudent' => 80,
+                'subjects_code' => 'SCI101',
             ],
             [
                 'subjects_name' => 'History',
                 'subjects_totalStudent' => 50,
+                'subjects_code' => 'HIST101',
             ],
         ]);
     }
