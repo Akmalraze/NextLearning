@@ -54,7 +54,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Mathematics : Form 1</h5>
                     <p class="card-text">Cg Zubaidah Saad</p>
-                    <a href="#" class="btn btn-primary">View Subject</a>
+                    <a href="{{ route('modules-list') }}" class="btn btn-primary">View Subject</a>
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Sejarah : Form 1</h5>
                     <p class="card-text">Cg Sazali Zamali</p>
-                    <a href="#" class="btn btn-primary">View Subject</a>
+                    <a href="{{ route('modules-list') }}" class="btn btn-primary">View Subject</a>
                 </div>
             </div>
         </div>
@@ -73,7 +73,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Science : Form 1</h5>
                     <p class="card-text">Cg Zainal Selamat</p>
-                    <a href="#" class="btn btn-primary">View Subject</a>
+                    <a href="{{ route('modules-list') }}" class="btn btn-primary">View Subject</a>
                 </div>
             </div>
         </div>

@@ -93,7 +93,6 @@
                         
                         <a href="{{ route('admin.index') }}" class="btn btn-primary ml-lg-3 primary-shadow">Home</a>
                     @else
-                        admin.index
                         <a href="{{ route('login') }}" class="btn btn-primary ml-lg-3 primary-shadow">Login</a>
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}" class="btn btn-primary ml-lg-3 primary-shadow">Register</a>
