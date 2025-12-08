@@ -20,54 +20,54 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::get('/Dashboard', function () {
-    return view('admin.index');  
+    return view('admin.index');
 })->name('report');
 
-Route::controller(ModuleController::class)
-        ->prefix('ManageModules')
-        ->name('modules-')
-        ->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/list', 'list')->name('list');
-            Route::get('/create', 'create')->name('create');                
-            Route::post('/store', 'store')->name('store');                      
-            Route::get('{modules}/edit', 'edit')->name('edit');
-            Route::put('{modules}', 'update')->name('update');
-            Route::get('{modules}', 'view')->name('view');
-            Route::delete('{modules}', 'destroy')->name('destroy');
-        });
+Route::middleware(['auth', 'role:Admin'])->controller(ModuleController::class)
+    ->prefix('ManageModules')
+    ->name('modules-')
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/list', 'list')->name('list');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/store', 'store')->name('store');
+        Route::get('{modules}/edit', 'edit')->name('edit');
+        Route::put('{modules}', 'update')->name('update');
+        Route::get('{modules}', 'view')->name('view');
+        Route::delete('{modules}', 'destroy')->name('destroy');
+    });
 
 
-Route::controller(ClassController::class)
-        ->prefix('ManageClasses')
-        ->name('classes-')
-        ->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');                
-            Route::post('/store', 'store')->name('store');                      
-            Route::get('{classes}/edit', 'edit')->name('edit');
-            Route::put('{classes}', 'update')->name('update');
-            Route::get('{classes}', 'view')->name('view');
-            Route::delete('{classes}', 'destroy')->name('destroy');
-        });
+Route::middleware(['auth', 'role:Admin'])->controller(ClassController::class)
+    ->prefix('ManageClasses')
+    ->name('classes-')
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('create', 'create')->name('create');
+        Route::post('/store', 'store')->name('store');
+        Route::get('{classes}/edit', 'edit')->name('edit');
+        Route::put('{classes}', 'update')->name('update');
+        Route::get('{classes}', 'view')->name('view');
+        Route::delete('{classes}', 'destroy')->name('destroy');
+    });
 
 
 
 
 
 Route::get('/report', function () {
-    return view('pages.ManageReport.index');  
+    return view('pages.ManageReport.index');
 })->name('report');
 
 Route::get('/subject', function () {
-    return view('pages.ManageSubject.index');  
+    return view('pages.ManageSubject.index');
 })->name('subject');
 
 Route::get('/assessment', function () {
-    return view('pages.ManageAssessment.index');  
+    return view('pages.ManageAssessment.index');
 })->name('assessment');

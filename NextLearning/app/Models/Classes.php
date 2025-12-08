@@ -4,29 +4,59 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Subjects;
-use App\Models\Modules;
 
 class Classes extends Model
 {
     use HasFactory;
 
-    // Define which attributes can be mass-assigned
     protected $fillable = [
+        'form_level',
+        'name',
         'class_name',
+        'academic_session',
+        'homeroom_teacher_id',
         'user_id',
         'subjects_id',
     ];
 
-    // Relationship with Users (Many-to-one)
-    public function user()
+    // Relationship with homeroom teacher
+    public function homeroomTeacher()
     {
-        return $this->belongsTo(User::class, 'user_id', 'users_id');
+        return $this->belongsTo(User::class, 'homeroom_teacher_id');
     }
 
-    // Relationship with Subjects (One-to-many)
-    public function subjects()
+    // Relationship with Users (Many-to-one) - legacy
+    public function user()
     {
-        return $this->hasMany(Subjects::class, 'class_id', 'class_id');
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // Subject-Teacher assignments (master schedule)
+    public function subjectAssignments()
+    {
+        return $this->hasMany(SubjectClassTeacher::class, 'class_id');
+    }
+
+    // Teachers assigned to this class
+    public function teachers()
+    {
+        return $this->belongsToMany(User::class, 'subject_class_teacher', 'class_id', 'teacher_id')
+            ->withPivot('subject_id')
+            ->withTimestamps();
+    }
+
+    // Subjects assigned to this class
+    public function assignedSubjects()
+    {
+        return $this->belongsToMany(Subjects::class, 'subject_class_teacher', 'class_id', 'subject_id')
+            ->withPivot('teacher_id')
+            ->withTimestamps();
+    }
+
+    // Active students in this class
+    public function activeStudents()
+    {
+        return $this->belongsToMany(User::class, 'class_students', 'class_id', 'student_id')
+            ->wherePivot('status', 'active');
     }
 }

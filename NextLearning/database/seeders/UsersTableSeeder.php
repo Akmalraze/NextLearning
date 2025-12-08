@@ -15,56 +15,67 @@ class UsersTableSeeder extends Seeder
      */
     public function run(): void
     {
-        // Creating Permissions
-        $permission1 = Permission::create(['name' => 'view users']);
-        $permission2 = Permission::create(['name' => 'edit users']);
-        $permission3 = Permission::create(['name' => 'create users']);
-        $permission4 = Permission::create(['name' => 'delete users']);
-        $permission5 = Permission::create(['name' => 'view materials']);
-        $permission6 = Permission::create(['name' => 'create materials']);
-        $permission7 = Permission::create(['name' => 'edit materials']);
-        $permission8 = Permission::create(['name' => 'delete materials']);
+        // Creating Permissions (matching gate checks in views)
+        $userAccess = Permission::firstOrCreate(['name' => 'user_access']);
+        $userView = Permission::firstOrCreate(['name' => 'view users']);
+        $userEdit = Permission::firstOrCreate(['name' => 'edit users']);
+        $userCreate = Permission::firstOrCreate(['name' => 'create users']);
+        $userDelete = Permission::firstOrCreate(['name' => 'delete users']);
+
+        $roleAccess = Permission::firstOrCreate(['name' => 'role_access']);
+        $categoryAccess = Permission::firstOrCreate(['name' => 'category_access']);
+        $tagAccess = Permission::firstOrCreate(['name' => 'tag_access']);
+
+        $materialView = Permission::firstOrCreate(['name' => 'view materials']);
+        $materialCreate = Permission::firstOrCreate(['name' => 'create materials']);
+        $materialEdit = Permission::firstOrCreate(['name' => 'edit materials']);
+        $materialDelete = Permission::firstOrCreate(['name' => 'delete materials']);
 
         // Creating Roles
-        $roleAdmin = Role::create(['name' => 'Admin']);
-        $roleTeacher = Role::create(['name' => 'Teacher']);
-        $roleStudent = Role::create(['name' => 'Student']);
+        $roleAdmin = Role::firstOrCreate(['name' => 'Admin']);
+        $roleTeacher = Role::firstOrCreate(['name' => 'Teacher']);
+        $roleStudent = Role::firstOrCreate(['name' => 'Student']);
 
         // Assigning Permissions to Roles
+        // Admin gets all permissions
         $roleAdmin->givePermissionTo([
-            $permission1, $permission2, $permission3, $permission4, 
-            $permission5, $permission6, $permission7, $permission8
+            $userAccess,
+            $userView,
+            $userEdit,
+            $userCreate,
+            $userDelete,
+            $roleAccess,
+            $categoryAccess,
+            $tagAccess,
+            $materialView,
+            $materialCreate,
+            $materialEdit,
+            $materialDelete
         ]);
 
+        // Teacher gets limited permissions
         $roleTeacher->givePermissionTo([
-            $permission1, $permission5, $permission6, $permission7
+            $userView,
+            $materialView,
+            $materialCreate,
+            $materialEdit
         ]);
 
+        // Student gets view-only permissions
         $roleStudent->givePermissionTo([
-            $permission1, $permission5
+            $userView,
+            $materialView
         ]);
 
         // Creating Admin User
-        $admin = User::create(
-            
-        [
+        $admin = User::create([
             'name' => 'Admin User',
             'email' => 'admin@demo.com',
             'password' => Hash::make('adminpassword'),
-            'status' => 1,  // Active status
+            'status' => 1,
             'created_at' => now(),
             'updated_at' => now(),
-        ],
-        [
-            'name' => 'Akmal Razelan',
-            'email' => 'akmalraze@gmail.com',
-            'password' => Hash::make('12345678'),
-            'status' => 1,  // Active status
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]
-    
-    );
+        ]);
         $admin->assignRole($roleAdmin);
 
         // Creating Teacher User
