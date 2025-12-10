@@ -12,8 +12,17 @@ use App\Http\Controllers\Admin\SubjectController;
 
 Auth::routes(['register' => false]);
 
-Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], function () {
-    Route::get('/', [AdminController::class, 'index'])->name('index');
+// Role-specific dashboard routes
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index')->middleware('role:Admin');
+    Route::get('/teacher', [AdminController::class, 'index'])->name('teacher.index')->middleware('role:Teacher');
+    Route::get('/student', [AdminController::class, 'index'])->name('student.index')->middleware('role:Student');
+
+    // Generic dashboard route (redirects based on role)
+    Route::get('/dashboard', [AdminController::class, 'redirectToDashboard'])->name('dashboard');
+});
+
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'active', 'role:Admin']], function () {
 
     // profile
     Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
@@ -25,7 +34,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
     Route::resource('users', UserController::class);
     Route::get('users-bulk-create', [UserController::class, 'bulkCreate'])->name('users.bulk-create');
     Route::post('users-bulk-store', [UserController::class, 'bulkStore'])->name('users.bulk-store');
-    Route::get('user-toggle-status/{id}/{status}', [UserController::class, 'toggleStatus'])->name('user.toggleStatus');
+    Route::patch('user-toggle-status/{id}', [UserController::class, 'toggleStatus'])->name('user.toggleStatus');
 
     // Class Management
     Route::resource('classes', ClassController::class);

@@ -93,7 +93,7 @@
                     @foreach($users as $key => $user)
                     <tr data-entry-id="{{ $user->id }}">
                         <td>
-                            {{ $user->id ?? '' }}
+                            {{ $user->id_number ?? '' }}
                         </td>
                         <td>
                             {{ $user->name ?? '' }}
@@ -128,15 +128,25 @@
                                 @can('delete users')
                                 @if (auth()->user()->hasRole('Admin') && $user->id !== auth()->id())
                                 @if($user->status)
-                                <a href="{{ route('admin.user.toggleStatus', ['id' => $user->id, 'status' => 0]) }}"
-                                    class="btn btn-sm btn-outline-danger" title="Deactivate">
-                                    <span data-feather="user-x"></span>
-                                </a>
+                                <form action="{{ route('admin.user.toggleStatus', ['id' => $user->id]) }}" method="POST"
+                                    style="display: inline;">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="0">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Deactivate">
+                                        <span data-feather="user-x"></span>
+                                    </button>
+                                </form>
                                 @else
-                                <a href="{{ route('admin.user.toggleStatus', ['id' => $user->id, 'status' => 1]) }}"
-                                    class="btn btn-sm btn-outline-success" title="Activate">
-                                    <span data-feather="user-check"></span>
-                                </a>
+                                <form action="{{ route('admin.user.toggleStatus', ['id' => $user->id]) }}" method="POST"
+                                    style="display: inline;">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="1">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Activate">
+                                        <span data-feather="user-check"></span>
+                                    </button>
+                                </form>
                                 @endif
                                 @endif
                                 @endcan

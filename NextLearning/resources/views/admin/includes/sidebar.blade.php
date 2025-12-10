@@ -1,64 +1,20 @@
-<div class="sidebar position-fixed border-right col-md-3 col-lg-2 p-0 bg-body-tertiary" style="z-index: 9999;">
-    <div class="offcanvas-md offcanvas-start bg-body-tertiary" tabindex="-1" id="sidebarMenu"
-        aria-labelledby="sidebarMenuLabel">
+<div class="sidebar position-fixed border-right col-md-3 col-lg-2 p-0" style="z-index: 9999;">
+    <div class="offcanvas-md offcanvas-start" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="sidebarMenuLabel">{{ config('devstarit.app_name') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu"
                 aria-label="Close"></button>
         </div>
 
-        <div class="offcanvas-body position-static sidebar-sticky d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto"
-            style="background-color: #202C46 !important;">
+        <div class="offcanvas-body position-static sidebar-sticky d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link {{ (request()->is('admin')) ? 'active' : '' }}" aria-current="page"
-                        href="{{ route('admin.index') }}">
+                    <a class="nav-link {{ (request()->is('admin') || request()->is('teacher') || request()->is('student')) ? 'active' : '' }}"
+                        aria-current="page" href="{{ route('dashboard') }}">
                         <span data-feather="home" class="align-text-bottom"></span>
                         Dashboard
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ (request()->is('modules-index')) ? 'active' : '' }}" aria-current="page"
-                        href="{{ route('modules-index') }}">
-                        <span data-feather="home" class="align-text-bottom"></span>
-                        Module
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link {{ (request()->is('assessment')) ? 'active' : '' }}" aria-current="page"
-                        href="{{ route('assessment') }}">
-                        <span data-feather="home" class="align-text-bottom"></span>
-                        Assessment
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ (request()->is('report')) ? 'active' : '' }}" aria-current="page"
-                        href="{{ route('report') }}">
-                        <span data-feather="home" class="align-text-bottom"></span>
-                        Report
-                    </a>
-                </li>
-                {{-- <li class="nav-item">
-                    <a class="nav-link {{ (request()->is('admin')) ? 'active' : '' }}" aria-current="page"
-                        href="{{ route('admin.index') }}">
-                        <span data-feather="home" class="align-text-bottom"></span>
-                        Inbox
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ (request()->is('admin')) ? 'active' : '' }}" aria-current="page"
-                        href="{{ route('admin.index') }}">
-                        <span data-feather="home" class="align-text-bottom"></span>
-                        Setting
-                    </a>
-                </li> --}}
-
-
-
-
-
-
                 {{-- Manage User, Subject & Class Menu --}}
                 @can('user_access')
                 <li class="nav-item">
@@ -97,6 +53,43 @@
                     </div>
                 </li>
                 @endcan
+                <li class="nav-item">
+                    <a class="nav-link {{ (request()->is('ManageModules*')) ? 'active' : '' }}" aria-current="page"
+                        href="{{ route('modules-index') }}">
+                        <span data-feather="book" class="align-text-bottom"></span>
+                        Module
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ (request()->is('assessment')) ? 'active' : '' }}" aria-current="page"
+                        href="{{ route('assessment') }}">
+                        <span data-feather="home" class="align-text-bottom"></span>
+                        Assessment
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ (request()->is('report')) ? 'active' : '' }}" aria-current="page"
+                        href="{{ route('report') }}">
+                        <span data-feather="home" class="align-text-bottom"></span>
+                        Report
+                    </a>
+                </li>
+                {{-- <li class="nav-item">
+                    <a class="nav-link {{ (request()->is('admin')) ? 'active' : '' }}" aria-current="page"
+                        href="{{ route('admin.index') }}">
+                        <span data-feather="home" class="align-text-bottom"></span>
+                        Inbox
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ (request()->is('admin')) ? 'active' : '' }}" aria-current="page"
+                        href="{{ route('admin.index') }}">
+                        <span data-feather="home" class="align-text-bottom"></span>
+                        Setting
+                    </a>
+                </li> --}}
+
 
                 {{-- @can('permission_access')
                 <li class="nav-item">
@@ -146,7 +139,7 @@
             </ul>
 
             <h6
-                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-white-50 text-uppercase">
                 <span>Setting</span>
                 <a class="link-secondary" href="#" aria-label="Add a new report">
                     <span data-feather="plus-circle" class="align-text-bottom"></span>

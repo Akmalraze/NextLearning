@@ -193,12 +193,16 @@ class UserController extends Controller
     /**
      * Toggle user status (ban/unban)
      */
-    public function toggleStatus($id, $status)
+    public function toggleStatus(Request $request, $id)
     {
         abort_if(!auth()->user()->hasRole('Admin'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
+        $request->validate([
+            'status' => 'required|in:0,1',
+        ]);
+
         $user = User::findOrFail($id);
-        $user->status = $status;
+        $user->status = $request->input('status');
 
         if ($user->save()) {
             flash()->addSuccess('User status updated successfully.');

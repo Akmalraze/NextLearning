@@ -31,7 +31,30 @@ class AdminController extends Controller
             return $this->studentDashboard($user);
         }
 
-        return view('admin.index');
+        return view('component.dashboard.index');
+    }
+
+    /**
+     * Redirect user to their role-specific dashboard
+     */
+    public function redirectToDashboard()
+    {
+        $user = Auth::user();
+
+        if ($user->hasRole('Admin')) {
+            return redirect()->route('admin.index');
+        }
+
+        if ($user->hasRole('Teacher')) {
+            return redirect()->route('teacher.index');
+        }
+
+        if ($user->hasRole('Student')) {
+            return redirect()->route('student.index');
+        }
+
+        // Fallback to admin route
+        return redirect()->route('admin.index');
     }
 
     private function adminDashboard()
@@ -79,7 +102,7 @@ class AdminController extends Controller
             'activeSubjects' => $activeSubjects,
         ];
 
-        return view('admin.index', compact('stats', 'enrollmentByForm', 'recentUsers'));
+        return view('component.dashboard.index', compact('stats', 'enrollmentByForm', 'recentUsers'));
     }
 
     private function teacherDashboard($user)
@@ -100,7 +123,7 @@ class AdminController extends Controller
             'totalSubjects' => 0, // Simplified for now
         ];
 
-        return view('admin.index', compact('teacherStats', 'teacherClasses'));
+        return view('component.dashboard.index', compact('teacherStats', 'teacherClasses'));
     }
 
     private function studentDashboard($user)
@@ -122,6 +145,6 @@ class AdminController extends Controller
             'className' => $activeClass ? ($activeClass->form_level . ' ' . ($activeClass->name ?? $activeClass->class_name)) : 'Not Assigned',
         ];
 
-        return view('admin.index', compact('studentStats', 'enrolledSubjects', 'activeClass'));
+        return view('component.dashboard.index', compact('studentStats', 'enrolledSubjects', 'activeClass'));
     }
 }

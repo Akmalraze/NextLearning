@@ -21,6 +21,7 @@
     <!-- Styles -->
     <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/sidebar-theme.css') }}" rel="stylesheet">
 
     @yield('styles')
 </head>
@@ -35,14 +36,22 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            width: 100vw;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            z-index: 99999;
             transition: opacity 0.3s ease-out;
+        }
+
+        [data-bs-theme="light"] .page-loader {
+            background: rgba(255, 255, 255, 0.98);
+        }
+
+        [data-bs-theme="dark"] .page-loader {
+            background: rgba(32, 44, 70, 0.98);
         }
 
         .page-loader.hidden {
@@ -51,8 +60,22 @@
         }
 
         .page-loader img {
-            max-width: 100px;
-            max-height: 100px;
+            max-width: 80px;
+            max-height: 80px;
+        }
+
+        .page-loader-text {
+            margin-top: 16px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        [data-bs-theme="light"] .page-loader-text {
+            color: #333333;
+        }
+
+        [data-bs-theme="dark"] .page-loader-text {
+            color: #ffffff;
         }
     </style>
     <script>

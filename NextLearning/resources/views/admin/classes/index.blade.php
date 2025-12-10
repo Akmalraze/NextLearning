@@ -60,7 +60,7 @@
                 <tbody>
                     @forelse($classes as $class)
                     <tr>
-                        <td>{{ $class->name ?? $class->class_name }}</td>
+                        <td>{{ $class->form_level }} {{ $class->name ?? $class->class_name }}</td>
                         <td><span class="badge bg-primary">{{ $class->form_level }}</span></td>
                         <td>{{ $class->academic_session }}</td>
                         <td>

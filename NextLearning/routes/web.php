@@ -24,11 +24,7 @@ Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::get('/Dashboard', function () {
-    return view('admin.index');
-})->name('report');
-
-Route::middleware(['auth', 'role:Admin'])->controller(ModuleController::class)
+Route::middleware(['auth', 'active'])->controller(ModuleController::class)
     ->prefix('ManageModules')
     ->name('modules-')
     ->group(function () {
@@ -43,7 +39,7 @@ Route::middleware(['auth', 'role:Admin'])->controller(ModuleController::class)
     });
 
 
-Route::middleware(['auth', 'role:Admin'])->controller(ClassController::class)
+Route::middleware(['auth', 'active', 'role:Admin'])->controller(ClassController::class)
     ->prefix('ManageClasses')
     ->name('classes-')
     ->group(function () {

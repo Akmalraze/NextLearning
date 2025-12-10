@@ -44,7 +44,7 @@
     <div class="card-body">
         <!-- Assign Teacher Form -->
         <div class="card mb-4">
-            <div class="card-header bg-light">
+            <div class="card-header bg-body-secondary">
                 <strong><span data-feather="user-plus"></span> Assign Teacher to Subject</strong>
             </div>
             <div class="card-body">

@@ -71,6 +71,7 @@ class UsersTableSeeder extends Seeder
         $admin = User::create([
             'name' => 'Admin User',
             'email' => 'admin@demo.com',
+            'id_number' => 'AD001',
             'password' => Hash::make('adminpassword'),
             'status' => 1,
             'created_at' => now(),
@@ -82,6 +83,7 @@ class UsersTableSeeder extends Seeder
         $teacher = User::create([
             'name' => 'Teacher User',
             'email' => 'teacher@demo.com',
+            'id_number' => 'TE001',
             'password' => Hash::make('teacherpassword'),
             'status' => 1,  // Active status
             'created_at' => now(),
@@ -93,6 +95,7 @@ class UsersTableSeeder extends Seeder
         $student = User::create([
             'name' => 'Student User',
             'email' => 'student@demo.com',
+            'id_number' => 'ST001',
             'password' => Hash::make('studentpassword'),
             'status' => 1,  // Active status
             'created_at' => now(),
