@@ -24,21 +24,6 @@ class FakeSubjectClassTeacherSeeder extends Seeder
         $classes = Classes::pluck('id')->toArray();
         $subjects = Subjects::where('is_active', true)->pluck('id')->toArray();
 
-        if (empty($teachers)) {
-            $this->command->warn('⚠️ No teachers found. Please run FakeUsersSeeder first.');
-            return;
-        }
-
-        if (empty($classes)) {
-            $this->command->warn('⚠️ No classes found. Please run FakeClassesSeeder first.');
-            return;
-        }
-
-        if (empty($subjects)) {
-            $this->command->warn('⚠️ No active subjects found. Please run FakeSubjectsSeeder first.');
-            return;
-        }
-
         $assignmentCount = 0;
 
         // For each class, assign 5-10 subjects with teachers

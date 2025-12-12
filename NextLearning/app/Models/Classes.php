@@ -14,11 +14,6 @@ class Classes extends Model
      */
     public const FORM_LEVELS = [1, 2, 3, 4, 5];
 
-    /**
-     * Valid class names (Malaysian themed)
-     */
-    public const CLASS_NAMES = ['Raya', 'Ixora', 'Kemboja', 'Mawar', 'Seroja'];
-
     protected $fillable = [
         'form_level',
         'name',
