@@ -13,19 +13,31 @@ class SubjectsSeederTable extends Seeder
      */
     public function run(): void
     {
-         // Seed Subjects
+        // Seed Subjects (without form_level - it's now on classes table)
         DB::table('subjects')->insert([
             [
-                'subjects_name' => 'Mathematics',
-                'subjects_totalStudent' => 100,
+                'name' => 'Mathematics',
+                'code' => 'MATH',
+                'description' => 'Mathematical concepts and problem solving',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'subjects_name' => 'Science',
-                'subjects_totalStudent' => 80,
+                'name' => 'Science',
+                'code' => 'SCI',
+                'description' => 'General science subjects',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
-                'subjects_name' => 'History',
-                'subjects_totalStudent' => 50,
+                'name' => 'History',
+                'code' => 'HIST',
+                'description' => 'Historical studies',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ]);
     }
