@@ -8,7 +8,11 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+<<<<<<< Updated upstream
     <title>{{ config('devstarit.app_name') }} </title>
+=======
+    <title>{{ config('devstarit.app_name') }}</title>
+>>>>>>> Stashed changes
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -134,7 +138,7 @@
 
 <div class="container-fluid">
     <div class="row">
-       @if (Route::currentRouteName() == 'modules-list')
+       @if (Route::currentRouteName() == 'modules-list' || Route::currentRouteName() == 'modules-view' || Route::currentRouteName() == 'modules-material'|| Route::currentRouteName() == 'modules-edit')
             @include('admin.includes.subject')
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 position-relative">
                 @include('admin.includes.breadcrumb')

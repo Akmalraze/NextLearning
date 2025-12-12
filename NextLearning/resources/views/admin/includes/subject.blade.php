@@ -8,25 +8,25 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{ route('modules-view') }}">
                                 <span data-feather="file"></span>
                                 Modules 1: 
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{ route('modules-view') }}">
                                 <span data-feather="shopping-cart"></span>
                                 Modules 2:
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{ route('modules-view') }}">
                                 <span data-feather="users"></span>
                                 Modules 3:
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{ route('modules-view') }}">
                                 <span data-feather="bar-chart-2"></span>
                                 Modules 4:
                             </a>

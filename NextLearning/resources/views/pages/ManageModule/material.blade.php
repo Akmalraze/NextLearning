@@ -11,7 +11,7 @@
             @csrf
             @method('PUT')
             <div class="mb-3">
-                <label for="title">Modules Name*</label>
+                <label for="title">Title*</label>
                 <input type="text" id="title" name="name" class="form-control @error('name') is-invalid @enderror"  required>
                 @error('name')
                     <span class="invalid-feedback" role="alert">
@@ -20,7 +20,7 @@
                 @enderror
             </div>
             <div class="mb-3">
-                <label for="email">Modules Description*</label>
+                <label for="email">Document Description*</label>
                 <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror"  required>
                 @error('email')
                     <span class="invalid-feedback" role="alert">

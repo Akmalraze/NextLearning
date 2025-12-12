@@ -29,6 +29,17 @@ class ModuleController extends Controller
         return view('pages.ManageModule.create');
     }
 
+    public function edit()
+    {
+        return view('pages.ManageModule.edit');
+    }
+
+    public function material()
+    {
+        return view('pages.ManageModule.material');
+    }
+
+
 
     public function store(Request $request)
     {

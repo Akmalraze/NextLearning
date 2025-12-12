@@ -36,9 +36,10 @@ Route::controller(ModuleController::class)
             Route::get('/list', 'list')->name('list');
             Route::get('/create', 'create')->name('create');                
             Route::post('/store', 'store')->name('store');                      
-            Route::get('{modules}/edit', 'edit')->name('edit');
+            Route::get('/edit', 'edit')->name('edit');
+            Route::get('/material', 'material')->name('material');
             Route::put('{modules}', 'update')->name('update');
-            Route::get('{modules}', 'view')->name('view');
+            Route::get('/view', 'view')->name('view');
             Route::delete('{modules}', 'destroy')->name('destroy');
         });
 
@@ -60,9 +61,9 @@ Route::controller(ClassController::class)
 
 
 
-Route::get('/report', function () {
+Route::get('/reports', function () {
     return view('pages.ManageReport.index');  
-})->name('report');
+})->name('reports');
 
 Route::get('/subject', function () {
     return view('pages.ManageSubject.index');  
