@@ -9,9 +9,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('devstarit.app_name') }} </title>
-
-
+    <title>{{ config('devstarit.app_name') }} - {{ config('devstarit.app_desc') }}</title>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -24,10 +22,6 @@
     <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
     <link href="{{ asset('css/sidebar-theme.css') }}" rel="stylesheet">
-
-    <!--Favicon-->
-  <link rel="shortcut icon" href="assets/images/logo2.png" type="image/x-icon">
-  <link rel="icon" href="assets/images/logo2.png" type="image/x-icon">
 
     @yield('styles')
 </head>
@@ -60,9 +54,6 @@
             background: rgba(32, 44, 70, 0.98);
         }
 
-<div class="container-fluid">
-    <div class="row">
-       @if (Route::currentRouteName() == 'modules-list' || Route::currentRouteName() == 'modules-view' || Route::currentRouteName() == 'modules-material'|| Route::currentRouteName() == 'modules-edit')
         .page-loader.hidden {
             opacity: 0;
             pointer-events: none;
