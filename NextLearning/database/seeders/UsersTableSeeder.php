@@ -68,39 +68,45 @@ class UsersTableSeeder extends Seeder
         ]);
 
         // Creating Admin User
-        $admin = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@demo.com',
-            'id_number' => 'AD001',
-            'password' => Hash::make('adminpassword'),
-            'status' => 1,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        $admin->assignRole($roleAdmin);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@demo.com'],
+            [
+                'name' => 'Admin User',
+                'id_number' => 'AD001',
+                'password' => Hash::make('adminpassword'),
+                'status' => 1,
+            ]
+        );
+        if (!$admin->hasRole($roleAdmin)) {
+            $admin->assignRole($roleAdmin);
+        }
 
         // Creating Teacher User
-        $teacher = User::create([
-            'name' => 'Teacher User',
-            'email' => 'teacher@demo.com',
-            'id_number' => 'TE001',
-            'password' => Hash::make('teacherpassword'),
-            'status' => 1,  // Active status
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        $teacher->assignRole($roleTeacher);
+        $teacher = User::firstOrCreate(
+            ['email' => 'teacher@demo.com'],
+            [
+                'name' => 'Teacher User',
+                'id_number' => 'TE001',
+                'password' => Hash::make('teacherpassword'),
+                'status' => 1,
+            ]
+        );
+        if (!$teacher->hasRole($roleTeacher)) {
+            $teacher->assignRole($roleTeacher);
+        }
 
         // Creating Student User
-        $student = User::create([
-            'name' => 'Student User',
-            'email' => 'student@demo.com',
-            'id_number' => 'ST001',
-            'password' => Hash::make('studentpassword'),
-            'status' => 1,  // Active status
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        $student->assignRole($roleStudent);
+        $student = User::firstOrCreate(
+            ['email' => 'student@demo.com'],
+            [
+                'name' => 'Student User',
+                'id_number' => 'ST001',
+                'password' => Hash::make('studentpassword'),
+                'status' => 1,
+            ]
+        );
+        if (!$student->hasRole($roleStudent)) {
+            $student->assignRole($roleStudent);
+        }
     }
 }

@@ -9,15 +9,34 @@ class Classes extends Model
 {
     use HasFactory;
 
+    /**
+     * Valid form levels (Form 1 to Form 5)
+     */
+    public const FORM_LEVELS = [1, 2, 3, 4, 5];
+
+    /**
+     * Valid class names (Malaysian themed)
+     */
+    public const CLASS_NAMES = ['Raya', 'Ixora', 'Kemboja', 'Mawar', 'Seroja'];
+
     protected $fillable = [
         'form_level',
         'name',
-        'class_name',
         'academic_session',
         'homeroom_teacher_id',
-        'user_id',
-        'subjects_id',
     ];
+
+    protected $casts = [
+        'form_level' => 'integer',
+    ];
+
+    /**
+     * Get the full class name (e.g., "Form 1 Raya")
+     */
+    public function getFullNameAttribute(): string
+    {
+        return "Form {$this->form_level} {$this->name}";
+    }
 
     // Relationship with homeroom teacher
     public function homeroomTeacher()

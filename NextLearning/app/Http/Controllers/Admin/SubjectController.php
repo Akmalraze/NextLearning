@@ -52,7 +52,7 @@ class SubjectController extends Controller
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:subjects,code',
             'description' => 'nullable|string',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable',
         ]);
 
         // Also set legacy fields
@@ -98,7 +98,7 @@ class SubjectController extends Controller
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:subjects,code,' . $id,
             'description' => 'nullable|string',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable',
         ]);
 
         // Update legacy fields
@@ -120,10 +120,10 @@ class SubjectController extends Controller
 
         // Check for dependencies
         $moduleCount = $subject->modules()->count();
-        $assessmentCount = $subject->assessments()->count();
+        $classAssignmentCount = $subject->classAssignments()->count();
 
-        if ($moduleCount > 0 || $assessmentCount > 0) {
-            flash()->addError("Cannot delete subject with {$moduleCount} modules and {$assessmentCount} assessments. Please reassign or delete them first.");
+        if ($moduleCount > 0 || $classAssignmentCount > 0) {
+            flash()->addError("Cannot delete subject with {$moduleCount} modules and {$classAssignmentCount} class assignments. Please remove them first.");
             return back();
         }
 

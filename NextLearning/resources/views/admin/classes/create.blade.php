@@ -26,11 +26,10 @@
                 <select name="form_level" id="form_level" class="form-select @error('form_level') is-invalid @enderror"
                     required>
                     <option value="">Select Form Level</option>
-                    <option value="Form 1" {{ old('form_level')=='Form 1' ? 'selected' : '' }}>Form 1</option>
-                    <option value="Form 2" {{ old('form_level')=='Form 2' ? 'selected' : '' }}>Form 2</option>
-                    <option value="Form 3" {{ old('form_level')=='Form 3' ? 'selected' : '' }}>Form 3</option>
-                    <option value="Form 4" {{ old('form_level')=='Form 4' ? 'selected' : '' }}>Form 4</option>
-                    <option value="Form 5" {{ old('form_level')=='Form 5' ? 'selected' : '' }}>Form 5</option>
+                    @foreach(\App\Models\Classes::FORM_LEVELS as $level)
+                    <option value="{{ $level }}" {{ old('form_level')==$level ? 'selected' : '' }}>Form {{ $level }}
+                    </option>
+                    @endforeach
                 </select>
                 @error('form_level')
                 <span class="invalid-feedback">{{ $message }}</span>
@@ -40,7 +39,7 @@
             <div class="mb-3">
                 <label for="name" class="form-label">Class Name*</label>
                 <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror"
-                    value="{{ old('name') }}" placeholder="e.g., Amanah, Bestari, Cerdik" required>
+                    value="{{ old('name') }}" placeholder="e.g., Raya, Ixora, Kemboja" required>
                 @error('name')
                 <span class="invalid-feedback">{{ $message }}</span>
                 @enderror

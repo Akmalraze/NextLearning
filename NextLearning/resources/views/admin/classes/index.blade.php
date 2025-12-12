@@ -49,8 +49,8 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Class Name</th>
                         <th>Form Level</th>
+                        <th>Class Name</th>
                         <th>Academic Session</th>
                         <th>Homeroom Teacher</th>
                         <th>Students</th>
@@ -60,8 +60,8 @@
                 <tbody>
                     @forelse($classes as $class)
                     <tr>
-                        <td>{{ $class->form_level }} {{ $class->name ?? $class->class_name }}</td>
-                        <td><span class="badge bg-primary">{{ $class->form_level }}</span></td>
+                        <td>{{ $class->form_level }}</td>
+                        <td>{{ $class->name }}</td>
                         <td>{{ $class->academic_session }}</td>
                         <td>
                             @if($class->homeroomTeacher)
@@ -108,8 +108,8 @@
         </div>
 
         <!-- Pagination -->
-        <div class="mt-3">
-            {{ $classes->links() }}
+        <div class="mt-3 d-flex justify-content-center">
+            {{ $classes->links('pagination::bootstrap-5') }}
         </div>
     </div>
 </div>

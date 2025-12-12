@@ -24,8 +24,7 @@ class ClassController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('class_name', 'like', "%{$search}%")
-                    ->orWhere('form_level', 'like', "%{$search}%");
+                    ->orWhere('form_level', $search);
             });
         }
 
@@ -48,9 +47,14 @@ class ClassController extends Controller
     {
         abort_if(Gate::denies('create users'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
+        // Get teachers not already assigned as homeroom teachers
+        $assignedTeacherIds = Classes::whereNotNull('homeroom_teacher_id')
+            ->pluck('homeroom_teacher_id')
+            ->toArray();
+
         $teachers = User::whereHas('roles', function ($query) {
             $query->where('name', 'Teacher');
-        })->get();
+        })->whereNotIn('id', $assignedTeacherIds)->get();
 
         return view('admin.classes.create', compact('teachers'));
     }
@@ -60,13 +64,20 @@ class ClassController extends Controller
         abort_if(Gate::denies('create users'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $validated = $request->validate([
-            'form_level' => 'required|string|max:50',
-            'name' => 'required|string|max:255',
+            'form_level' => 'required|integer|in:' . implode(',', Classes::FORM_LEVELS),
+            'name' => 'required|string|max:100',
             'academic_session' => 'required|string|max:255',
             'homeroom_teacher_id' => 'nullable|exists:users,id',
         ]);
 
-        $validated['class_name'] = $validated['form_level'] . ' ' . $validated['name'];
+        // Check for unique form_level + name combination
+        $exists = Classes::where('form_level', $validated['form_level'])
+            ->where('name', $validated['name'])
+            ->exists();
+
+        if ($exists) {
+            return back()->withInput()->withErrors(['name' => 'This class already exists.']);
+        }
 
         Classes::create($validated);
 
@@ -100,9 +111,16 @@ class ClassController extends Controller
         abort_if(Gate::denies('edit users'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $class = Classes::findOrFail($id);
+
+        // Get teachers not already assigned as homeroom teachers (except current class's teacher)
+        $assignedTeacherIds = Classes::whereNotNull('homeroom_teacher_id')
+            ->where('id', '!=', $id)
+            ->pluck('homeroom_teacher_id')
+            ->toArray();
+
         $teachers = User::whereHas('roles', function ($query) {
             $query->where('name', 'Teacher');
-        })->get();
+        })->whereNotIn('id', $assignedTeacherIds)->get();
 
         return view('admin.classes.edit', compact('class', 'teachers'));
     }
@@ -114,13 +132,21 @@ class ClassController extends Controller
         $class = Classes::findOrFail($id);
 
         $validated = $request->validate([
-            'form_level' => 'required|string|max:50',
-            'name' => 'required|string|max:255',
+            'form_level' => 'required|integer|in:' . implode(',', Classes::FORM_LEVELS),
+            'name' => 'required|string|max:100',
             'academic_session' => 'required|string|max:255',
             'homeroom_teacher_id' => 'nullable|exists:users,id',
         ]);
 
-        $validated['class_name'] = $validated['form_level'] . ' ' . $validated['name'];
+        // Check for unique form_level + name combination (excluding current class)
+        $exists = Classes::where('form_level', $validated['form_level'])
+            ->where('name', $validated['name'])
+            ->where('id', '!=', $id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withInput()->withErrors(['name' => 'This class already exists.']);
+        }
 
         $class->update($validated);
 
@@ -154,11 +180,11 @@ class ClassController extends Controller
         $class = Classes::findOrFail($id);
         $enrolledStudents = $class->activeStudents()->with('roles')->get();
 
-        // Get students not yet enrolled in this class
+        // Get students not enrolled in ANY class (with active status)
         $availableStudents = User::whereHas('roles', function ($query) {
             $query->where('name', 'Student');
-        })->whereDoesntHave('classes', function ($query) use ($id) {
-            $query->where('classes.id', $id);
+        })->whereDoesntHave('classes', function ($query) {
+            $query->where('class_students.status', 'active');
         })->get();
 
         return view('admin.classes.enrollments', compact('class', 'enrolledStudents', 'availableStudents'));

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Classes;
+use App\Models\ClassStudent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
@@ -51,7 +52,7 @@ class UserController extends Controller
             $query->where('status', $status);
         }
 
-        $users = $query->latest()->paginate(15)->withQueryString();
+        $users = $query->orderBy('id_number', 'asc')->paginate(15)->withQueryString();
         $classes = Classes::all();
 
         return view('admin.users.index', compact('users', 'tab', 'search', 'status', 'classes'));
@@ -117,7 +118,7 @@ class UserController extends Controller
     {
         abort_if(Gate::denies('edit users'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $user = User::with(['roles', 'enrollments'])->findOrFail($id);
+        $user = User::with(['roles', 'classes'])->findOrFail($id);
         $roles = Role::all();
         $classes = Classes::all();
         $currentClass = $user->activeClass()->first();
@@ -280,6 +281,12 @@ class UserController extends Controller
             // Check if email already exists
             if (User::where('email', $email)->exists()) {
                 $errors[] = "Line " . ($index + 1) . ": Email '{$email}' already exists";
+                continue;
+            }
+
+            // Check if id_number already exists (if provided)
+            if ($idNumber && User::where('id_number', $idNumber)->exists()) {
+                $errors[] = "Line " . ($index + 1) . ": ID Number '{$idNumber}' already exists";
                 continue;
             }
 

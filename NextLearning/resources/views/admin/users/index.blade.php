@@ -158,8 +158,8 @@
             </table>
         </div>
     </div>
-    <div class="card-footer clearfix">
-        {{ $users->links() }}
+    <div class="card-footer d-flex justify-content-center">
+        {{ $users->links('pagination::bootstrap-5') }}
     </div>
 </div>
 

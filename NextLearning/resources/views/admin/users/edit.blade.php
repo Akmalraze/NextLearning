@@ -81,7 +81,7 @@
                     <option value="">Select Class (Optional)</option>
                     @foreach($classes as $class)
                     <option value="{{ $class->id }}" {{ old('class_id')==$class->id ? 'selected' : '' }}>
-                        {{ $class->form_level ?? '' }} {{ $class->name ?? $class->class_name }}
+                        {{ $class->full_name }}
                     </option>
                     @endforeach
                 </select>

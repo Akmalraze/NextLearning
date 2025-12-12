@@ -78,7 +78,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">{{ $subjects->links() }}</div>
+        <div class="mt-3 d-flex justify-content-center">{{ $subjects->links('pagination::bootstrap-5') }}</div>
     </div>
 </div>
 <div class="alert alert-info mt-4">
