@@ -10,7 +10,11 @@
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     <title>{{ config('devstarit.app_name') }} </title>
+=======
+    <title>{{ config('devstarit.app_name') }}</title>
+>>>>>>> Stashed changes
 =======
     <title>{{ config('devstarit.app_name') }}</title>
 >>>>>>> Stashed changes
