@@ -9,7 +9,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     <title>{{ config('devstarit.app_name') }} </title>
+=======
+    <title>{{ config('devstarit.app_name') }}</title>
+>>>>>>> Stashed changes
 =======
     <title>{{ config('devstarit.app_name') }}</title>
 >>>>>>> Stashed changes
