@@ -14,9 +14,13 @@ return new class extends Migration
         // Create Subjects Table
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
-            $table->string('subjects_name');
-            $table->string('subjects_code')->uniques();
-            $table->integer('subjects_totalStudent');
+
+            // Modern fields
+            $table->string('name');
+            $table->string('code')->unique();
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
+
             $table->timestamps();
         });
     }
