@@ -64,6 +64,15 @@ Route::get('/subject', function () {
     return view('pages.ManageSubject.index');
 })->name('subject');
 
-Route::get('/assessment', function () {
-    return view('pages.ManageAssessment.index');
-})->name('assessment');
+// Assessments - accessible to Teacher and Student only
+Route::middleware(['auth', 'active', 'role:Teacher|Student'])->group(function () {
+    Route::resource('assessments', App\Http\Controllers\AssessmentController::class);
+    
+    // Questions for quiz assessments
+    Route::post('assessments/{id}/questions', [App\Http\Controllers\AssessmentController::class, 'storeQuestion'])->name('assessments.questions.store');
+    Route::delete('assessments/{id}/questions/{questionId}', [App\Http\Controllers\AssessmentController::class, 'deleteQuestion'])->name('assessments.questions.destroy');
+    
+    // Materials for test/homework assessments
+    Route::post('assessments/{id}/materials', [App\Http\Controllers\AssessmentController::class, 'uploadMaterial'])->name('assessments.materials.store');
+    Route::delete('assessments/{id}/materials/{materialId}', [App\Http\Controllers\AssessmentController::class, 'deleteMaterial'])->name('assessments.materials.destroy');
+});
