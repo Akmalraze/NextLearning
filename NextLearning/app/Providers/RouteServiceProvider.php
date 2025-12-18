@@ -14,10 +14,11 @@ class RouteServiceProvider extends ServiceProvider
      * The path to your application's "home" route.
      *
      * Typically, users are redirected here after authentication.
+     * This redirects to /dashboard which then redirects to role-specific dashboards.
      *
      * @var string
      */
-    public const HOME = '/admin';
+    public const HOME = '/dashboard';
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.
@@ -37,7 +38,7 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path('routes/web.php'));
 
             Route::middleware('web')
-            ->group(base_path('routes/admin.php'));
+                ->group(base_path('routes/admin.php'));
         });
     }
 }
