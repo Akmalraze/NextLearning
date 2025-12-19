@@ -89,7 +89,7 @@
                                 <tr>
                                     <th>Title</th>
                                     <th>Type</th>
-                                    <th>Due Date</th>
+                                    <th>End Date & Time</th>
                                     <th>Total Marks</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -104,7 +104,7 @@
                                             {{ ucfirst($assessment->type) }}
                                         </span>
                                     </td>
-                                    <td>{{ $assessment->due_date ? $assessment->due_date->format('M d, Y') : 'N/A' }}</td>
+                                    <td>{{ $assessment->end_date ? $assessment->end_date->format('M d, Y h:i A') : 'N/A' }}</td>
                                     <td>{{ number_format($assessment->total_marks, 2) }}</td>
                                     <td>
                                         @if($assessment->is_published)
@@ -116,17 +116,12 @@
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a href="{{ route('assessments.show', $assessment->id) }}"
-                                                class="btn btn-sm btn-outline-info" title="View & Manage">
-                                                <span data-feather="eye"></span>
-                                                @if($assessment->type === 'quiz')
-                                                <small class="d-block" style="font-size: 0.7rem;">Add Questions</small>
-                                                @else
-                                                <small class="d-block" style="font-size: 0.7rem;">Upload Materials</small>
-                                                @endif
+                                                class="btn btn-sm btn-outline-info" title="View Details">
+                                                <span data-feather="eye"></span> Details
                                             </a>
                                             <a href="{{ route('assessments.edit', $assessment->id) }}"
                                                 class="btn btn-sm btn-outline-warning" title="Edit">
-                                                <span data-feather="edit-2"></span>
+                                                <span data-feather="edit-2"></span> Edit
                                             </a>
                                             <form action="{{ route('assessments.destroy', $assessment->id) }}" method="POST"
                                                 style="display:inline;" onsubmit="return confirm('Delete this assessment?')">
@@ -178,7 +173,16 @@
             </div>
             @else
             <div class="mb-4">
-                <h5>Published Assessments</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Published Assessments</h5>
+                    <div>
+                        <span class="badge bg-danger me-2">
+                            <span data-feather="alert-circle" style="width: 12px; height: 12px;"></span> Not Attempted
+                        </span>
+                        <span class="badge bg-warning me-2">In Progress</span>
+                        <span class="badge bg-success">Submitted</span>
+                    </div>
+                </div>
                 
                 <!-- Search & Filter -->
                 <form method="GET" class="mb-4">
@@ -206,38 +210,98 @@
                 <!-- Assessments List -->
                 <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Type</th>
-                                <th>Subject</th>
-                                <th>Due Date</th>
-                                <th>Total Marks</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Subject</th>
+                                    <th>End Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Total Marks</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
                         <tbody>
                             @forelse($assessments as $assessment)
-                            <tr>
-                                <td>{{ $assessment->title }}</td>
+                            @php
+                                $submission = $submissions[$assessment->id] ?? null;
+                                $now = now();
+                                $hasStarted = $assessment->start_date === null || $now->gte($assessment->start_date);
+                                $hasEnded = $assessment->end_date !== null && $now->gt($assessment->end_date);
+                                
+                                // Determine status
+                                if ($submission && $submission->submitted_at) {
+                                    $status = 'submitted';
+                                    $statusText = 'Submitted';
+                                    $statusBadge = 'success';
+                                } elseif ($submission && $submission->started_at && !$submission->submitted_at) {
+                                    if ($hasEnded) {
+                                        $status = 'expired';
+                                        $statusText = 'Time Expired';
+                                        $statusBadge = 'danger';
+                                    } else {
+                                        $status = 'in_progress';
+                                        $statusText = 'In Progress';
+                                        $statusBadge = 'warning';
+                                    }
+                                } elseif ($hasEnded) {
+                                    $status = 'not_attempted_expired';
+                                    $statusText = 'Not Attempted (Expired)';
+                                    $statusBadge = 'secondary';
+                                } elseif (!$hasStarted) {
+                                    $status = 'not_started';
+                                    $statusText = 'Not Started Yet';
+                                    $statusBadge = 'info';
+                                } else {
+                                    $status = 'not_attempted';
+                                    $statusText = 'Not Attempted';
+                                    $statusBadge = 'danger';
+                                }
+                            @endphp
+                            <tr class="{{ $status === 'not_attempted' ? 'table-danger' : ($status === 'in_progress' ? 'table-warning' : '') }}">
+                                <td>
+                                    <strong>{{ $assessment->title }}</strong>
+                                    @if($status === 'not_attempted')
+                                    <span class="badge bg-danger ms-2" title="Action Required">
+                                        <span data-feather="alert-circle" style="width: 12px; height: 12px;"></span>
+                                    </span>
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="badge bg-{{ $assessment->type === 'quiz' ? 'info' : ($assessment->type === 'test' ? 'warning' : 'success') }}">
                                         {{ ucfirst($assessment->type) }}
                                     </span>
                                 </td>
                                 <td>{{ $assessment->subject ? $assessment->subject->name : 'N/A' }}</td>
-                                <td>{{ $assessment->due_date ? $assessment->due_date->format('M d, Y') : 'N/A' }}</td>
+                                <td>
+                                    @if($assessment->end_date)
+                                        {{ $assessment->end_date->format('M d, Y h:i A') }}
+                                        @if($hasEnded)
+                                        <br><small class="text-danger">(Expired)</small>
+                                        @endif
+                                    @else
+                                        N/A
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ $statusBadge }}">{{ $statusText }}</span>
+                                    @if($submission && $submission->score !== null && $status === 'submitted')
+                                    <br><small class="text-muted">Score: {{ number_format($submission->score, 2) }}/{{ number_format($assessment->total_marks, 2) }}</small>
+                                    @endif
+                                </td>
                                 <td>{{ number_format($assessment->total_marks, 2) }}</td>
                                 <td>
                                     <a href="{{ route('assessments.show', $assessment->id) }}"
-                                        class="btn btn-sm btn-outline-info" title="View">
-                                        <span data-feather="eye"></span> View
+                                        class="btn btn-sm btn-{{ $status === 'not_attempted' ? 'danger' : ($status === 'in_progress' ? 'warning' : 'outline-info') }}" 
+                                        title="View">
+                                        <span data-feather="{{ $status === 'not_attempted' ? 'arrow-right-circle' : 'eye' }}"></span> 
+                                        {{ $status === 'not_attempted' ? 'Start' : 'View' }}
                                     </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">
+                                <td colspan="7" class="text-center text-muted">
                                     No published assessments available.
                                 </td>
                             </tr>

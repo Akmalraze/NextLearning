@@ -54,6 +54,12 @@
                             <th>Total Marks:</th>
                             <td>{{ number_format($assessment->total_marks, 2) }}</td>
                         </tr>
+                        @if($assessment->type === 'quiz' && $assessment->time_limit)
+                        <tr>
+                            <th>Time Limit:</th>
+                            <td>{{ $assessment->time_limit }} minutes</td>
+                        </tr>
+                        @endif
                     </tbody>
                 </table>
             </div>
@@ -61,16 +67,12 @@
                 <table class="table table-bordered">
                     <tbody>
                         <tr>
-                            <th width="40%">Start Date:</th>
-                            <td>{{ $assessment->start_date ? $assessment->start_date->format('F d, Y') : 'Not set' }}</td>
+                            <th width="40%">Start Date & Time:</th>
+                            <td>{{ $assessment->start_date ? $assessment->start_date->format('F d, Y h:i A') : 'Not set' }}</td>
                         </tr>
                         <tr>
-                            <th>End Date:</th>
-                            <td>{{ $assessment->end_date ? $assessment->end_date->format('F d, Y') : 'Not set' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Due Date:</th>
-                            <td>{{ $assessment->due_date ? $assessment->due_date->format('F d, Y') : 'Not set' }}</td>
+                            <th>End Date & Time:</th>
+                            <td>{{ $assessment->end_date ? $assessment->end_date->format('F d, Y h:i A') : 'Not set' }}</td>
                         </tr>
                         <tr>
                             <th>Created:</th>
@@ -92,144 +94,73 @@
         </div>
 
         @if(auth()->user()->hasRole('Teacher') && $assessment->teacher_id === auth()->id())
-        <!-- Instructions for Teachers -->
+        <!-- Teacher Actions -->
         <div class="alert alert-info mt-4">
-            <h6 class="alert-heading">
-                <span data-feather="info"></span> Manage Assessment Content
-            </h6>
-            @if($assessment->type === 'quiz')
-            <p class="mb-0">Click the <strong>"Add Question"</strong> button below to create multiple-choice questions (A, B, C, D) for this quiz.</p>
-            @else
-            <p class="mb-0">Click the <strong>"Upload Material"</strong> button below to upload files (up to 10MB) for this {{ $assessment->type }}.</p>
-            @endif
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="alert-heading">
+                        <span data-feather="info"></span> Assessment Details
+                    </h6>
+                    <p class="mb-0">To manage questions or materials, click the <strong>"Edit"</strong> button above.</p>
+                </div>
+                <a href="{{ route('assessments.submissions', $assessment->id) }}" class="btn btn-primary">
+                    <span data-feather="users"></span> View Student Submissions
+                </a>
+            </div>
         </div>
 
-        <!-- Quiz Questions Section -->
+        <!-- Quiz Questions Display (Read-only for teachers in details view) -->
         @if($assessment->type === 'quiz')
         <div class="card mt-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header">
                 <h6 class="mb-0">Questions</h6>
-                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
-                    <span data-feather="plus"></span> Add Question
-                </button>
             </div>
             <div class="card-body">
                 @forelse($assessment->questions as $index => $question)
+                @php
+                    $options = $question->options ?? [];
+                    if (empty($options) || !is_array($options)) {
+                        $options = array_values(array_filter([
+                            $question->option_a ?? null,
+                            $question->option_b ?? null,
+                            $question->option_c ?? null,
+                            $question->option_d ?? null,
+                        ], function ($opt) { return $opt !== null && $opt !== ''; }));
+                    }
+                    $correctAnswers = is_array($question->correct_answer) ? $question->correct_answer : explode(',', $question->correct_answer);
+                @endphp
                 <div class="card mb-3">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h6 class="mb-0">Question {{ $index + 1 }} ({{ number_format($question->marks, 2) }} marks)</h6>
-                            <form action="{{ route('assessments.questions.destroy', [$assessment->id, $question->id]) }}" method="POST" 
-                                  style="display:inline;" onsubmit="return confirm('Delete this question?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    <span data-feather="trash-2"></span>
-                                </button>
-                            </form>
-                        </div>
+                        <h6 class="mb-2">Question {{ $index + 1 }} ({{ number_format($question->marks, 2) }} marks)</h6>
                         <p class="mb-3">{{ $question->question }}</p>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" disabled {{ $question->correct_answer === 'a' ? 'checked' : '' }}>
-                                    <label class="form-check-label {{ $question->correct_answer === 'a' ? 'text-success fw-bold' : '' }}">
-                                        A. {{ $question->option_a }}
+                        @if($question->question_type === 'short_answer')
+                            <p class="text-muted"><em>Short Answer Question</em></p>
+                            @if($question->correct_answer)
+                            <p class="text-success"><strong>Sample Answer:</strong> {{ $question->correct_answer }}</p>
+                            @endif
+                        @else
+                            <div class="mb-2">
+                                @foreach($options as $optIndex => $optText)
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="{{ $question->question_type === 'checkboxes' ? 'checkbox' : 'radio' }}" disabled 
+                                           {{ in_array((string)$optIndex, array_map('strval', $correctAnswers)) ? 'checked' : '' }}>
+                                    <label class="form-check-label {{ in_array((string)$optIndex, array_map('strval', $correctAnswers)) ? 'text-success fw-bold' : '' }}">
+                                        Option {{ $optIndex + 1 }}: {{ $optText }}
                                     </label>
                                 </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" disabled {{ $question->correct_answer === 'b' ? 'checked' : '' }}>
-                                    <label class="form-check-label {{ $question->correct_answer === 'b' ? 'text-success fw-bold' : '' }}">
-                                        B. {{ $question->option_b }}
-                                    </label>
-                                </div>
+                                @endforeach
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" disabled {{ $question->correct_answer === 'c' ? 'checked' : '' }}>
-                                    <label class="form-check-label {{ $question->correct_answer === 'c' ? 'text-success fw-bold' : '' }}">
-                                        C. {{ $question->option_c }}
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" disabled {{ $question->correct_answer === 'd' ? 'checked' : '' }}>
-                                    <label class="form-check-label {{ $question->correct_answer === 'd' ? 'text-success fw-bold' : '' }}">
-                                        D. {{ $question->option_d }}
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
                 @empty
-                <p class="text-muted text-center">No questions added yet. Click "Add Question" to create questions for this quiz.</p>
+                <p class="text-muted text-center">No questions added yet.</p>
                 @endforelse
-            </div>
-        </div>
-
-        <!-- Add Question Modal -->
-        <div class="modal fade" id="addQuestionModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <form action="{{ route('assessments.questions.store', $assessment->id) }}" method="POST">
-                        @csrf
-                        <div class="modal-header">
-                            <h5 class="modal-title">Add Question</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="question" class="form-label">Question*</label>
-                                <textarea id="question" name="question" class="form-control" rows="3" required></textarea>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="option_a" class="form-label">Option A*</label>
-                                    <input type="text" id="option_a" name="option_a" class="form-control" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="option_b" class="form-label">Option B*</label>
-                                    <input type="text" id="option_b" name="option_b" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="option_c" class="form-label">Option C*</label>
-                                    <input type="text" id="option_c" name="option_c" class="form-control" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="option_d" class="form-label">Option D*</label>
-                                    <input type="text" id="option_d" name="option_d" class="form-control" required>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="correct_answer" class="form-label">Correct Answer*</label>
-                                    <select id="correct_answer" name="correct_answer" class="form-select" required>
-                                        <option value="">Select Answer</option>
-                                        <option value="a">A</option>
-                                        <option value="b">B</option>
-                                        <option value="c">C</option>
-                                        <option value="d">D</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="marks" class="form-label">Marks*</label>
-                                    <input type="number" id="marks" name="marks" step="0.01" min="0" class="form-control" value="1" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Add Question</button>
-                        </div>
-                    </form>
-                </div>
             </div>
         </div>
         @endif
 
-        <!-- Materials Section for Test/Homework -->
+        <!-- Materials Section for Test/Homework (Teacher view) -->
         @if(in_array($assessment->type, ['test', 'homework']))
         <div class="card mt-4">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -260,54 +191,478 @@
                                 <a href="{{ asset('storage/' . $material->file_path) }}" target="_blank" class="btn btn-sm btn-outline-info">
                                     <span data-feather="download"></span> Download
                                 </a>
-                                <form action="{{ route('assessments.materials.destroy', [$assessment->id, $material->id]) }}" method="POST" 
-                                      style="display:inline;" onsubmit="return confirm('Delete this material?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <span data-feather="trash-2"></span>
-                                    </button>
-                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
                 @empty
-                <p class="text-muted text-center">No materials uploaded yet. Click "Upload Material" to add materials for this assessment.</p>
+                <p class="text-muted text-center">No materials uploaded yet.</p>
                 @endforelse
             </div>
         </div>
+        @endif
 
-        <!-- Upload Material Modal -->
-        <div class="modal fade" id="uploadMaterialModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form action="{{ route('assessments.materials.store', $assessment->id) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="modal-header">
-                            <h5 class="modal-title">Upload Material</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        @elseif(auth()->user()->hasRole('Student'))
+        <!-- Student view -->
+        @php
+            $timeCheck = $timeCheck ?? ['within' => true, 'reason' => null, 'message' => null];
+            $isWithinTime = $timeCheck['within'] ?? true;
+        @endphp
+        
+        @if($assessment->type === 'quiz')
+        @php
+            $inProgressSubmission = $allSubmissions->whereNotNull('started_at')->whereNull('submitted_at')->first();
+            $hasStarted = $inProgressSubmission !== null;
+            $isSubmitted = $inProgressSubmission === null && $allSubmissions->whereNotNull('submitted_at')->isNotEmpty();
+            $timeLimit = $assessment->time_limit;
+        @endphp
+        
+        @if(!$isWithinTime)
+        <!-- Time restriction message -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">Quiz Not Available</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-{{ $timeCheck['reason'] === 'not_started' ? 'info' : 'warning' }}">
+                    <p class="mb-0">{{ $timeCheck['message'] }}</p>
+                </div>
+            </div>
+        </div>
+        @elseif(!$hasStarted && !$isSubmitted)
+        <!-- Start Quiz Button -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">Ready to Start?</h6>
+            </div>
+            <div class="card-body text-center">
+                @if($timeLimit)
+                <p class="mb-3">This quiz has a time limit of <strong>{{ $timeLimit }} minutes</strong>.</p>
+                @endif
+                @if($assessment->end_date)
+                <p class="mb-3">You can take this quiz until <strong>{{ $assessment->end_date->format('F d, Y h:i A') }}</strong>.</p>
+                @endif
+                <p class="mb-4">Once you click "Start Quiz", the timer will begin. Make sure you are ready before starting.</p>
+                <form action="{{ route('assessments.startQuiz', $assessment->id) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Start Quiz
+                    </button>
+                </form>
+            </div>
+        </div>
+        @elseif($hasStarted && !$isSubmitted && $isWithinTime)
+        <!-- Quiz attempt form with timer -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Quiz Questions</h6>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-warning" id="pauseResumeBtn">
+                        <span data-feather="pause"></span> <span id="pauseResumeText">Pause</span>
+                    </button>
+                    @if($timeLimit)
+                    <div class="badge bg-{{ $timeLimit > 5 ? 'info' : 'danger' }} fs-6" id="quizTimer">
+                        <span data-feather="clock"></span> <span id="timerDisplay">--:--</span>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            <div class="card-body" id="quizContent">
+                <div id="pausedMessage" class="alert alert-warning text-center" style="display: none;">
+                    <h5><span data-feather="pause-circle"></span> Quiz Paused</h5>
+                    <p class="mb-0">The timer is still running. Click "Resume" to continue answering questions.</p>
+                </div>
+                <div id="questionsContainer">
+                <form action="{{ route('assessments.submitQuiz', $assessment->id) }}" method="POST" id="quizForm">
+                <input type="hidden" name="submission_id" value="{{ $inProgressSubmission->id }}">
+                    @csrf
+                    @forelse($assessment->questions as $index => $question)
+                    @php
+                        $options = $question->options;
+                        if (!$options || !is_array($options) || count($options) === 0) {
+                            $options = array_values(array_filter([
+                                $question->option_a,
+                                $question->option_b,
+                                $question->option_c,
+                                $question->option_d,
+                            ], function ($opt) { return $opt !== null && $opt !== ''; }));
+                        }
+                    @endphp
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="mb-2">Question {{ $index + 1 }} ({{ number_format($question->marks, 2) }} marks)</h6>
+                            <p class="mb-3">{{ $question->question }}</p>
+
+                            @if($question->question_type === 'short_answer')
+                                <div class="mb-2">
+                                    <input type="text"
+                                           name="answers[{{ $question->id }}]"
+                                           class="form-control"
+                                           placeholder="Enter your answer"
+                                           required>
+                                </div>
+                            @elseif($question->question_type === 'checkboxes')
+                                @foreach($options as $optIndex => $optText)
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="answers[{{ $question->id }}][]"
+                                           value="{{ $optIndex }}"
+                                           id="q{{ $question->id }}_opt{{ $optIndex }}">
+                                    <label class="form-check-label" for="q{{ $question->id }}_opt{{ $optIndex }}">
+                                        {{ $optText }}
+                                    </label>
+                                </div>
+                                @endforeach
+                            @else
+                                @foreach($options as $optIndex => $optText)
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="answers[{{ $question->id }}]"
+                                           value="{{ $optIndex }}"
+                                           id="q{{ $question->id }}_opt{{ $optIndex }}"
+                                           required>
+                                    <label class="form-check-label" for="q{{ $question->id }}_opt{{ $optIndex }}">
+                                        {{ $optText }}
+                                    </label>
+                                </div>
+                                @endforeach
+                            @endif
                         </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="file" class="form-label">File*</label>
-                                <input type="file" id="file" name="file" class="form-control" required>
-                                <small class="text-muted">Max file size: 10MB</small>
-                            </div>
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea id="description" name="description" class="form-control" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Upload</button>
-                        </div>
-                    </form>
+                    </div>
+                    @empty
+                    <p class="text-muted text-center">No questions available for this quiz.</p>
+                    @endforelse
+
+                    @if($assessment->questions->count() > 0)
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary" id="submitQuizBtn">
+                            Submit Quiz
+                        </button>
+                    </div>
+                    @endif
+                </form>
+                </div>
+            </div>
+        </div>
+        @elseif($hasStarted && !$isSubmitted && !$isWithinTime)
+        <!-- Quiz started but time expired -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">Quiz Time Expired</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <p class="mb-0">{{ $timeCheck['message'] }}</p>
+                </div>
+            </div>
+        </div>
+        @elseif($isSubmitted)
+        <!-- Quiz submitted - show attempts -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Quiz Attempts</h6>
+                @if($canAttemptAgain && $isWithinTime)
+                <form action="{{ route('assessments.startQuiz', $assessment->id) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <span data-feather="play"></span> Start New Attempt
+                    </button>
+                </form>
+                @endif
+            </div>
+            <div class="card-body">
+                @php
+                    $submittedSubmissions = $allSubmissions->whereNotNull('submitted_at')->sortByDesc('attempt_number');
+                    $maxAttemptsDisplay = $assessment->max_attempts === null ? 'Unlimited' : $assessment->max_attempts;
+                @endphp
+                
+                <div class="alert alert-info">
+                    <p class="mb-0">
+                        <strong>Maximum Attempts:</strong> {{ $maxAttemptsDisplay }} | 
+                        <strong>Your Attempts:</strong> {{ $submittedSubmissions->count() }}
+                        @if($assessment->max_attempts !== null)
+                        / {{ $assessment->max_attempts }}
+                        @endif
+                    </p>
+                    @if($highestScore !== null && $assessment->show_marks)
+                    <p class="mb-0 mt-2">
+                        <strong>Highest Score:</strong> {{ number_format($highestScore, 2) }} / {{ number_format($assessment->total_marks, 2) }}
+                        ({{ number_format(($highestScore / $assessment->total_marks) * 100, 2) }}%)
+                    </p>
+                    @endif
+                </div>
+
+                @if($assessment->show_marks)
+                <h6 class="mb-3">Your Attempts:</h6>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Attempt #</th>
+                                <th>Score</th>
+                                <th>Submitted At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($submittedSubmissions as $attempt)
+                            <tr class="{{ $attempt->score == $highestScore && $highestScore !== null ? 'table-success' : '' }}">
+                                <td>Attempt {{ $attempt->attempt_number }}</td>
+                                <td>
+                                    @if($attempt->score !== null)
+                                    <strong>{{ number_format($attempt->score, 2) }} / {{ number_format($assessment->total_marks, 2) }}</strong>
+                                    <br><small class="text-muted">{{ number_format(($attempt->score / $assessment->total_marks) * 100, 2) }}%</small>
+                                    @if($attempt->score == $highestScore && $highestScore !== null)
+                                    <span class="badge bg-success">Highest</span>
+                                    @endif
+                                    @else
+                                    <span class="text-muted">Not graded</span>
+                                    @endif
+                                </td>
+                                <td>{{ $attempt->submitted_at->format('M d, Y h:i A') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <div class="alert alert-warning">
+                    <p class="mb-0">Marks are hidden by the teacher. You will not be able to see your scores.</p>
+                </div>
+                @endif
+
+                @if(!$canAttemptAgain && $assessment->max_attempts !== null)
+                <div class="alert alert-warning mt-3">
+                    <p class="mb-0">You have reached the maximum number of attempts for this quiz.</p>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
+        
+        @if($hasStarted && !$isSubmitted && $isWithinTime && $inProgressSubmission)
+        <script>
+            (function() {
+                const quizForm = document.getElementById('quizForm');
+                const submitBtn = document.getElementById('submitQuizBtn');
+                const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+                const pauseResumeText = document.getElementById('pauseResumeText');
+                const questionsContainer = document.getElementById('questionsContainer');
+                const pausedMessage = document.getElementById('pausedMessage');
+                
+                let isPaused = false;
+                
+                // Pause/Resume functionality
+                if (pauseResumeBtn) {
+                    pauseResumeBtn.addEventListener('click', function() {
+                        isPaused = !isPaused;
+                        
+                        if (isPaused) {
+                            // Pause: Hide questions, show paused message
+                            questionsContainer.style.display = 'none';
+                            pausedMessage.style.display = 'block';
+                            pauseResumeText.textContent = 'Resume';
+                            pauseResumeBtn.classList.remove('btn-warning');
+                            pauseResumeBtn.classList.add('btn-success');
+                            
+                            // Change icon (if feather is available)
+                            const icon = pauseResumeBtn.querySelector('[data-feather]');
+                            if (icon && typeof feather !== 'undefined') {
+                                icon.setAttribute('data-feather', 'play');
+                                feather.replace();
+                            }
+                        } else {
+                            // Resume: Show questions, hide paused message
+                            questionsContainer.style.display = 'block';
+                            pausedMessage.style.display = 'none';
+                            pauseResumeText.textContent = 'Pause';
+                            pauseResumeBtn.classList.remove('btn-success');
+                            pauseResumeBtn.classList.add('btn-warning');
+                            
+                            // Change icon (if feather is available)
+                            const icon = pauseResumeBtn.querySelector('[data-feather]');
+                            if (icon && typeof feather !== 'undefined') {
+                                icon.setAttribute('data-feather', 'pause');
+                                feather.replace();
+                            }
+                        }
+                    });
+                }
+                
+                @if($timeLimit)
+                // Timer functionality (only if time limit is set)
+                const startedAt = '{{ $inProgressSubmission->started_at->timestamp }}';
+                const timeLimitMinutes = {{ $timeLimit }};
+                const timeLimitSeconds = timeLimitMinutes * 60;
+                const startTime = parseInt(startedAt) * 1000; // Convert to milliseconds
+                const endTime = startTime + (timeLimitSeconds * 1000);
+                const timerDisplay = document.getElementById('timerDisplay');
+                
+                function updateTimer() {
+                    const now = Date.now();
+                    const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
+                    
+                    if (remaining <= 0) {
+                        timerDisplay.textContent = '00:00';
+                        timerDisplay.parentElement.classList.remove('bg-info');
+                        timerDisplay.parentElement.classList.add('bg-danger');
+                        
+                        // Auto-submit the form
+                        if (quizForm && submitBtn) {
+                            submitBtn.disabled = true;
+                            quizForm.submit();
+                        }
+                        return;
+                    }
+                    
+                    const minutes = Math.floor(remaining / 60);
+                    const seconds = remaining % 60;
+                    timerDisplay.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+                    
+                    // Change color when less than 5 minutes remain
+                    if (remaining < 300 && !timerDisplay.parentElement.classList.contains('bg-danger')) {
+                        timerDisplay.parentElement.classList.remove('bg-info');
+                        timerDisplay.parentElement.classList.add('bg-danger');
+                    }
+                    
+                    setTimeout(updateTimer, 1000);
+                }
+                
+                updateTimer();
+                @endif
+            })();
+        </script>
+        @endif
+        @elseif(in_array($assessment->type, ['test', 'homework']))
+        @php
+            $hasSubmitted = $submission && $submission->submitted_at;
+        @endphp
+        
+        @if(!$isWithinTime && $timeCheck['reason'] === 'ended')
+        <!-- Time restriction message -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">Submission Closed</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <p class="mb-0">{{ $timeCheck['message'] }}</p>
                 </div>
             </div>
         </div>
         @endif
+        
+        <!-- Materials list (read-only for students) -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">Materials</h6>
+            </div>
+            <div class="card-body">
+                @forelse($assessment->materials as $material)
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">
+                                    <span data-feather="file"></span>
+                                    {{ $material->file_name }}
+                                </h6>
+                                @if($material->description)
+                                <p class="text-muted mb-1">{{ $material->description }}</p>
+                                @endif
+                                <small class="text-muted">
+                                    Size: {{ number_format($material->file_size / 1024, 2) }} KB | 
+                                    Uploaded: {{ $material->created_at->format('M d, Y') }}
+                                </small>
+                            </div>
+                            <div>
+                                <a href="{{ asset('storage/' . $material->file_path) }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                    <span data-feather="download"></span> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <p class="text-muted text-center">No materials uploaded yet.</p>
+                @endforelse
+            </div>
+        </div>
+
+        @if($hasSubmitted)
+        <!-- Already submitted message -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Answer Submitted</h6>
+                @php
+                    $canRemove = $timeCheck['within'] && $timeCheck['reason'] !== 'ended';
+                @endphp
+                @if($canRemove)
+                <form action="{{ route('assessments.removeSubmission', $assessment->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove your submission? You will be able to resubmit again.');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                        <span data-feather="trash-2"></span> Remove Submission
+                    </button>
+                </form>
+                @endif
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <p class="mb-0">You have already submitted your answer for this {{ $assessment->type }}.</p>
+                    <p class="mb-0 mt-2">Submitted at: {{ $submission->submitted_at->format('F d, Y h:i A') }}</p>
+                    @if($submission->answer_file_path)
+                    <p class="mb-0 mt-2">
+                        <a href="{{ asset('storage/' . $submission->answer_file_path) }}" target="_blank" class="btn btn-sm btn-outline-info">
+                            <span data-feather="download"></span> Download Your Submission
+                        </a>
+                    </p>
+                    @endif
+                    @if(!$canRemove)
+                    <p class="mb-0 mt-2"><small class="text-muted">Submission cannot be removed after the deadline.</small></p>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @elseif($isWithinTime)
+        <!-- Student answer upload form -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">Submit Your Answer</h6>
+            </div>
+            <div class="card-body">
+                @if($assessment->end_date)
+                <div class="alert alert-info mb-3">
+                    <p class="mb-0">Submission deadline: <strong>{{ $assessment->end_date->format('F d, Y h:i A') }}</strong></p>
+                </div>
+                @endif
+                <form action="{{ route('assessments.submitHomework', $assessment->id) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="answer_file" class="form-label">Answer File*</label>
+                        <input type="file" id="answer_file" name="answer_file" class="form-control" required>
+                        <small class="text-muted">Max file size: 10MB</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload Answer</button>
+                </form>
+            </div>
+        </div>
+        @elseif(!$isWithinTime && $timeCheck['reason'] === 'not_started')
+        <!-- Not started yet message -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">Submission Not Available</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <p class="mb-0">{{ $timeCheck['message'] }}</p>
+                </div>
+            </div>
+        </div>
+        @endif
+        @endif
+
         @endif
 
         @if(auth()->user()->hasRole('Teacher') && $assessment->teacher_id === auth()->id())

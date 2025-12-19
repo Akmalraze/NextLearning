@@ -21,14 +21,18 @@ class Assessments extends Model
         'due_date',
         'total_marks',
         'is_published',
+        'time_limit',
+        'max_attempts',
+        'show_marks',
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
         'due_date' => 'date',
         'total_marks' => 'decimal:2',
         'is_published' => 'boolean',
+        'show_marks' => 'boolean',
     ];
 
     /**

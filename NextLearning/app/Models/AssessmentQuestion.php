@@ -12,11 +12,14 @@ class AssessmentQuestion extends Model
     protected $fillable = [
         'assessment_id',
         'question',
+        'question_type',
+        'options',
         'option_a',
         'option_b',
         'option_c',
         'option_d',
         'correct_answer',
+        'shuffle_options',
         'marks',
         'order',
     ];
@@ -24,6 +27,8 @@ class AssessmentQuestion extends Model
     protected $casts = [
         'marks' => 'decimal:2',
         'order' => 'integer',
+        'shuffle_options' => 'boolean',
+        'options' => 'array',
     ];
 
     /**
