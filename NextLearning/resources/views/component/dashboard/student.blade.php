@@ -125,7 +125,7 @@
                             <small class="text-muted">{{ Str::limit($subject->description, 60) }}</small>
                         </p>
                         @endif
-                        <a href="#" class="btn btn-sm btn-outline-primary mt-2">
+                        <a href="{{ route('modules-index') }}" class="btn btn-sm btn-outline-primary mt-2">
                             <i data-feather="eye" style="width: 14px; height: 14px;"></i> View Subject
                         </a>
                     </div>

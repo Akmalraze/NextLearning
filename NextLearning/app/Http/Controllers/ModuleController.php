@@ -29,7 +29,7 @@ class ModuleController extends Controller
 
     public function create()
     {
-        abort_if(Gate::denies('create modules'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        //abort_if(Gate::denies('create modules'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return view('pages.ManageModule.create');
     }
 
