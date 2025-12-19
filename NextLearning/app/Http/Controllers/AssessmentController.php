@@ -137,6 +137,9 @@ class AssessmentController extends Controller
                 ));
             }
 
+            $now = now();
+            
+            // Get all published assessments for the student's class
             $query = Assessments::where('class_id', $studentClass->id)
                 ->where('is_published', true)
                 ->with(['class', 'subject', 'teacher']);
@@ -152,17 +155,47 @@ class AssessmentController extends Controller
                 $query->where('type', $type);
             }
 
-            $assessments = $query->latest()->paginate(15)->withQueryString();
+            // Get all assessments (without pagination for separation)
+            $allAssessments = $query->get();
             
             // Load submission status for each assessment
             $submissions = collect([]);
-            if ($assessments->count() > 0) {
-                $assessmentIds = $assessments->pluck('id');
+            if ($allAssessments->count() > 0) {
+                $assessmentIds = $allAssessments->pluck('id');
                 $submissions = AssessmentSubmission::whereIn('assessment_id', $assessmentIds)
                     ->where('student_id', $student->id)
                     ->get()
                     ->keyBy('assessment_id');
             }
+            
+            // Separate expired and active assessments
+            $expiredAssessments = collect([]);
+            $activeAssessments = collect([]);
+            
+            foreach ($allAssessments as $assessment) {
+                $hasEnded = $assessment->end_date !== null && $now->gt($assessment->end_date);
+                $submission = $submissions[$assessment->id] ?? null;
+                $isSubmitted = $submission && $submission->submitted_at;
+                
+                // Expired: assessment has ended (regardless of submission status)
+                // Active: assessment hasn't ended yet (can still answer or resubmit if allowed)
+                if ($hasEnded) {
+                    $expiredAssessments->push($assessment);
+                } else {
+                    $activeAssessments->push($assessment);
+                }
+            }
+            
+            // Sort active assessments by end_date (earliest expiry first) - priority order
+            $activeAssessments = $activeAssessments->sortBy(function ($assessment) {
+                // If no end_date, put at the end
+                return $assessment->end_date ? $assessment->end_date->timestamp : PHP_INT_MAX;
+            })->values();
+            
+            // Sort expired assessments by end_date (most recently expired first)
+            $expiredAssessments = $expiredAssessments->sortByDesc(function ($assessment) {
+                return $assessment->end_date ? $assessment->end_date->timestamp : 0;
+            })->values();
             
             // Initialize variables for student view
             $classSubjectCombos = collect([]);
@@ -172,7 +205,8 @@ class AssessmentController extends Controller
             $selectedSubject = null;
             
             return view('pages.ManageAssessment.index', compact(
-                'assessments', 
+                'activeAssessments', 
+                'expiredAssessments',
                 'classSubjectCombos', 
                 'classId', 
                 'subjectId', 
