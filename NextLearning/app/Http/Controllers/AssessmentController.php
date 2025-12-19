@@ -80,7 +80,11 @@ class AssessmentController extends Controller
                     $query->where('type', $type);
                 }
 
-                $assessments = $query->latest()->paginate(15)->withQueryString();
+                // Sort by due_date (earliest first), then by created_at for those without due_date
+                $assessments = $query->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END')
+                    ->orderBy('due_date', 'asc')
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(15)->withQueryString();
                 
                 return view('pages.ManageAssessment.index', compact(
                     'assessments', 
@@ -168,20 +172,24 @@ class AssessmentController extends Controller
                     ->keyBy('assessment_id');
             }
             
-            // Separate expired and active assessments
+            // Separate into: active (not submitted), submitted, and expired (not submitted)
             $expiredAssessments = collect([]);
             $activeAssessments = collect([]);
+            $submittedAssessments = collect([]);
             
             foreach ($allAssessments as $assessment) {
                 $hasEnded = $assessment->end_date !== null && $now->gt($assessment->end_date);
                 $submission = $submissions[$assessment->id] ?? null;
                 $isSubmitted = $submission && $submission->submitted_at;
                 
-                // Expired: assessment has ended (regardless of submission status)
-                // Active: assessment hasn't ended yet (can still answer or resubmit if allowed)
-                if ($hasEnded) {
+                // First check if submitted - submitted assessments go to their own table
+                if ($isSubmitted) {
+                    $submittedAssessments->push($assessment);
+                } elseif ($hasEnded) {
+                    // Expired and not submitted
                     $expiredAssessments->push($assessment);
                 } else {
+                    // Active and not submitted
                     $activeAssessments->push($assessment);
                 }
             }
@@ -190,6 +198,12 @@ class AssessmentController extends Controller
             $activeAssessments = $activeAssessments->sortBy(function ($assessment) {
                 // If no end_date, put at the end
                 return $assessment->end_date ? $assessment->end_date->timestamp : PHP_INT_MAX;
+            })->values();
+            
+            // Sort submitted assessments by submitted_at (most recently submitted first)
+            $submittedAssessments = $submittedAssessments->sortByDesc(function ($assessment) use ($submissions) {
+                $submission = $submissions[$assessment->id] ?? null;
+                return $submission && $submission->submitted_at ? $submission->submitted_at->timestamp : 0;
             })->values();
             
             // Sort expired assessments by end_date (most recently expired first)
@@ -205,7 +219,8 @@ class AssessmentController extends Controller
             $selectedSubject = null;
             
             return view('pages.ManageAssessment.index', compact(
-                'activeAssessments', 
+                'activeAssessments',
+                'submittedAssessments',
                 'expiredAssessments',
                 'classSubjectCombos', 
                 'classId', 

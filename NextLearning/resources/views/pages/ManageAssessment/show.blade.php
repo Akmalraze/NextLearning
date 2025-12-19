@@ -98,9 +98,9 @@
         <div class="alert alert-info mt-4">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="alert-heading">
+            <h6 class="alert-heading">
                         <span data-feather="info"></span> Assessment Details
-                    </h6>
+            </h6>
                     <p class="mb-0">To manage questions or materials, click the <strong>"Edit"</strong> button above.</p>
                 </div>
                 <a href="{{ route('assessments.submissions', $assessment->id) }}" class="btn btn-primary">
@@ -244,7 +244,7 @@
                 @endif
                 <p class="mb-4">Once you click "Start Quiz", the timer will begin. Make sure you are ready before starting.</p>
                 <form action="{{ route('assessments.startQuiz', $assessment->id) }}" method="POST">
-                    @csrf
+                        @csrf
                     <button type="submit" class="btn btn-primary btn-lg">
                         Start Quiz
                     </button>
@@ -253,96 +253,149 @@
         </div>
         @elseif($hasStarted && !$isSubmitted && $isWithinTime)
         <!-- Quiz attempt form with timer -->
-        <div class="card mt-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Quiz Questions</h6>
-                <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-sm btn-warning" id="pauseResumeBtn">
-                        <span data-feather="pause"></span> <span id="pauseResumeText">Pause</span>
-                    </button>
-                    @if($timeLimit)
-                    <div class="badge bg-{{ $timeLimit > 5 ? 'info' : 'danger' }} fs-6" id="quizTimer">
-                        <span data-feather="clock"></span> <span id="timerDisplay">--:--</span>
+        <div class="row mt-4">
+            <!-- Question Navigator Sidebar -->
+            <div class="col-md-3 mb-4">
+                <div class="card sticky-top" style="top: 20px;">
+                    <div class="card-header">
+                        <h6 class="mb-0">Question Navigator</h6>
                     </div>
-                    @endif
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <small class="text-muted">Progress: <span id="questionProgress">0/0</span></small>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2" id="questionNavigator">
+                            @foreach($assessment->questions as $index => $question)
+                            <button type="button" 
+                                    class="btn btn-sm question-nav-btn {{ $index === 0 ? 'btn-primary' : 'btn-outline-secondary' }}" 
+                                    data-question-index="{{ $index }}"
+                                    id="nav-btn-{{ $index }}">
+                                {{ $index + 1 }}
+                            </button>
+                            @endforeach
+                        </div>
+                        <hr>
+                        <div class="small">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge bg-success me-2" style="width: 20px; height: 20px;"></span>
+                                <span>Answered</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary me-2" style="width: 20px; height: 20px; opacity: 0.5;"></span>
+                                <span>Not Answered</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card-body" id="quizContent">
-                <div id="pausedMessage" class="alert alert-warning text-center" style="display: none;">
-                    <h5><span data-feather="pause-circle"></span> Quiz Paused</h5>
-                    <p class="mb-0">The timer is still running. Click "Resume" to continue answering questions.</p>
-                </div>
-                <div id="questionsContainer">
-                <form action="{{ route('assessments.submitQuiz', $assessment->id) }}" method="POST" id="quizForm">
-                <input type="hidden" name="submission_id" value="{{ $inProgressSubmission->id }}">
-                    @csrf
-                    @forelse($assessment->questions as $index => $question)
-                    @php
-                        $options = $question->options;
-                        if (!$options || !is_array($options) || count($options) === 0) {
-                            $options = array_values(array_filter([
-                                $question->option_a,
-                                $question->option_b,
-                                $question->option_c,
-                                $question->option_d,
-                            ], function ($opt) { return $opt !== null && $opt !== ''; }));
-                        }
-                    @endphp
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h6 class="mb-2">Question {{ $index + 1 }} ({{ number_format($question->marks, 2) }} marks)</h6>
-                            <p class="mb-3">{{ $question->question }}</p>
 
-                            @if($question->question_type === 'short_answer')
-                                <div class="mb-2">
-                                    <input type="text"
-                                           name="answers[{{ $question->id }}]"
-                                           class="form-control"
-                                           placeholder="Enter your answer"
-                                           required>
-                                </div>
-                            @elseif($question->question_type === 'checkboxes')
-                                @foreach($options as $optIndex => $optText)
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input"
-                                           type="checkbox"
-                                           name="answers[{{ $question->id }}][]"
-                                           value="{{ $optIndex }}"
-                                           id="q{{ $question->id }}_opt{{ $optIndex }}">
-                                    <label class="form-check-label" for="q{{ $question->id }}_opt{{ $optIndex }}">
-                                        {{ $optText }}
-                                    </label>
-                                </div>
-                                @endforeach
-                            @else
-                                @foreach($options as $optIndex => $optText)
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input"
-                                           type="radio"
-                                           name="answers[{{ $question->id }}]"
-                                           value="{{ $optIndex }}"
-                                           id="q{{ $question->id }}_opt{{ $optIndex }}"
-                                           required>
-                                    <label class="form-check-label" for="q{{ $question->id }}_opt{{ $optIndex }}">
-                                        {{ $optText }}
-                                    </label>
-                                </div>
-                                @endforeach
+            <!-- Main Question Area -->
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <span id="questionCounter">Question 1 of {{ $assessment->questions->count() }}</span>
+                        </h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-sm btn-warning" id="pauseResumeBtn">
+                                <span data-feather="pause"></span> <span id="pauseResumeText">Pause</span>
+                            </button>
+                            @if($timeLimit)
+                            <div class="badge bg-{{ $timeLimit > 5 ? 'info' : 'danger' }} fs-6" id="quizTimer">
+                                <span data-feather="clock"></span> <span id="timerDisplay">--:--</span>
+                            </div>
                             @endif
                         </div>
                     </div>
-                    @empty
-                    <p class="text-muted text-center">No questions available for this quiz.</p>
-                    @endforelse
+                    <div class="card-body" id="quizContent">
+                        <div id="pausedMessage" class="alert alert-warning text-center" style="display: none;">
+                            <h5><span data-feather="pause-circle"></span> Quiz Paused</h5>
+                            <p class="mb-0">The timer is still running. Click "Resume" to continue answering questions.</p>
+                        </div>
+                        <div id="questionsContainer">
+                            <form action="{{ route('assessments.submitQuiz', $assessment->id) }}" method="POST" id="quizForm">
+                                <input type="hidden" name="submission_id" value="{{ $inProgressSubmission->id }}">
+                                @csrf
+                                @forelse($assessment->questions as $index => $question)
+                                @php
+                                    $options = $question->options;
+                                    if (!$options || !is_array($options) || count($options) === 0) {
+                                        $options = array_values(array_filter([
+                                            $question->option_a,
+                                            $question->option_b,
+                                            $question->option_c,
+                                            $question->option_d,
+                                        ], function ($opt) { return $opt !== null && $opt !== ''; }));
+                                    }
+                                @endphp
+                                <div class="question-card" data-question-index="{{ $index }}" style="display: {{ $index === 0 ? 'block' : 'none' }};">
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h6 class="mb-2">Question {{ $index + 1 }} ({{ number_format($question->marks, 2) }} marks)</h6>
+                                            <p class="mb-3">{{ $question->question }}</p>
 
-                    @if($assessment->questions->count() > 0)
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary" id="submitQuizBtn">
-                            Submit Quiz
-                        </button>
+                                            @if($question->question_type === 'short_answer')
+                                                <div class="mb-2">
+                                                    <input type="text"
+                                                           name="answers[{{ $question->id }}]"
+                                                           class="form-control answer-input"
+                                                           data-question-id="{{ $question->id }}"
+                                                           placeholder="Enter your answer">
+                                                </div>
+                                            @elseif($question->question_type === 'checkboxes')
+                                                @foreach($options as $optIndex => $optText)
+                                                <div class="form-check mb-1">
+                                                    <input class="form-check-input answer-input"
+                                                           type="checkbox"
+                                                           name="answers[{{ $question->id }}][]"
+                                                           value="{{ $optIndex }}"
+                                                           data-question-id="{{ $question->id }}"
+                                                           id="q{{ $question->id }}_opt{{ $optIndex }}">
+                                                    <label class="form-check-label" for="q{{ $question->id }}_opt{{ $optIndex }}">
+                                                        {{ $optText }}
+                                                    </label>
+                                                </div>
+                                                @endforeach
+                                            @else
+                                                @foreach($options as $optIndex => $optText)
+                                                <div class="form-check mb-1">
+                                                    <input class="form-check-input answer-input"
+                                                           type="radio"
+                                                           name="answers[{{ $question->id }}]"
+                                                           value="{{ $optIndex }}"
+                                                           data-question-id="{{ $question->id }}"
+                                                           id="q{{ $question->id }}_opt{{ $optIndex }}">
+                                                    <label class="form-check-label" for="q{{ $question->id }}_opt{{ $optIndex }}">
+                                                        {{ $optText }}
+                                                    </label>
+                                                </div>
+                                                @endforeach
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                @empty
+                                <p class="text-muted text-center">No questions available for this quiz.</p>
+                                @endforelse
+
+                                @if($assessment->questions->count() > 0)
+                                <div class="d-flex justify-content-between align-items-center mt-4">
+                                    <button type="button" class="btn btn-secondary" id="prevQuestionBtn" style="display: none;">
+                                        <span data-feather="arrow-left"></span> Previous
+                                    </button>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-primary" id="nextQuestionBtn">
+                                            Next <span data-feather="arrow-right"></span>
+                                        </button>
+                                        <button type="submit" class="btn btn-secondary" id="submitQuizBtn" style="display: none;" disabled title="Please answer all questions before submitting">
+                                            <span data-feather="check"></span> Submit Quiz
+                                        </button>
+                                    </div>
+                                </div>
+                                @endif
+                            </form>
+                        </div>
                     </div>
-                    @endif
-                </form>
                 </div>
             </div>
         </div>
@@ -450,8 +503,272 @@
                 const pauseResumeText = document.getElementById('pauseResumeText');
                 const questionsContainer = document.getElementById('questionsContainer');
                 const pausedMessage = document.getElementById('pausedMessage');
+                const prevBtn = document.getElementById('prevQuestionBtn');
+                const nextBtn = document.getElementById('nextQuestionBtn');
+                const questionCounter = document.getElementById('questionCounter');
+                const questionProgress = document.getElementById('questionProgress');
                 
+                const submissionId = {{ $inProgressSubmission->id }};
+                const totalQuestions = {{ $assessment->questions->count() }};
+                let currentQuestionIndex = 0;
                 let isPaused = false;
+                
+                // Storage key for answers
+                const storageKey = `quiz_answers_${submissionId}`;
+                
+                // Load saved answers from localStorage
+                function loadAnswers() {
+                    const saved = localStorage.getItem(storageKey);
+                    if (saved) {
+                        try {
+                            const answers = JSON.parse(saved);
+                            Object.keys(answers).forEach(questionId => {
+                                const value = answers[questionId];
+                                const inputs = document.querySelectorAll(`[name*="[${questionId}]"][data-question-id="${questionId}"]`);
+                                
+                                inputs.forEach(input => {
+                                    if (input.type === 'checkbox') {
+                                        input.checked = Array.isArray(value) && value.includes(input.value);
+                                    } else if (input.type === 'radio') {
+                                        input.checked = input.value == value;
+                                    } else {
+                                        input.value = value || '';
+                                    }
+                                });
+                            });
+                        } catch (e) {
+                            console.error('Error loading answers:', e);
+                        }
+                    }
+                    updateQuestionStatus();
+                }
+                
+                // Save answers to localStorage
+                function saveAnswers() {
+                    const answers = {};
+                    const allInputs = document.querySelectorAll('.answer-input');
+                    
+                    allInputs.forEach(input => {
+                        const questionId = input.getAttribute('data-question-id');
+                        if (!questionId) return;
+                        
+                        if (input.type === 'checkbox') {
+                            if (!answers[questionId]) answers[questionId] = [];
+                            if (input.checked) {
+                                answers[questionId].push(input.value);
+                            }
+                        } else if (input.type === 'radio') {
+                            if (input.checked) {
+                                answers[questionId] = input.value;
+                            }
+                        } else {
+                            answers[questionId] = input.value;
+                        }
+                    });
+                    
+                    localStorage.setItem(storageKey, JSON.stringify(answers));
+                    updateQuestionStatus();
+                }
+                
+                // Check if all questions are answered
+                function checkAllQuestionsAnswered() {
+                    const saved = localStorage.getItem(storageKey);
+                    let answers = {};
+                    if (saved) {
+                        try {
+                            answers = JSON.parse(saved);
+                        } catch (e) {
+                            return false;
+                        }
+                    }
+                    
+                    const questionCards = document.querySelectorAll('.question-card');
+                    
+                    for (let i = 0; i < questionCards.length; i++) {
+                        const card = questionCards[i];
+                        const questionId = card.querySelector('[data-question-id]')?.getAttribute('data-question-id');
+                        if (!questionId) {
+                            return false;
+                        }
+                        
+                        const value = answers[questionId];
+                        
+                        // Check if question has an answer
+                        if (!value) {
+                            return false;
+                        }
+                        
+                        // For checkboxes, check if array has items
+                        if (Array.isArray(value)) {
+                            if (value.length === 0) {
+                                return false;
+                            }
+                        } else {
+                            // For radio or text inputs, check if value is not empty
+                            if (value === '' || value === null || value === undefined) {
+                                return false;
+                            }
+                        }
+                    }
+                    
+                    return true;
+                }
+                
+                // Update question navigator and progress
+                function updateQuestionStatus() {
+                    const saved = localStorage.getItem(storageKey);
+                    let answers = {};
+                    if (saved) {
+                        try {
+                            answers = JSON.parse(saved);
+                        } catch (e) {
+                            answers = {};
+                        }
+                    }
+                    
+                    let answeredCount = 0;
+                    const questionCards = document.querySelectorAll('.question-card');
+                    
+                    questionCards.forEach((card, index) => {
+                        const questionId = card.querySelector('[data-question-id]')?.getAttribute('data-question-id');
+                        const navBtn = document.getElementById(`nav-btn-${index}`);
+                        
+                        if (!navBtn) return;
+                        
+                        // Check if question is answered
+                        let isAnswered = false;
+                        if (questionId && answers[questionId]) {
+                            const value = answers[questionId];
+                            isAnswered = Array.isArray(value) ? value.length > 0 : value !== '' && value !== null;
+                        }
+                        
+                        if (isAnswered) {
+                            answeredCount++;
+                        }
+                        
+                        // Don't change current question's primary state
+                        if (index === currentQuestionIndex) {
+                            navBtn.classList.remove('btn-success', 'btn-outline-secondary');
+                            navBtn.classList.add('btn-primary');
+                        } else {
+                            // Update non-current questions
+                            if (isAnswered) {
+                                navBtn.classList.remove('btn-outline-secondary', 'btn-primary');
+                                navBtn.classList.add('btn-success');
+                            } else {
+                                navBtn.classList.remove('btn-success', 'btn-primary');
+                                navBtn.classList.add('btn-outline-secondary');
+                            }
+                        }
+                    });
+                    
+                    questionProgress.textContent = `${answeredCount}/${totalQuestions}`;
+                    
+                    // Update submit button state
+                    const allAnswered = checkAllQuestionsAnswered();
+                    if (submitBtn) {
+                        if (allAnswered) {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('btn-secondary');
+                            submitBtn.classList.add('btn-primary');
+                            submitBtn.title = 'Submit Quiz';
+                        } else {
+                            submitBtn.disabled = true;
+                            submitBtn.classList.remove('btn-primary');
+                            submitBtn.classList.add('btn-secondary');
+                            submitBtn.title = `Please answer all questions (${answeredCount}/${totalQuestions} answered)`;
+                        }
+                    }
+                }
+                
+                // Show specific question
+                function showQuestion(index) {
+                    if (index < 0 || index >= totalQuestions) {
+                        console.error('Invalid question index:', index);
+                        return;
+                    }
+                    
+                    // Hide all questions
+                    const allCards = document.querySelectorAll('.question-card');
+                    if (allCards.length === 0) {
+                        console.error('No question cards found');
+                        return;
+                    }
+                    
+                    allCards.forEach(card => {
+                        card.style.display = 'none';
+                    });
+                    
+                    // Show current question
+                    const currentCard = document.querySelector(`.question-card[data-question-index="${index}"]`);
+                    if (currentCard) {
+                        currentCard.style.display = 'block';
+                    } else {
+                        console.error('Question card not found for index:', index);
+                    }
+                    
+                    // Update prev/next buttons
+                    if (prevBtn) {
+                        prevBtn.style.display = index === 0 ? 'none' : 'inline-block';
+                    }
+                    if (nextBtn) {
+                        nextBtn.style.display = index === totalQuestions - 1 ? 'none' : 'inline-block';
+                    }
+                    if (submitBtn) {
+                        submitBtn.style.display = index === totalQuestions - 1 ? 'inline-block' : 'none';
+                    }
+                    
+                    // Update counter
+                    if (questionCounter) {
+                        questionCounter.textContent = `Question ${index + 1} of ${totalQuestions}`;
+                    }
+                    
+                    // Set current index before updating status
+                    currentQuestionIndex = index;
+                    
+                    // Update question status to show answered indicators
+                    updateQuestionStatus();
+                }
+                
+                // Navigation handlers
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', function() {
+                        if (currentQuestionIndex > 0) {
+                            saveAnswers();
+                            showQuestion(currentQuestionIndex - 1);
+                        }
+                    });
+                }
+                
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', function() {
+                        if (currentQuestionIndex < totalQuestions - 1) {
+                            saveAnswers();
+                            showQuestion(currentQuestionIndex + 1);
+                        }
+                    });
+                }
+                
+                // Question navigator button clicks
+                document.querySelectorAll('.question-nav-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-question-index'));
+                        saveAnswers();
+                        showQuestion(index);
+                    });
+                });
+                
+                // Save answers on input change
+                document.querySelectorAll('.answer-input').forEach(input => {
+                    input.addEventListener('change', function() {
+                        saveAnswers();
+                    });
+                    input.addEventListener('input', function() {
+                        if (this.type === 'text') {
+                            saveAnswers();
+                        }
+                    });
+                });
                 
                 // Pause/Resume functionality
                 if (pauseResumeBtn) {
@@ -490,6 +807,102 @@
                     });
                 }
                 
+                // Flag to bypass validation (for auto-submit on timer expiry)
+                let bypassValidation = false;
+                
+                // Before form submit, ensure all answers are in the form
+                if (quizForm) {
+                    quizForm.addEventListener('submit', function(e) {
+                        // First, save current answers
+                        saveAnswers();
+                        
+                        // Check if all questions are answered (skip if bypassing validation)
+                        if (!bypassValidation && !checkAllQuestionsAnswered()) {
+                            e.preventDefault();
+                            alert('Please answer all questions before submitting the quiz.');
+                            
+                            // Find first unanswered question and navigate to it
+                            const savedForCheck = localStorage.getItem(storageKey);
+                            let answersForCheck = {};
+                            if (savedForCheck) {
+                                try {
+                                    answersForCheck = JSON.parse(savedForCheck);
+                                } catch (e) {
+                                    answersForCheck = {};
+                                }
+                            }
+                            
+                            const questionCards = document.querySelectorAll('.question-card');
+                            for (let i = 0; i < questionCards.length; i++) {
+                                const card = questionCards[i];
+                                const questionId = card.querySelector('[data-question-id]')?.getAttribute('data-question-id');
+                                if (!questionId) {
+                                    showQuestion(i);
+                                    return;
+                                }
+                                
+                                const value = answersForCheck[questionId];
+                                if (!value || (Array.isArray(value) && value.length === 0) || (!Array.isArray(value) && (value === '' || value === null))) {
+                                    showQuestion(i);
+                                    return;
+                                }
+                            }
+                            return;
+                        }
+                        
+                        // Reset bypass flag
+                        bypassValidation = false;
+                        
+                        // Load answers from localStorage into form
+                        const saved = localStorage.getItem(storageKey);
+                        if (saved) {
+                            try {
+                                const answers = JSON.parse(saved);
+                                Object.keys(answers).forEach(questionId => {
+                                    const value = answers[questionId];
+                                    const inputs = document.querySelectorAll(`[name*="[${questionId}]"][data-question-id="${questionId}"]`);
+                                    
+                                    inputs.forEach(input => {
+                                        if (input.type === 'checkbox') {
+                                            input.checked = Array.isArray(value) && value.includes(input.value);
+                                        } else if (input.type === 'radio') {
+                                            input.checked = input.value == value;
+                                        } else {
+                                            input.value = value || '';
+                                        }
+                                    });
+                                });
+                            } catch (e) {
+                                console.error('Error loading answers for submit:', e);
+                            }
+                        }
+                        
+                        // Clear localStorage after submit
+                        localStorage.removeItem(storageKey);
+                    });
+                }
+                
+                // Initialize - ensure DOM is ready and questions exist
+                function initializeQuiz() {
+                    const questionCards = document.querySelectorAll('.question-card');
+                    if (questionCards.length === 0) {
+                        console.error('No question cards found - cannot initialize quiz navigation');
+                        return;
+                    }
+                    
+                    console.log('Initializing quiz with', questionCards.length, 'questions');
+                    loadAnswers();
+                    showQuestion(0);
+                }
+                
+                // Wait for DOM to be ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initializeQuiz);
+                } else {
+                    // DOM already ready, use setTimeout to ensure rendering is complete
+                    setTimeout(initializeQuiz, 50);
+                }
+                
                 @if($timeLimit)
                 // Timer functionality (only if time limit is set)
                 const startedAt = '{{ $inProgressSubmission->started_at->timestamp }}';
@@ -508,9 +921,13 @@
                         timerDisplay.parentElement.classList.remove('bg-info');
                         timerDisplay.parentElement.classList.add('bg-danger');
                         
-                        // Auto-submit the form
+                        // Auto-submit the form (bypass validation when time expires)
                         if (quizForm && submitBtn) {
                             submitBtn.disabled = true;
+                            // Save answers before auto-submit
+                            saveAnswers();
+                            // Bypass validation for auto-submit
+                            bypassValidation = true;
                             quizForm.submit();
                         }
                         return;
@@ -645,7 +1062,7 @@
                         <small class="text-muted">Max file size: 10MB</small>
                     </div>
                     <button type="submit" class="btn btn-primary">Upload Answer</button>
-                </form>
+                    </form>
             </div>
         </div>
         @elseif(!$isWithinTime && $timeCheck['reason'] === 'not_started')

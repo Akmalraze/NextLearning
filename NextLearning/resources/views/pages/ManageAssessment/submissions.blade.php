@@ -147,7 +147,7 @@
                                             <span data-feather="save"></span>
                                         </button>
                                     </div>
-                                    <div>
+<div>
                                         @if($submission->score !== null)
                                         <small class="text-muted">{{ number_format(($submission->score / $assessment->total_marks) * 100, 2) }}%</small>
                                         @endif

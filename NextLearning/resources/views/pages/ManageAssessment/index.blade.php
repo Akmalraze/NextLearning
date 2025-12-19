@@ -232,27 +232,12 @@
                                 $submission = $submissions[$assessment->id] ?? null;
                                 $now = now();
                                 $hasStarted = $assessment->start_date === null || $now->gte($assessment->start_date);
-                                $hasEnded = $assessment->end_date !== null && $now->gt($assessment->end_date);
                                 
-                                // Determine status
-                                if ($submission && $submission->submitted_at) {
-                                    $status = 'submitted';
-                                    $statusText = 'Submitted';
-                                    $statusBadge = 'success';
-                                } elseif ($submission && $submission->started_at && !$submission->submitted_at) {
-                                    if ($hasEnded) {
-                                        $status = 'expired';
-                                        $statusText = 'Time Expired';
-                                        $statusBadge = 'danger';
-                                    } else {
-                                        $status = 'in_progress';
-                                        $statusText = 'In Progress';
-                                        $statusBadge = 'warning';
-                                    }
-                                } elseif ($hasEnded) {
-                                    $status = 'not_attempted_expired';
-                                    $statusText = 'Not Attempted (Expired)';
-                                    $statusBadge = 'secondary';
+                                // Determine status (active assessments are not submitted)
+                                if ($submission && $submission->started_at && !$submission->submitted_at) {
+                                    $status = 'in_progress';
+                                    $statusText = 'In Progress';
+                                    $statusBadge = 'warning';
                                 } elseif (!$hasStarted) {
                                     $status = 'not_started';
                                     $statusText = 'Not Started Yet';
@@ -281,18 +266,12 @@
                                 <td>
                                     @if($assessment->end_date)
                                         {{ $assessment->end_date->format('M d, Y h:i A') }}
-                                        @if($hasEnded)
-                                        <br><small class="text-danger">(Expired)</small>
-                                        @endif
                                     @else
                                         N/A
                                     @endif
                                 </td>
                                 <td>
                                     <span class="badge bg-{{ $statusBadge }}">{{ $statusText }}</span>
-                                    @if($submission && $submission->score !== null && $status === 'submitted')
-                                    <br><small class="text-muted">Score: {{ number_format($submission->score, 2) }}/{{ number_format($assessment->total_marks, 2) }}</small>
-                                    @endif
                                 </td>
                                 <td>{{ number_format($assessment->total_marks, 2) }}</td>
                                 <td>
@@ -309,10 +288,84 @@
                         </table>
                     </div>
                 </div>
-                @elseif(isset($activeAssessments) && $activeAssessments->isEmpty() && (!isset($expiredAssessments) || $expiredAssessments->isEmpty()))
+                @elseif(isset($activeAssessments) && $activeAssessments->isEmpty() && (!isset($submittedAssessments) || $submittedAssessments->isEmpty()) && (!isset($expiredAssessments) || $expiredAssessments->isEmpty()))
                 <div class="alert alert-info">
                     <span data-feather="info"></span>
                     No published assessments available.
+                </div>
+                @endif
+
+                <!-- Submitted Assessments (Separate Table) -->
+                @if(isset($submittedAssessments) && $submittedAssessments->isNotEmpty())
+                <div class="mb-5">
+                    <h6 class="mb-3 text-success">
+                        <span data-feather="check-circle"></span> Submitted Assessments
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-success">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Subject</th>
+                                    <th>Submitted Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Score</th>
+                                    <th>Total Marks</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($submittedAssessments as $assessment)
+                                @php
+                                    $submission = $submissions[$assessment->id] ?? null;
+                                    $status = 'submitted';
+                                    $statusText = 'Submitted';
+                                    $statusBadge = 'success';
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <strong>{{ $assessment->title }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ $assessment->type === 'quiz' ? 'info' : ($assessment->type === 'test' ? 'warning' : 'success') }}">
+                                            {{ ucfirst($assessment->type) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $assessment->subject ? $assessment->subject->name : 'N/A' }}</td>
+                                    <td>
+                                        @if($submission && $submission->submitted_at)
+                                            {{ $submission->submitted_at->format('M d, Y h:i A') }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ $statusBadge }}">{{ $statusText }}</span>
+                                    </td>
+                                    <td>
+                                        @if($submission && $submission->score !== null && $assessment->show_marks)
+                                            <strong>{{ number_format($submission->score, 2) }}</strong>
+                                            <br><small class="text-muted">({{ number_format(($submission->score / $assessment->total_marks) * 100, 2) }}%)</small>
+                                        @elseif($submission && $submission->score === null)
+                                            <span class="text-muted">Pending</span>
+                                        @else
+                                            <span class="text-muted">N/A</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ number_format($assessment->total_marks, 2) }}</td>
+                                    <td>
+                                        <a href="{{ route('assessments.show', $assessment->id) }}"
+                                            class="btn btn-sm btn-outline-success" 
+                                            title="View Submission">
+                                            <span data-feather="eye"></span> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 @endif
 
@@ -372,7 +425,7 @@
                                     </td>
                                     <td>
                                         <span class="badge bg-{{ $statusBadge }}">{{ $statusText }}</span>
-                                        @if($submission && $submission->score !== null && $status === 'submitted')
+                                        @if($submission && $submission->score !== null && $status === 'submitted' && $assessment->show_marks)
                                         <br><small class="text-muted">Score: {{ number_format($submission->score, 2) }}/{{ number_format($assessment->total_marks, 2) }}</small>
                                         @endif
                                     </td>

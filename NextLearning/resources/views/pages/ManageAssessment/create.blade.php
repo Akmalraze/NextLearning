@@ -172,8 +172,12 @@
                             @enderror
                             <small class="text-muted">Leave empty for unlimited attempts. System will keep the highest score.</small>
                         </div>
+                    </div>
+                    
+                    <!-- Show Marks option for all assessment types -->
+                    <div class="row" id="showMarksSection">
                         <div class="col-md-6 mb-3">
-                            <div class="form-check mt-4">
+                            <div class="form-check">
                                 <input type="hidden" name="show_marks" value="0">
                                 <input type="checkbox" class="form-check-input" id="show_marks" name="show_marks" value="1" {{
                                     old('show_marks', true) ? 'checked' : '' }}>
