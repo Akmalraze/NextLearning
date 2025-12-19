@@ -56,9 +56,10 @@ Route::middleware(['auth', 'active', 'role:Admin'])->controller(ClassController:
 
 
 
-Route::get('/report', function () {
-    return view('pages.ManageReport.index');
-})->name('report');
+// Route::get('/report', function () {
+//     return view('pages.ManageReport.adminreport');
+// })->name('report');
+Route::get('/report', [ModuleController::class, 'adminReport'])->name('report');
 
 Route::get('/subject', function () {
     return view('pages.ManageSubject.index');
