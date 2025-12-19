@@ -63,43 +63,6 @@ class ModuleController extends Controller
         return view('pages.ManageModule.create');
     }
 
-    public function adminReport()
-    {
-        // User & Role Distribution
-        $totalStudents = User::role('student')->count();
-        $totalTeachers = User::role('teacher')->count();
-        $totalAdmins   = User::role('admin')->count();
-
-    // Teacher Workload
-        $teachers = User::role('teacher')->get();
-        $workload = $teachers->map(function($teacher) {
-        $classes = DB::table('subject_class_teacher')
-            ->where('teacher_id', $teacher->id)
-            ->distinct('class_id')
-            ->count('class_id');
-        $subjects = DB::table('subject_class_teacher')
-            ->where('teacher_id', $teacher->id)
-            ->distinct('subject_id')
-            ->count('subject_id');
-        $totalAssignments = DB::table('subject_class_teacher')
-            ->where('teacher_id', $teacher->id)
-            ->count();
-        return [
-            'teacher' => $teacher->name,
-            'classes' => $classes,
-            'subjects' => $subjects,
-            'totalAssignments' => $totalAssignments
-        ];
-    });
-
-    return view('pages.ManageReport.adminreport', compact(
-        'totalStudents', 'totalTeachers', 'totalAdmins', 'workload'
-    ));
-    }
-
-
-
-
 
 
     // public function updated(Request $request)
