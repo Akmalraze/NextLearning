@@ -42,10 +42,16 @@ class Subjects extends Model
             ->withTimestamps();
     }
 
-    // Relationship with Modules (One-to-many)
+     // Relationship with Modules (One-to-many)
     public function modules()
     {
-        return $this->hasMany(Modules::class, 'subject_id', 'subjects_id');
+        return $this->hasMany(Modules::class, 'subject_id');
+    }
+
+    // Relationship with Materials (One-to-many)
+    public function materials()
+    {
+        return $this->hasMany(Material::class);
     }
 
     // Relationship with Assessments (Many-to-many)

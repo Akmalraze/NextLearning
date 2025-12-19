@@ -224,27 +224,21 @@
     @include('admin.includes.navbar')
     <!-- /.navbar -->
 
-    <div class="container-fluid">
+   <div class="container-fluid">
         <div class="row">
-            @if (Route::currentRouteName() == 'modules-list')
-            @include('admin.includes.subject')
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 position-relative">
-                @include('admin.includes.breadcrumb')
-                @include('admin.includes.flash')
-                @yield('content')
-            </main>
+            <!-- Sidebar -->
+            @if (Route::currentRouteName() == 'modules-index')
+                @include('admin.includes.subject')  <!-- Subject Sidebar for Modules -->
             @else
-            @include('admin.includes.sidebar')
+                @include('admin.includes.sidebar')  <!-- Default Sidebar -->
+            @endif
+            
+            <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 position-relative">
                 @include('admin.includes.breadcrumb')
                 @include('admin.includes.flash')
                 @yield('content')
             </main>
-            @endif
-
-
-
-
         </div>
     </div>
 

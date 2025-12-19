@@ -10,79 +10,117 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ModuleController extends Controller
 {
-    public function index()
-    {
+    /**
+     * Display a listing of all modules.
+     */
+  public function index(Request $request)
+{
+    // Get the selected subject_id (if any)
+    $subjectId = $request->get('subject_id');
 
-        return view('pages.ManageModule.index');
+    // Get all active subjects and their modules
+    $subjects = Subjects::with('modules')->where('is_active', true)->get();
+
+    // Filter modules based on subject_id if provided
+    $query = Modules::with('subject')->latest();
+
+    if ($subjectId) {
+        $query->where('subject_id', $subjectId);
     }
 
-    public function list()
-    {
+    $modules = $query->paginate(15)->withQueryString();
 
-        return view('pages.ManageModule.list');
+    return view('pages.ManageModule.index', compact('modules', 'subjects', 'subjectId'));
+}
+
+
+
+    /**
+     * Show the form to create a new module.
+     */
+    public function create($subjectId)
+{
+    $subject = Subjects::findOrFail($subjectId);
+    if (!$subject->is_active) {
+        return redirect()->route('modules.index')->with('error', 'This subject is not active.');
+    }
+    return view('pages.ManageModule.create', compact('subject'));
+}
+
+    /**
+     * Store a newly created module in the database.
+     */
+  public function store(Request $request)
+{
+    
+
+    // Validate the input data
+    $validated = $request->validate([
+        'modules_name' => 'required|string|max:255',
+        'modules_description' => 'nullable|string|max:255',
+        'subject_id' => 'required|exists:subjects,id',  // Ensure the subject exists in the database
+    ]);
+
+    // Create a new module under the selected subject
+    Modules::create($validated);
+
+    // Redirect back with a success message
+    return redirect()->route('modules-index')->with('success', 'Module created successfully.');
+}
+
+    // In the MaterialController
+public function show($moduleId)
+{
+    $module = Modules::with('materials')->findOrFail($moduleId);  // Load materials along with the module
+
+    return view('pages.ManageModule.view', compact('module'));
+}
+
+
+    /**
+     * Show the form to edit an existing module.
+     */
+    public function edit($id)
+    {
+        $modules = Modules::findOrFail($id);
+        $subjects = Subjects::where('is_active', true)->get();
+        return view('pages.ManageModule.edit', compact('modules', 'subjects'));
     }
 
-    public function view()
+    /**
+     * Update an existing module in the database.
+     */
+   public function update(Request $request, $id)
+{
+    
+
+    $module = Modules::findOrFail($id);
+
+    // Validate input data
+    $validated = $request->validate([
+        'modules_name' => 'required|string|max:255',
+        'modules_description' => 'nullable|string|max:255',
+        'subject_id' => 'required|exists:subjects,id', // Ensure valid subject_id
+    ]);
+
+    // Update the module
+    $module->update($validated);
+
+    // Redirect back with success message
+    return redirect()->route('modules-index')->with('success', 'Module updated successfully.');
+}
+
+
+    /**
+     * Delete a module from the database.
+     */
+    public function destroy($id)
     {
-        return view('pages.ManageModule.view');
+        
+
+        $module = Modules::findOrFail($id);
+        $module->delete();
+
+        return redirect()->route('modules-index')->with('success', 'Module deleted successfully.');
     }
-
-    public function create()
-    {
-        //abort_if(Gate::denies('create modules'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('pages.ManageModule.create');
-    }
-
-
-    public function store(Request $request)
-    {
-        abort_if(Gate::denies('create modules'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
-        $request->validate([
-            'modules_name' => 'required|string|max:255',
-            'modules_code' => 'required|numeric|min:0',
-            'modules_description' => 'required|string|max:255',
-            'subject_id' => 'required|exists:subjects,id',
-
-
-        ]);
-
-        // Create the module
-        $modules = Modules::create([
-            'modules_name' => $request->modules_name,
-            'modules_code' => $request->modules_code,
-            'modules_description' => $request->modules_description,
-            'subject_id' => $request->subject_id,
-
-        ]);
-
-
-        return view('pages.ManageModule.create');
-    }
-
-
-
-
-
-
-
-
-    // public function updated(Request $request)
-    // {
-    //      $validated = $request->validate([
-    //         'modules_name'        => 'required|string|max:255',
-    //         'farms_size_ha'     => 'required|numeric|min:0',
-    //         'farms_description' => 'required|string|max:255',
-    //         'locations_id'      => 'required|exists:locations,locations_id',
-    //         // kalau memang ada kolum ini pada jadual farms:
-    //         'tasks_priority'    => 'nullable|in:Normal,Penting,Sangat Penting',
-    //     ]);
-
-    //     // Kemaskini
-    //     $modules->update($validated);
-
-    //     // Kembali ke halaman view atau index
-    //     return redirect()->route('module-view', $modules->$modules_id)
-    //         ->with('success', 'Farm updated successfully.');
-    // }
 }

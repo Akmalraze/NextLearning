@@ -72,6 +72,7 @@ class Classes extends Model
             ->withTimestamps();
     }
 
+
     // Active students in this class
     public function activeStudents()
     {
