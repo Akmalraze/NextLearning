@@ -68,6 +68,10 @@ Route::middleware(['auth', 'role:Teacher'])
     ->get('/teacher/report', [ReportController::class, 'teacherReport'])
     ->name('teacher.report');
 
+    Route::get('/teacher/report/export', [ReportController::class, 'teacherReportExport'])
+    ->name('teacher.report.export')
+    ->middleware('auth', 'role:Teacher');
+
 Route::get('/subject', function () {
     return view('pages.ManageSubject.index');
 })->name('subject');
