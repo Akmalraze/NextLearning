@@ -60,7 +60,13 @@ Route::middleware(['auth', 'active', 'role:Admin'])->controller(ClassController:
 // Route::get('/report', function () {
 //     return view('pages.ManageReport.adminreport');
 // })->name('report');
-Route::middleware(['auth', 'role:Admin'])->get('/report', [ReportController::class, 'adminReport'])->name('report');
+Route::middleware(['auth', 'role:Admin'])
+    ->get('/admin/report', [ReportController::class, 'adminReport'])
+    ->name('admin.report');
+
+Route::middleware(['auth', 'role:Teacher'])
+    ->get('/teacher/report', [ReportController::class, 'teacherReport'])
+    ->name('teacher.report');
 
 Route::get('/subject', function () {
     return view('pages.ManageSubject.index');

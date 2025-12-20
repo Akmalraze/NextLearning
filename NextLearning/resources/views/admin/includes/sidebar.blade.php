@@ -68,13 +68,27 @@
                         Assessment
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ (request()->is('report')) ? 'active' : '' }}" aria-current="page"
-                        href="{{ route('report') }}">
-                        <span data-feather="home" class="align-text-bottom"></span>
-                        Report
-                    </a>
-                </li>
+                @role('Admin')
+<li class="nav-item">
+    <a class="nav-link {{ request()->is('admin/report') ? 'active' : '' }}"
+        aria-current="page"
+        href="{{ route('admin.report') }}">
+        <span data-feather="home" class="align-text-bottom"></span>
+        Report
+    </a>
+</li>
+@endrole
+
+@role('Teacher')
+<li class="nav-item">
+    <a class="nav-link {{ request()->is('teacher/report') ? 'active' : '' }}"
+        aria-current="page"
+        href="{{ route('teacher.report') }}">
+        <span data-feather="home" class="align-text-bottom"></span>
+        Report
+    </a>
+</li>
+@endrole
                 {{-- <li class="nav-item">
                     <a class="nav-link {{ (request()->is('admin')) ? 'active' : '' }}" aria-current="page"
                         href="{{ route('admin.index') }}">

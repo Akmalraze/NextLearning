@@ -18,7 +18,7 @@
                 <button class="nav-link" id="workload-tab" data-bs-toggle="tab" data-bs-target="#workloadReport" type="button" role="tab">Teacher Workload</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="classAssignment-tab" data-bs-toggle="tab" data-bs-target="#classAssignmentReport" type="button" role="tab">Class Subject Assignment</button>
+                <button class="nav-link" id="classAssignment-tab" data-bs-toggle="tab" data-bs-target="#classAssignmentReport" type="button" role="tab">Class Subject Report</button>
             </li>
         </ul>
 
@@ -69,7 +69,7 @@
                             <th>Classes Assigned</th>
                             <th>Subjects Assigned</th>
                             <th>Total Assignments</th>
-                            <th>Status</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -79,13 +79,7 @@
                             <td>{{ $w['classes'] }}</td>
                             <td>{{ $w['subjects'] }}</td>
                             <td>{{ $w['totalAssignments'] }}</td>
-                            <td>
-                                @if($w['totalAssignments'] > 5)
-                                    <span class="badge bg-danger">Overloaded</span>
-                                @else
-                                    <span class="badge bg-success">Normal</span>
-                                @endif
-                            </td>
+                            
                         </tr>
                         @endforeach
                     </tbody>
