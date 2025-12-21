@@ -10,8 +10,9 @@
 
     <div class="card-body">
 
-        {{-- Filter & Export --}}
-        <div class="mb-3 d-flex justify-content-between align-items-center">
+        {{-- Filter & Search --}}
+        <div class="mb-5 d-flex justify-content-between align-items-center">
+
             {{-- Filter by Session --}}
             <form action="{{ route('teacher.report') }}" method="get" class="d-flex">
                 <select name="session" class="form-select me-2">
@@ -22,24 +23,27 @@
                         </option>
                     @endforeach
                 </select>
-                <button type="submit" class="btn btn-primary">Filter</button>
+
+                <input type="text" name="search" class="form-control me-2"
+                       placeholder="Search subject or student..."
+                       value="{{ request('search') }}">
+
+                <button type="submit" class="btn btn-primary w-100">Filter / Search</button>
             </form>
 
             {{-- Export Buttons --}}
             <div>
                 <form action="{{ route('teacher.report.export') }}" method="get" class="d-inline me-2">
                     <input type="hidden" name="type" value="progress">
-                    @if($selectedSession)
-                        <input type="hidden" name="session" value="{{ $selectedSession }}">
-                    @endif
+                    <input type="hidden" name="session" value="{{ $selectedSession }}">
+                    <input type="hidden" name="search" value="{{ request('search') }}">
                     <button type="submit" class="btn btn-success">Export Progress CSV</button>
                 </form>
 
                 <form action="{{ route('teacher.report.export') }}" method="get" class="d-inline">
                     <input type="hidden" name="type" value="students">
-                    @if($selectedSession)
-                        <input type="hidden" name="session" value="{{ $selectedSession }}">
-                    @endif
+                    <input type="hidden" name="session" value="{{ $selectedSession }}">
+                    <input type="hidden" name="search" value="{{ request('search') }}">
                     <button type="submit" class="btn btn-info">Export Students CSV</button>
                 </form>
             </div>
@@ -89,29 +93,32 @@
                             </thead>
                             <tbody>
                                 @forelse($class['subjects'] as $sub)
-                                <tr>
-                                    <td>{{ $sub['subject_name'] }}</td>
-                                    <td>{{ $sub['total'] }}</td>
-                                    <td>{{ $sub['completed'] }}</td>
-                                    <td style="width: 180px;">
-                                        <div class="progress" style="height: 20px;">
-                                            @if($sub['progress'] > 0)
-                                            <div class="progress-bar bg-success" role="progressbar"
-                                                style="width: {{ $sub['progress'] }}%;"
-                                                aria-valuenow="{{ $sub['progress'] }}"
-                                                aria-valuemin="0" aria-valuemax="100">
-                                                {{ $sub['progress'] }}%
+                                    @if(empty(request('search')) || 
+                                        str_contains(strtolower($sub['subject_name']), strtolower(request('search'))))
+                                    <tr>
+                                        <td>{{ $sub['subject_name'] }}</td>
+                                        <td>{{ $sub['total'] }}</td>
+                                        <td>{{ $sub['completed'] }}</td>
+                                        <td style="width: 180px;">
+                                            <div class="progress" style="height: 20px;">
+                                                @if($sub['progress'] > 0)
+                                                <div class="progress-bar bg-success" role="progressbar"
+                                                    style="width: {{ $sub['progress'] }}%;"
+                                                    aria-valuenow="{{ $sub['progress'] }}"
+                                                    aria-valuemin="0" aria-valuemax="100">
+                                                    {{ $sub['progress'] }}%
+                                                </div>
+                                                @else
+                                                <div class="progress-bar bg-secondary" role="progressbar"
+                                                    style="width: 100%;" aria-valuenow="0"
+                                                    aria-valuemin="0" aria-valuemax="100">
+                                                    No data yet
+                                                </div>
+                                                @endif
                                             </div>
-                                            @else
-                                            <div class="progress-bar bg-secondary" role="progressbar"
-                                                style="width: 100%;" aria-valuenow="0"
-                                                aria-valuemin="0" aria-valuemax="100">
-                                                No data yet
-                                            </div>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
+                                    @endif
                                 @empty
                                 <tr>
                                     <td colspan="4" class="text-center text-muted">
@@ -135,11 +142,14 @@
                             </thead>
                             <tbody>
                                 @forelse($class['students'] as $student)
-                                <tr>
-                                    <td>{{ $student->id }}</td>
-                                    <td>{{ $student->name }}</td>
-                                    <td>{{ $student->email }}</td>
-                                </tr>
+                                    @if(empty(request('search')) || 
+                                        str_contains(strtolower($student->name), strtolower(request('search'))))
+                                    <tr>
+                                        <td>{{ $student->id }}</td>
+                                        <td>{{ $student->name }}</td>
+                                        <td>{{ $student->email }}</td>
+                                    </tr>
+                                    @endif
                                 @empty
                                 <tr>
                                     <td colspan="3" class="text-center text-muted">
