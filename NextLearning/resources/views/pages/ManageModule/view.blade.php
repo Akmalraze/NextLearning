@@ -21,7 +21,9 @@
     
 
         <hr>
+        @if(!auth()->user()->hasRole('Student')) 
         <a href="{{ route('materials-create', $module->id) }}" class="btn btn-primary">Add Material</a>
+        @endif
     </div>
 </div>
 @endsection

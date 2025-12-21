@@ -1,39 +1,58 @@
-<form action="{{ route('materials-store') }}" method="POST" enctype="multipart/form-data">
-    @csrf
+@extends('layouts.master')
 
-    <input type="hidden" name="subject_id" value="{{ $subject->id }}">
-
-    <div class="mb-3">
-        <label for="materials_name">Material Name*</label>
-        <input type="text" id="materials_name" name="materials_name" value="{{ old('materials_name') }}"
-               class="form-control @error('materials_name') is-invalid @enderror" required>
-        @error('materials_name')
-        <span class="invalid-feedback" role="alert">
-            <strong>{{ $message }}</strong>
-        </span>
-        @enderror
+@section('content')
+<div class="card">
+    <div class="card-header">
+        Add Material — {{ $module->module_name }}
     </div>
 
-    <div class="mb-3">
-        <label for="file">Upload Material (PDF, Doc, etc.)*</label>
-        <input type="file" id="file" name="file" class="form-control @error('file') is-invalid @enderror" required>
-        @error('file')
-        <span class="invalid-feedback" role="alert">
-            <strong>{{ $message }}</strong>
-        </span>
-        @enderror
-    </div>
+    <div class="card-body">
+        <form action="{{ route('materials-store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
 
-    <div class="mb-3">
-        <label for="materials_notes">Material Notes</label>
-        <textarea id="materials_notes" name="materials_notes"
-                  class="form-control @error('materials_notes') is-invalid @enderror">{{ old('materials_notes') }}</textarea>
-        @error('materials_notes')
-        <span class="invalid-feedback" role="alert">
-            <strong>{{ $message }}</strong>
-        </span>
-        @enderror
-    </div>
+            {{-- REQUIRED --}}
+            <input type="hidden" name="module_id" value="{{ $module->id }}">
 
-    <button class="btn btn-primary" type="submit">Create Material</button>
-</form>
+            <div class="mb-3">
+                <label for="materials_name">Material Name *</label>
+                <input type="text"
+                       name="materials_name"
+                       class="form-control @error('materials_name') is-invalid @enderror"
+                       value="{{ old('materials_name') }}"
+                       required>
+
+                @error('materials_name')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="file">Upload File *</label>
+                <input type="file"
+                       name="file"
+                       class="form-control @error('file') is-invalid @enderror"
+                       required>
+
+                @error('file')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="materials_notes">Notes (optional)</label>
+                <textarea name="materials_notes"
+                          class="form-control @error('materials_notes') is-invalid @enderror"
+                          rows="3">{{ old('materials_notes') }}</textarea>
+
+                @error('materials_notes')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <button class="btn btn-primary">
+                Upload Material
+            </button>
+        </form>
+    </div>
+</div>
+@endsection

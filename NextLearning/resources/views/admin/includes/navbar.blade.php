@@ -1,8 +1,12 @@
 <header class="navbar sticky-top bg-body-tertiary border-bottom flex-md-nowrap p-0 shadow">
-    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="{{ route('dashboard') }}">
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 d-flex align-items-center" href="{{ route('dashboard') }}">
+        <!-- Logo -->
+        <img src="/images/logo.png" alt="App Logo" class="logo-img" style="height: 20px; margin-right: 8px;">
+        <!-- App Name -->
         <span class="fw-bold">{{ config('devstarit.app_name') }}</span>
     </a>
 
+    <!-- Mobile View Icon -->
     <ul class="navbar-nav flex-row d-md-none">
         <li class="nav-item text-nowrap">
             <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse"
@@ -23,7 +27,8 @@
             </button>
         </li>
     </ul>
-
+    
+    <!-- User Profile Dropdown -->
     <div class="dropdown me-3 m-auto">
         <a href="javascript:void(0)" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
             {{ auth()->user()->name }}

@@ -226,14 +226,19 @@
 
    <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
-            @if (Route::currentRouteName() == 'modules-index')
-                @include('admin.includes.subject')  <!-- Subject Sidebar for Modules -->
+            @php
+                $routeName = Route::currentRouteName();
+            @endphp
+
+            @if (
+                Str::startsWith($routeName, 'modules-') ||
+                Str::startsWith($routeName, 'materials-')
+            )
+                @include('admin.includes.subject')
             @else
-                @include('admin.includes.sidebar')  <!-- Default Sidebar -->
+                @include('admin.includes.sidebar')
             @endif
-            
-            <!-- Main Content -->
+             <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 position-relative">
                 @include('admin.includes.breadcrumb')
                 @include('admin.includes.flash')

@@ -27,7 +27,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 Route::middleware(['auth', 'active'])->prefix('ManageModules')->name('modules-')->group(function () {
     Route::get('/', [ModuleController::class, 'index'])->name('index');
-    Route::get('/list', [ModuleController::class, 'list'])->name('list');
+    Route::get('/list/{subject}', [ModuleController::class, 'list'])->name('list');
     Route::get('/create/{subjectId}', [ModuleController::class, 'create'])->name('create');
     Route::post('/store', [ModuleController::class, 'store'])->name('store');
     Route::get('{module}/edit', [ModuleController::class, 'edit'])->name('edit');

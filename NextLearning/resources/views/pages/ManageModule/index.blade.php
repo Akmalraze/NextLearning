@@ -40,12 +40,16 @@
                     <td>{{ $module->subject->name ?? 'N/A' }}</td>
                     <td>
                         <a href="{{ route('modules-view', $module->id) }}" class="btn btn-sm btn-info">View</a>
-                        <a href="{{ route('modules-edit', $module->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                        <form action="{{ route('modules-destroy', $module->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-danger">Delete</button>
-                        </form>
+                        <!-- Only show Edit and Delete buttons if the user is not a Student -->
+                        <!-- Only show Edit and Delete buttons if the user is not a Student -->
+                        @if(!auth()->user()->hasRole('Student')) 
+                            <a href="{{ route('modules-edit', $module->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                            <form action="{{ route('modules-destroy', $module->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        @endif
                     </td>
                 </tr>
                 @endforeach
@@ -60,9 +64,20 @@
         <p class="text-center text-muted">No modules found.</p>
         @endif
 
-        <div class="mt-3">
-            <a class="btn btn-primary" href="{{ route('modules-create',$subject->id) }}" role="button">Add New Module</a>
-        </div>
+        @if($subjectId)
+        @if(!auth()->user()->hasRole('Student')) 
+            <a class="btn btn-primary"
+            href="{{ route('modules-create', $subjectId) }}">
+                Add New Module
+            </a>
+        @endif
+
+            <a class="btn btn-outline-primary"
+            href="{{ route('modules-list', $subjectId) }}">
+                View Subject
+            </a>
+        @endif
+
     </div>
 </div>
 

@@ -15,13 +15,12 @@ class ModuleController extends Controller
      */
   public function index(Request $request)
 {
-    // Get the selected subject_id (if any)
     $subjectId = $request->get('subject_id');
 
-    // Get all active subjects and their modules
-    $subjects = Subjects::with('modules')->where('is_active', true)->get();
+    $subjects = Subjects::with('modules')
+        ->where('is_active', true)
+        ->get();
 
-    // Filter modules based on subject_id if provided
     $query = Modules::with('subject')->latest();
 
     if ($subjectId) {
@@ -30,10 +29,14 @@ class ModuleController extends Controller
 
     $modules = $query->paginate(15)->withQueryString();
 
-    return view('pages.ManageModule.index', compact('modules', 'subjects', 'subjectId'));
+    // optional: active module (if viewing module page)
+    $currentModuleId = $request->route('module');
+
+    return view(
+        'pages.ManageModule.index',
+        compact('modules', 'subjects', 'subjectId', 'currentModuleId')
+    );
 }
-
-
 
     /**
      * Show the form to create a new module.
@@ -71,9 +74,38 @@ class ModuleController extends Controller
     // In the MaterialController
 public function show($moduleId)
 {
-    $module = Modules::with('materials')->findOrFail($moduleId);  // Load materials along with the module
+    $module = Modules::with(['materials', 'subject'])->findOrFail($moduleId);
 
-    return view('pages.ManageModule.view', compact('module'));
+    $subjectId = $module->subject_id;
+    $currentModuleId = $module->id;
+
+    $subjects = Subjects::with('modules')
+        ->where('is_active', true)
+        ->get();
+
+    return view(
+        'pages.ManageModule.view',
+        compact('module', 'subjects', 'subjectId', 'currentModuleId')
+    );
+}
+
+public function list(Subjects $subject)
+{
+    $subjectId = $subject->id;
+
+    // Load modules & materials
+    $subject->load(['modules.materials']);
+
+    $subjects = Subjects::with('modules')
+        ->where('is_active', true)
+        ->get();
+
+    $currentModuleId = null;
+
+    return view(
+        'pages.ManageModule.list',
+        compact('subject', 'subjects', 'subjectId', 'currentModuleId')
+    );
 }
 
 
@@ -81,11 +113,22 @@ public function show($moduleId)
      * Show the form to edit an existing module.
      */
     public function edit($id)
-    {
-        $modules = Modules::findOrFail($id);
-        $subjects = Subjects::where('is_active', true)->get();
-        return view('pages.ManageModule.edit', compact('modules', 'subjects'));
-    }
+{
+    $module = Modules::with('subject')->findOrFail($id);
+
+    $subjectId = $module->subject_id;
+    $currentModuleId = $module->id;
+
+    $subjects = Subjects::with('modules')
+        ->where('is_active', true)
+        ->get();
+
+    return view(
+        'pages.ManageModule.edit',
+        compact('module', 'subjects', 'subjectId', 'currentModuleId')
+    );
+}
+
 
     /**
      * Update an existing module in the database.
