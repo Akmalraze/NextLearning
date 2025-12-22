@@ -15,31 +15,43 @@ class ModuleController extends Controller
 {
     /**
      * Display a listing of all modules.
-     */
-  public function index(Request $request)
+     */public function index(Request $request)
 {
+    // Get subject_id from query
     $subjectId = $request->get('subject_id');
 
+    // Load active subjects with modules
     $subjects = Subjects::with('modules')
         ->where('is_active', true)
         ->get();
 
-    $query = Modules::with('subject')->latest();
-
-    if ($subjectId) {
-        $query->where('subject_id', $subjectId);
+    // 🚨 If subject_id sent, use it; else pick the first active subject
+    if (!$subjectId && $subjects->count() > 0) {
+        $subjectId = $subjects->first()->id;
     }
 
-    $modules = $query->paginate(15)->withQueryString();
+    // Filter modules by subject_id only
+    $modules = Modules::with('subject')
+        ->where('subject_id', $subjectId)
+        ->latest()
+        ->paginate(15)
+        ->withQueryString();
 
-    // optional: active module (if viewing module page)
-    $currentModuleId = $request->route('module');
+    $currentModuleId = null;
 
     return view(
         'pages.ManageModule.index',
-        compact('modules', 'subjects', 'subjectId', 'currentModuleId')
+        compact(
+            'modules',
+            'subjects',
+            'subjectId',
+            'currentModuleId'
+        )
     );
 }
+
+
+
 
     /**
      * Show the form to create a new module.
@@ -58,8 +70,6 @@ class ModuleController extends Controller
      */
   public function store(Request $request)
 {
-    
-
     // Validate the input data
     $validated = $request->validate([
         'modules_name' => 'required|string|max:255',
@@ -71,7 +81,8 @@ class ModuleController extends Controller
     Modules::create($validated);
 
     // Redirect back with a success message
-    return redirect()->route('modules-index')->with('success', 'Module created successfully.');
+    return redirect()->route('modules-index', ['subject_id' => $validated['subject_id']])
+                     ->with('success', 'Module created successfully.');
 }
 
     // In the MaterialController

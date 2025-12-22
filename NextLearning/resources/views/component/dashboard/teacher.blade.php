@@ -54,15 +54,72 @@
     </div>
 </div>
 
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">My Subjects</h6>
+    </div>
+    <div class="card-body">
+
+        @if(isset($teachingClasses) && $teachingClasses->count() > 0)
+            <div class="row">
+
+                @foreach($teachingClasses as $classId => $subjects)
+                    @php $class = $subjects->first()->class; @endphp
+
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100"
+                            style="border-left: 4px solid {{ ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'][$loop->index % 5] }} !important;">
+
+                            <div class="card-body">
+                                <h5 class="card-title mb-2">
+                                    <i data-feather="book-open"></i>
+                                    {{ $class->form_level }} {{ $class->name ?? $class->class_name }}
+                                </h5>
+
+                                <ul class="list-unstyled mb-3">
+                                    @foreach($subjects as $item)
+                                        <li class="mb-1 d-flex justify-content-between align-items-center">
+                                            <span>
+                                                <i data-feather="book" style="width:14px;"></i>
+                                                {{ $item->subject->name }}
+                                            </span>
+
+                                            <a href="{{ route('modules-list', $item->subject->id) }}"
+                                            class="btn btn-sm btn-outline-primary btn-sm">
+                                                Modules
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+
+                            </div>
+
+                        </div>
+                    </div>
+                @endforeach
+
+            </div>
+        @else
+            <div class="text-center text-muted py-4">
+                <i data-feather="inbox"></i>
+                <p class="mt-3">No subjects assigned yet</p>
+            </div>
+        @endif
+
+    </div>
+</div>
+
+{{-- 
 <!-- Class Management Section -->
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">My Classes</h6>
     </div>
     <div class="card-body">
-        @if(isset($teacherClasses) && $teacherClasses->count() > 0)
+        @if(isset($teachingClasses) && $teachingClasses->count() > 0)
         <div class="row">
-            @foreach($teacherClasses as $class)
+            <div class="row">
+            @foreach($teachingClasses as $class)
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card border-0 shadow-sm h-100"
                     style="border-left: 4px solid {{ ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'][$loop->index % 5] }} !important;">
@@ -81,7 +138,7 @@
                                 {{ $class->activeStudents()->count() }} Students
                             </span>
                         </p>
-                        <a href="{{ route('modules-index', $class->id) }}"
+                        <a href="{{ route('admin.classes.show', $class->id) }}"
                             class="btn btn-sm btn-outline-primary mt-2">
                             <i data-feather="eye" style="width: 14px; height: 14px;"></i> View Class
                         </a>
@@ -90,6 +147,7 @@
             </div>
             @endforeach
         </div>
+        </div>
         @else
         <div class="text-center text-muted py-4">
             <i data-feather="inbox" style="width: 48px; height: 48px;"></i>
@@ -97,7 +155,7 @@
         </div>
         @endif
     </div>
-</div>
+</div> --}}
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Classes;
+use App\Models\SubjectClassTeacher;
 use App\Models\Subjects;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -110,6 +111,12 @@ class AdminController extends Controller
         // Simple teacher dashboard - show classes where user is homeroom teacher
         $teacherClasses = Classes::where('homeroom_teacher_id', $user->id)->get();
 
+        // Classes & subjects the teacher is teaching
+        $teachingClasses = SubjectClassTeacher::with(['class', 'subject'])
+            ->where('teacher_id', $user->id)
+            ->get()
+            ->groupBy('class_id');
+
         // Calculate total students
         $totalStudents = 0;
         foreach ($teacherClasses as $class) {
@@ -123,7 +130,7 @@ class AdminController extends Controller
             'totalSubjects' => 0, // Simplified for now
         ];
 
-        return view('component.dashboard.index', compact('teacherStats', 'teacherClasses'));
+        return view('component.dashboard.index', compact('teacherStats', 'teacherClasses' , 'teachingClasses'));
     }
 
    private function studentDashboard($user)
