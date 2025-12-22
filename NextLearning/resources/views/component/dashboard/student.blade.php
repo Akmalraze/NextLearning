@@ -105,7 +105,7 @@
         <h6 class="m-0 font-weight-bold text-primary">My Subjects</h6>
     </div>
     <div class="card-body">
-        @if(isset($enrolledSubjects) && count($enrolledSubjects) > 0)
+        @if(isset($enrolledSubjects) && $enrolledSubjects->count() > 0)
         <div class="row">
             @foreach($enrolledSubjects as $subject)
             <div class="col-lg-4 col-md-6 mb-4">

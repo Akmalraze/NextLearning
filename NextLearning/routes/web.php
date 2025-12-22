@@ -5,6 +5,7 @@ use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\MaterialController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,14 +73,47 @@ Route::middleware(['auth', 'active', 'role:Admin'])->controller(ClassController:
 
 
 
-Route::get('/report', function () {
-    return view('pages.ManageReport.index');
-})->name('report');
+
+Route::middleware(['auth', 'role:Admin'])
+    ->get('/admin/report', [ReportController::class, 'adminReport'])
+    ->name('admin.report');
+
+Route::get('/admin/report/export', [ReportController::class, 'adminReportExport'])
+    ->name('admin.report.export');
+
+Route::middleware(['auth', 'role:Teacher'])
+    ->get('/teacher/report', [ReportController::class, 'teacherReport'])
+    ->name('teacher.report');
+
+Route::get('/teacher/report/export', [ReportController::class, 'teacherReportExport'])
+    ->name('teacher.report.export')
+    ->middleware('auth', 'role:Teacher');
+
+
 
 Route::get('/subject', function () {
     return view('pages.ManageSubject.index');
 })->name('subject');
 
-Route::get('/assessment', function () {
-    return view('pages.ManageAssessment.index');
-})->name('assessment');
+// Assessments - accessible to Teacher and Student only
+Route::middleware(['auth', 'active', 'role:Teacher|Student'])->group(function () {
+    Route::resource('assessments', App\Http\Controllers\AssessmentController::class);
+    
+    // Questions for quiz assessments (Teacher)
+    Route::post('assessments/{id}/questions', [App\Http\Controllers\AssessmentController::class, 'storeQuestion'])->name('assessments.questions.store');
+    Route::delete('assessments/{id}/questions/{questionId}', [App\Http\Controllers\AssessmentController::class, 'deleteQuestion'])->name('assessments.questions.destroy');
+    
+    // Materials for test/homework assessments (Teacher)
+    Route::post('assessments/{id}/materials', [App\Http\Controllers\AssessmentController::class, 'uploadMaterial'])->name('assessments.materials.store');
+    Route::delete('assessments/{id}/materials/{materialId}', [App\Http\Controllers\AssessmentController::class, 'deleteMaterial'])->name('assessments.materials.destroy');
+
+    // Student submissions
+    Route::post('assessments/{id}/start-quiz', [App\Http\Controllers\AssessmentController::class, 'startQuiz'])->name('assessments.startQuiz');
+    Route::post('assessments/{id}/submit-quiz', [App\Http\Controllers\AssessmentController::class, 'submitQuiz'])->name('assessments.submitQuiz');
+    Route::post('assessments/{id}/submit-homework', [App\Http\Controllers\AssessmentController::class, 'submitHomework'])->name('assessments.submitHomework');
+    Route::delete('assessments/{id}/remove-submission', [App\Http\Controllers\AssessmentController::class, 'removeSubmission'])->name('assessments.removeSubmission');
+    
+    // Teacher: View and grade student submissions
+    Route::get('assessments/{id}/submissions', [App\Http\Controllers\AssessmentController::class, 'viewSubmissions'])->name('assessments.submissions');
+    Route::post('assessments/{id}/submissions/{submissionId}/update-mark', [App\Http\Controllers\AssessmentController::class, 'updateSubmissionMark'])->name('assessments.submissions.updateMark');
+});

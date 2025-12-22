@@ -7,6 +7,9 @@ use App\Models\Subjects;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+
 
 class ModuleController extends Controller
 {
