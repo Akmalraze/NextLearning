@@ -53,14 +53,7 @@
                     </div>
                 </li>
                 @endcan
-                <li class="nav-item">
-                    <a class="nav-link {{ (request()->is('ManageModules*')) ? 'active' : '' }}" aria-current="page"
-                        href="{{ route('modules-index') }}">
-                        <span data-feather="book" class="align-text-bottom"></span>
-                        Module
-                    </a>
-                </li>
-
+                
                 <li class="nav-item">
                     <a class="nav-link {{ (request()->is('assessments*')) ? 'active' : '' }}" aria-current="page"
                          href="{{ route('assessments.index') }}">
