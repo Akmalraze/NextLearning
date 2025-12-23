@@ -4,7 +4,8 @@ use App\Http\Controllers\ClassController;
 use App\Http\Controllers\ModuleController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\AdminReportController;
+use App\Http\Controllers\TeacherReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,20 +59,19 @@ Route::middleware(['auth', 'active', 'role:Admin'])->controller(ClassController:
 
 
 
-Route::middleware(['auth', 'role:Admin'])
-    ->get('/admin/report', [ReportController::class, 'adminReport'])
-    ->name('admin.report');
+Route::prefix('admin')->middleware(['auth', 'role:Admin'])->group(function () {
+    // Admin Report page
+    Route::get('/report', [AdminReportController::class, 'adminReport'])->name('admin.report');
+    // Admin Report export (JSON/CSV)
+    Route::get('/report/export', [AdminReportController::class, 'adminReportExport'])->name('admin.report.export');
+});
 
-Route::get('/admin/report/export', [ReportController::class, 'adminReportExport'])
-    ->name('admin.report.export');
-
-Route::middleware(['auth', 'role:Teacher'])
-    ->get('/teacher/report', [ReportController::class, 'teacherReport'])
-    ->name('teacher.report');
-
-Route::get('/teacher/report/export', [ReportController::class, 'teacherReportExport'])
-    ->name('teacher.report.export')
-    ->middleware('auth', 'role:Teacher');
+Route::prefix('teacher')->middleware(['auth', 'role:Teacher'])->group(function () {
+    // Teacher Report page
+    Route::get('/report', [TeacherReportController::class, 'teacherReport'])->name('teacher.report');
+    // Teacher Report export (CSV)
+    Route::get('/report/export', [TeacherReportController::class, 'teacherReportExport'])->name('teacher.report.export');
+});
 
 
 

@@ -9,33 +9,32 @@
 
     <div class="card-body">
 
+        {{-- Flash Message --}}
+        <div id="flashMessage" class="alert alert-success d-none"></div>
+
         {{-- Tabs --}}
         <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">
             <li class="nav-item">
                 <button class="nav-link {{ request('tab', 'roleReport') == 'roleReport' ? 'active' : '' }}" 
-                        data-bs-toggle="tab"
-                        data-bs-target="#roleReport" type="button">
+                        data-bs-toggle="tab" data-bs-target="#roleReport" type="button">
                     User & Role Distribution
                 </button>
             </li>
             <li class="nav-item">
                 <button class="nav-link {{ request('tab') == 'workloadReport' ? 'active' : '' }}" 
-                        data-bs-toggle="tab"
-                        data-bs-target="#workloadReport" type="button">
+                        data-bs-toggle="tab" data-bs-target="#workloadReport" type="button">
                     Teacher Assignment Overview
                 </button>
             </li>
             <li class="nav-item">
                 <button class="nav-link {{ request('tab') == 'classAssignmentReport' ? 'active' : '' }}" 
-                        data-bs-toggle="tab"
-                        data-bs-target="#classAssignmentReport" type="button">
+                        data-bs-toggle="tab" data-bs-target="#classAssignmentReport" type="button">
                     Class Subject Report
                 </button>
             </li>
         </ul>
 
         <div class="tab-content">
-
             {{-- ================= USER & ROLE DISTRIBUTION ================= --}}
             <div class="tab-pane fade {{ request('tab', 'roleReport') == 'roleReport' ? 'show active' : '' }}" 
                  id="roleReport">
@@ -84,10 +83,7 @@
                         <button type="submit" class="btn btn-primary ms-2">Search</button>
                     </form>
 
-                    <a href="{{ route('admin.report.export', ['type' => 'workload', 'search' => request('search')]) }}"
-                       class="btn btn-success">
-                        Export CSV
-                    </a>
+                    <button class="btn btn-success" id="downloadWorkloadCsv">Export CSV</button>
                 </div>
 
                 <table class="table table-bordered table-striped" id="workloadTable">
@@ -112,41 +108,44 @@
                 </table>
             </div>
 
-            {{-- ================= CLASS SUBJECT ASSIGNMENT ================= --}}
+            {{-- ================= CLASS SUBJECT REPORT ================= --}}
             <div class="tab-pane fade {{ request('tab') == 'classAssignmentReport' ? 'show active' : '' }}" 
                  id="classAssignmentReport">
 
                 <div class="d-flex justify-content-between mb-3">
                     <form method="GET" class="d-flex w-50">
-                        <input type="text" name="search" class="form-control"
-                               placeholder="Search class / subject / teacher..."
-                               value="{{ request('search') }}">
+                        <select name="class_id" class="form-select me-2" required>
+                            <option value="">-- Select Class --</option>
+                            @foreach($allClasses as $class)
+                                <option value="{{ $class->id }}" 
+                                    {{ ($selectedClassId ?? '') == $class->id ? 'selected' : '' }}>
+                                    Form {{ $class->form_level }} - {{ $class->name }}
+                                </option>
+                            @endforeach
+                        </select>
                         <input type="hidden" name="tab" value="classAssignmentReport">
-                        <button type="submit" class="btn btn-primary ms-2">Search</button>
+                        <button type="submit" class="btn btn-primary">View</button>
                     </form>
 
-                    <a href="{{ route('admin.report.export', ['type' => 'class-subject', 'search' => request('search')]) }}"
-                       class="btn btn-success">
-                        Export CSV
-                    </a>
+                    @if(!empty($selectedClassId))
+                        <button class="btn btn-success" id="downloadClassCsv">Export CSV</button>
+                    @endif
                 </div>
 
-                <table class="table table-bordered table-striped" id="classAssignmentTable">
-                    <thead>
-                        <tr>
-                            <th>Class</th>
-                            <th>Subject</th>
-                            <th>Assigned Teacher</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($classSubjectAssignment as $class)
-                            @foreach($class['subjects'] as $sub)
+                @if(!empty($classSubjectAssignment) && isset($classSubjectAssignment['subjects']))
+                    <table class="table table-bordered table-striped">
+                        <thead>
                             <tr>
-                                <td>{{ $class['class_name'] }}</td>
+                                <th>Subject</th>
+                                <th>Assigned Teacher</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($classSubjectAssignment['subjects'] as $sub)
+                            <tr>
                                 <td>{{ $sub->subject_name }}</td>
-                                <td>{{ $sub->teacher_name }}</td>
+                                <td>{{ $sub->teacher_name ?? '-' }}</td>
                                 <td>
                                     @if(empty($sub->teacher_name))
                                         <span class="badge bg-danger">Unassigned</span>
@@ -156,9 +155,11 @@
                                 </td>
                             </tr>
                             @endforeach
-                        @endforeach
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                @else
+                    <p class="text-muted">Select a class to view subjects and assigned teachers.</p>
+                @endif
             </div>
 
         </div>
@@ -186,19 +187,38 @@ new Chart(document.getElementById('roleDistributionChart'), {
     }
 });
 
-/* Optional: Frontend table search without reload (uncomment if needed) */
+/* ================= CSV Download with Flash ================= */
+function downloadCsv(type, classId = null) {
+    let params = { type: type };
+    if (classId) params.class_id = classId;
 
-function filterTable(input, tableId) {
-    const filter = input.value.toLowerCase();
-    const table = document.getElementById(tableId);
-    if (!table) return;
+    fetch("{{ route('admin.report.export') }}?" + new URLSearchParams(params))
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Show flash message
+                const flash = document.getElementById('flashMessage');
+                flash.innerText = 'CSV exported successfully.';
+                flash.classList.remove('d-none');
 
-    if (table.closest('.tab-pane').classList.contains('show', 'active')) {
-        table.querySelectorAll('tbody tr').forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(filter) ? '' : 'none';
+                // Trigger CSV download
+                const blob = new Blob([data.csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = data.filename;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
         });
-    }
 }
 
+document.getElementById('downloadWorkloadCsv')?.addEventListener('click', () => {
+    downloadCsv('workload');
+});
+
+document.getElementById('downloadClassCsv')?.addEventListener('click', () => {
+    downloadCsv('class-subject', {{ $selectedClassId ?? 'null' }});
+});
 </script>
 @endsection
