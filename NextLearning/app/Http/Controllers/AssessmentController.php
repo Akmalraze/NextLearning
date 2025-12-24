@@ -288,9 +288,10 @@ class AssessmentController extends Controller
             'type' => 'required|in:quiz,test,homework',
             'class_id' => 'required|exists:classes,id',
             'subject_id' => 'required|exists:subjects,id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'total_marks' => 'required|numeric|min:0|max:1000',
+            'time_limit' => 'nullable|integer|min:1|required_if:type,quiz',
             'max_attempts' => 'nullable|integer|min:1',
             'show_marks' => 'boolean',
             'is_published' => 'boolean',
@@ -312,6 +313,38 @@ class AssessmentController extends Controller
             'materials' => 'required_if:type,homework,test|array|min:1',
             'materials.*.file' => 'required_if:type,homework,test|file|max:10240',
             'materials.*.description' => 'nullable|string',
+        ], [
+            'title.required' => 'The assessment title field is required. Please fill in the title.',
+            'type.required' => 'The assessment type field is required. Please select a type.',
+            'type.in' => 'Please select a valid assessment type (Quiz, Test, or Homework).',
+            'class_id.required' => 'The class field is required. Please select a class.',
+            'class_id.exists' => 'The selected class is invalid. Please select a valid class.',
+            'subject_id.required' => 'The subject field is required. Please select a subject.',
+            'subject_id.exists' => 'The selected subject is invalid. Please select a valid subject.',
+            'start_date.required' => 'The start date field is required. Please select a start date and time.',
+            'start_date.date' => 'The start date must be a valid date and time.',
+            'end_date.required' => 'The end date field is required. Please select an end date and time.',
+            'end_date.date' => 'The end date must be a valid date and time.',
+            'total_marks.required' => 'The total marks field is required. Please enter the total marks.',
+            'total_marks.numeric' => 'The total marks must be a number.',
+            'total_marks.min' => 'The total marks must be at least 0.',
+            'total_marks.max' => 'The total marks cannot exceed 1000.',
+            'time_limit.required_if' => 'The time limit field is required for quiz assessments. Please enter the time limit in minutes.',
+            'time_limit.integer' => 'The time limit must be a whole number.',
+            'time_limit.min' => 'The time limit must be at least 1 minute.',
+            'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
+            'questions.required_if' => 'At least one question is required for quiz assessments. Please add questions.',
+            'questions.min' => 'At least one question is required for quiz assessments. Please add questions.',
+            'questions.*.question.required_with' => 'The question text is required. Please fill in the question.',
+            'questions.*.question_type.required_with' => 'The question type is required. Please select a question type.',
+            'questions.*.marks.required_with' => 'The marks field is required for each question. Please enter marks.',
+            'questions.*.marks.numeric' => 'The marks must be a number.',
+            'questions.*.marks.min' => 'The marks must be at least 0.',
+            'materials.required_if' => 'At least one material file is required for homework/test assessments. Please upload materials.',
+            'materials.min' => 'At least one material file is required for homework/test assessments. Please upload materials.',
+            'materials.*.file.required_if' => 'The material file is required. Please upload a file.',
+            'materials.*.file.file' => 'The uploaded file must be a valid file.',
+            'materials.*.file.max' => 'The file size cannot exceed 10MB.',
         ]);
 
         // Verify teacher is assigned to this class and subject
@@ -329,12 +362,8 @@ class AssessmentController extends Controller
         $validated['is_published'] = $request->has('is_published') ? 1 : 0;
         
         // Convert datetime-local format (Y-m-d\TH:i) to datetime format (Y-m-d H:i:s)
-        if (!empty($validated['start_date'])) {
-            $validated['start_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['start_date'])));
-        }
-        if (!empty($validated['end_date'])) {
-            $validated['end_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['end_date'])));
-        }
+        $validated['start_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['start_date'])));
+        $validated['end_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['end_date'])));
 
         // Create the assessment
         $assessment = Assessments::create($validated);
@@ -530,13 +559,33 @@ class AssessmentController extends Controller
             'type' => 'required|in:quiz,test,homework',
             'class_id' => 'required|exists:classes,id',
             'subject_id' => 'required|exists:subjects,id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'total_marks' => 'required|numeric|min:0|max:1000',
             'time_limit' => 'nullable|integer|min:1|required_if:type,quiz',
             'max_attempts' => 'nullable|integer|min:1',
             'show_marks' => 'boolean',
             'is_published' => 'boolean',
+        ], [
+            'title.required' => 'The assessment title field is required. Please fill in the title.',
+            'type.required' => 'The assessment type field is required. Please select a type.',
+            'type.in' => 'Please select a valid assessment type (Quiz, Test, or Homework).',
+            'class_id.required' => 'The class field is required. Please select a class.',
+            'class_id.exists' => 'The selected class is invalid. Please select a valid class.',
+            'subject_id.required' => 'The subject field is required. Please select a subject.',
+            'subject_id.exists' => 'The selected subject is invalid. Please select a valid subject.',
+            'start_date.required' => 'The start date field is required. Please select a start date and time.',
+            'start_date.date' => 'The start date must be a valid date and time.',
+            'end_date.required' => 'The end date field is required. Please select an end date and time.',
+            'end_date.date' => 'The end date must be a valid date and time.',
+            'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
+            'total_marks.required' => 'The total marks field is required. Please enter the total marks.',
+            'total_marks.numeric' => 'The total marks must be a number.',
+            'total_marks.min' => 'The total marks must be at least 0.',
+            'total_marks.max' => 'The total marks cannot exceed 1000.',
+            'time_limit.required_if' => 'The time limit field is required for quiz assessments. Please enter the time limit in minutes.',
+            'time_limit.integer' => 'The time limit must be a whole number.',
+            'time_limit.min' => 'The time limit must be at least 1 minute.',
         ]);
 
         // Verify teacher is assigned to this class and subject
@@ -553,12 +602,8 @@ class AssessmentController extends Controller
         $validated['is_published'] = $request->has('is_published') ? 1 : 0;
         
         // Convert datetime-local format (Y-m-d\TH:i) to datetime format (Y-m-d H:i:s)
-        if (!empty($validated['start_date'])) {
-            $validated['start_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['start_date'])));
-        }
-        if (!empty($validated['end_date'])) {
-            $validated['end_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['end_date'])));
-        }
+        $validated['start_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['start_date'])));
+        $validated['end_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['end_date'])));
 
         $assessment->update($validated);
 

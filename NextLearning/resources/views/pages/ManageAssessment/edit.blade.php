@@ -1,5 +1,27 @@
 @extends('layouts.master')
 @section('content')
+<style>
+    span.invalid-feedback,
+    .invalid-feedback.d-block,
+    .invalid-feedback {
+        color: #dc3545 !important;
+        display: block !important;
+    }
+    .form-label.text-danger,
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    .form-control.border-danger,
+    .form-select.border-danger,
+    .border-danger {
+        border-color: #dc3545 !important;
+    }
+    .alert-danger .text-danger,
+    .alert-danger ul li,
+    .alert-danger strong.text-danger {
+        color: #dc3545 !important;
+    }
+</style>
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Edit Assessment</h5>
@@ -14,36 +36,95 @@
         <div class="card-body">
             @if ($errors->any())
             <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
+                <strong class="text-danger">Please fix the following errors (in order from top to bottom):</strong>
+                <ul class="mb-0 mt-2">
+                    @php
+                        // Define field order as they appear in the form (top to bottom)
+                        $fieldOrder = [
+                            'title',
+                            'description',
+                            'type',
+                            'total_marks',
+                            'time_limit',
+                            'max_attempts',
+                            'class_id',
+                            'subject_id',
+                            'start_date',
+                            'end_date',
+                            'questions',
+                            'materials',
+                        ];
+                        
+                        // Build array of all errors with their field names
+                        $errorsByField = [];
+                        foreach ($errors->keys() as $key) {
+                            $baseField = explode('.', $key)[0]; // Get base field name
+                            if (!isset($errorsByField[$baseField])) {
+                                $errorsByField[$baseField] = [];
+                            }
+                            // Store the key so we can retrieve errors
+                            $errorsByField[$baseField][] = $key;
+                        }
+                        
+                        // Now build ordered error list based on field order
+                        $orderedErrors = [];
+                        $processedFields = [];
+                        
+                        // Process each field in the defined order
+                        foreach ($fieldOrder as $field) {
+                            // Check if this field has any errors
+                            if (isset($errorsByField[$field])) {
+                                // Get all error keys for this field (including nested)
+                                foreach ($errorsByField[$field] as $key) {
+                                    // Get all error messages for this key
+                                    foreach ($errors->get($key) as $errorMessage) {
+                                        $orderedErrors[] = $errorMessage;
+                                    }
+                                }
+                                $processedFields[] = $field;
+                            }
+                        }
+                        
+                        // Add any remaining errors for fields not in our order list
+                        foreach ($errorsByField as $field => $keys) {
+                            if (!in_array($field, $processedFields)) {
+                                foreach ($keys as $key) {
+                                    foreach ($errors->get($key) as $errorMessage) {
+                                        $orderedErrors[] = $errorMessage;
+                                    }
+                                }
+                            }
+                        }
+                    @endphp
+                    @foreach ($orderedErrors as $error)
+                    <li class="text-danger">{{ $error }}</li>
                     @endforeach
                 </ul>
             </div>
             @endif
             <div class="mb-3">
-                <label for="title" class="form-label">Assessment Title*</label>
-                <input type="text" id="title" name="title" class="form-control @error('title') is-invalid @enderror"
-                    value="{{ old('title', $assessment->title) }}" required 
+                <label for="title" class="form-label @error('title') text-danger @enderror">Assessment Title*</label>
+                <input type="text" id="title" name="title" class="form-control @error('title') is-invalid border-danger @enderror"
+                    value="{{ old('title', $assessment->title) }}"
                     placeholder="Enter assessment title" aria-label="Assessment title" title="Assessment title">
                 @error('title')
-                <span class="invalid-feedback">{{ $message }}</span>
+                <span class="invalid-feedback d-block" style="color: #dc3545 !important; font-size: 0.875em; display: block !important;">{{ $message }}</span>
                 @enderror
             </div>
             <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
+                <label for="description" class="form-label @error('description') text-danger @enderror">Description</label>
                 <textarea id="description" name="description"
-                    class="form-control @error('description') is-invalid @enderror"
+                    class="form-control @error('description') is-invalid border-danger @enderror"
                     rows="4" placeholder="Enter assessment description (optional)" 
                     aria-label="Assessment description" title="Assessment description">{{ old('description', $assessment->description) }}</textarea>
                 @error('description')
-                <span class="invalid-feedback">{{ $message }}</span>
+                <span class="invalid-feedback d-block" style="color: #dc3545 !important; font-size: 0.875em;">{{ $message }}</span>
                 @enderror
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="type" class="form-label">Assessment Type*</label>
-                    <select id="type" name="type" class="form-select @error('type') is-invalid @enderror" required
+                    <label for="type" class="form-label @error('type') text-danger @enderror">Assessment Type*</label>
+                    <select id="type" name="type" class="form-select @error('type') is-invalid border-danger @enderror"
                         aria-label="Assessment type" title="Select assessment type">
                         <option value="">Select Type</option>
                         <option value="quiz" {{ old('type', $assessment->type) === 'quiz' ? 'selected' : '' }}>Quiz</option>
@@ -51,28 +132,28 @@
                         <option value="homework" {{ old('type', $assessment->type) === 'homework' ? 'selected' : '' }}>Homework</option>
                     </select>
                     @error('type')
-                    <span class="invalid-feedback">{{ $message }}</span>
+                    <span class="invalid-feedback d-block" style="color: #dc3545 !important; font-size: 0.875em;">{{ $message }}</span>
                     @enderror
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="total_marks" class="form-label">Total Marks*</label>
+                    <label for="total_marks" class="form-label @error('total_marks') text-danger @enderror">Total Marks*</label>
                     <input type="number" id="total_marks" name="total_marks" step="0.01" min="0" max="1000"
-                        class="form-control @error('total_marks') is-invalid @enderror"
-                        value="{{ old('total_marks', $assessment->total_marks) }}" required
+                        class="form-control @error('total_marks') is-invalid border-danger @enderror"
+                        value="{{ old('total_marks', $assessment->total_marks) }}"
                         placeholder="Enter total marks" aria-label="Total marks" title="Total marks for this assessment">
                     @error('total_marks')
-                    <span class="invalid-feedback">{{ $message }}</span>
+                    <span class="invalid-feedback d-block" style="color: #dc3545 !important; font-size: 0.875em;">{{ $message }}</span>
                     @enderror
                 </div>
                 @if($assessment->type === 'quiz')
                 <div class="col-md-6 mb-3">
-                    <label for="time_limit" class="form-label">Time Limit (minutes)*</label>
+                    <label for="time_limit" class="form-label @error('time_limit') text-danger @enderror">Time Limit (minutes)*</label>
                     <input type="number" id="time_limit" name="time_limit" min="1" step="1"
-                        class="form-control @error('time_limit') is-invalid @enderror"
-                        value="{{ old('time_limit', $assessment->time_limit) }}" required
+                        class="form-control @error('time_limit') is-invalid border-danger @enderror"
+                        value="{{ old('time_limit', $assessment->time_limit) }}"
                         placeholder="Enter time limit in minutes" aria-label="Time limit in minutes" title="Time limit in minutes">
                     @error('time_limit')
-                    <span class="invalid-feedback">{{ $message }}</span>
+                    <span class="invalid-feedback d-block" style="color: #dc3545 !important; font-size: 0.875em;">{{ $message }}</span>
                     @enderror
                     <small class="text-muted">Required for quizzes</small>
                 </div>
@@ -81,13 +162,13 @@
             @if($assessment->type === 'quiz')
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="max_attempts" class="form-label">Maximum Attempts</label>
+                    <label for="max_attempts" class="form-label @error('max_attempts') text-danger @enderror">Maximum Attempts</label>
                     <input type="number" id="max_attempts" name="max_attempts" min="1" step="1"
-                        class="form-control @error('max_attempts') is-invalid @enderror"
+                        class="form-control @error('max_attempts') is-invalid border-danger @enderror"
                         value="{{ old('max_attempts', $assessment->max_attempts) }}" 
                         placeholder="Leave empty for unlimited" aria-label="Maximum attempts" title="Maximum number of attempts allowed">
                     @error('max_attempts')
-                    <span class="invalid-feedback">{{ $message }}</span>
+                    <span class="invalid-feedback d-block" style="color: #dc3545 !important; font-size: 0.875em;">{{ $message }}</span>
                     @enderror
                     <small class="text-muted">Leave empty for unlimited attempts. System will keep the highest score.</small>
                 </div>
@@ -111,8 +192,8 @@
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="class_id" class="form-label">Class*</label>
-                    <select id="class_id" name="class_id" class="form-select @error('class_id') is-invalid @enderror" required
+                    <label for="class_id" class="form-label @error('class_id') text-danger @enderror">Class*</label>
+                    <select id="class_id" name="class_id" class="form-select @error('class_id') is-invalid border-danger @enderror"
                         aria-label="Select class" title="Select class">
                         <option value="">Select Class</option>
                         @foreach($classes as $class)
@@ -122,12 +203,12 @@
                         @endforeach
                     </select>
                     @error('class_id')
-                    <span class="invalid-feedback">{{ $message }}</span>
+                    <span class="invalid-feedback d-block" style="color: #dc3545 !important; font-size: 0.875em;">{{ $message }}</span>
                     @enderror
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="subject_id" class="form-label">Subject*</label>
-                    <select id="subject_id" name="subject_id" class="form-select @error('subject_id') is-invalid @enderror" required
+                    <label for="subject_id" class="form-label @error('subject_id') text-danger @enderror">Subject*</label>
+                    <select id="subject_id" name="subject_id" class="form-select @error('subject_id') is-invalid border-danger @enderror"
                         aria-label="Select subject" title="Select subject">
                         <option value="">Select Subject</option>
                         @foreach($subjects as $subject)
@@ -137,27 +218,27 @@
                         @endforeach
                     </select>
                     @error('subject_id')
-                    <span class="invalid-feedback">{{ $message }}</span>
+                    <span class="invalid-feedback d-block" style="color: #dc3545 !important; font-size: 0.875em;">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="start_date" class="form-label">Start Date & Time</label>
+                    <label for="start_date" class="form-label @error('start_date') text-danger @enderror">Start Date & Time*</label>
                     <input type="datetime-local" id="start_date" name="start_date"
-                        class="form-control @error('start_date') is-invalid @enderror"
+                        class="form-control @error('start_date') is-invalid border-danger @enderror"
                         value="{{ old('start_date', $assessment->start_date ? $assessment->start_date->format('Y-m-d\TH:i') : '') }}" min="{{ date('Y-m-d\TH:i') }}" aria-label="Start date and time">
                     @error('start_date')
-                    <span class="invalid-feedback">{{ $message }}</span>
+                    <span class="invalid-feedback d-block" style="color: #dc3545 !important; font-size: 0.875em;">{{ $message }}</span>
                     @enderror
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="end_date" class="form-label">End Date & Time</label>
+                    <label for="end_date" class="form-label @error('end_date') text-danger @enderror">End Date & Time*</label>
                     <input type="datetime-local" id="end_date" name="end_date"
-                        class="form-control @error('end_date') is-invalid @enderror"
+                        class="form-control @error('end_date') is-invalid border-danger @enderror"
                         value="{{ old('end_date', $assessment->end_date ? $assessment->end_date->format('Y-m-d\TH:i') : '') }}" min="{{ date('Y-m-d\TH:i') }}" aria-label="End date and time">
                     @error('end_date')
-                    <span class="invalid-feedback">{{ $message }}</span>
+                    <span class="invalid-feedback d-block" style="color: #dc3545 !important; font-size: 0.875em;">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
@@ -473,6 +554,24 @@
                 deleteForm2.submit();
             });
         });
+    });
+
+    // Show errors on page load - errors should always be visible after form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        @if ($errors->any())
+            // Errors exist, so form was submitted - show them and scroll to first error
+            const errorAlert = document.querySelector('.alert-danger');
+            if (errorAlert) {
+                setTimeout(() => {
+                    errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const firstInvalidField = document.querySelector('.is-invalid, .border-danger');
+                    if (firstInvalidField) {
+                        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalidField.focus();
+                    }
+                }, 100);
+            }
+        @endif
     });
 </script>
 @endsection
