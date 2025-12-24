@@ -248,7 +248,6 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script>
         feather.replace()

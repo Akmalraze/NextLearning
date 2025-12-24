@@ -878,23 +878,29 @@
                 
                 // Validate checkbox questions - ensure at least one correct answer is selected
                 const checkboxGroups = {};
-                const checkboxes = document.querySelectorAll('.correct-answer-cb[data-required-group]');
+                // Only get checkboxes from visible questions that are actually checkbox type
+                const questionItems = document.querySelectorAll('.question-item');
                 
-                // Only validate if there are checkbox questions
-                if (checkboxes.length > 0) {
-                    checkboxes.forEach(cb => {
-                        const groupId = cb.getAttribute('data-required-group');
-                        if (!checkboxGroups[groupId]) checkboxGroups[groupId] = [];
-                        checkboxGroups[groupId].push(cb);
-                    });
-                    
-                    for (const groupId in checkboxGroups) {
-                        const checked = checkboxGroups[groupId].some(cb => cb.checked);
-                        if (!checked) {
-                            e.preventDefault();
-                            alert('Please select at least one correct answer for checkbox questions.');
-                            return false;
+                questionItems.forEach(questionItem => {
+                    const questionTypeSelector = questionItem.querySelector('.question-type-selector');
+                    if (questionTypeSelector && questionTypeSelector.value === 'checkboxes') {
+                        const questionIndex = questionItem.dataset.questionIndex;
+                        const checkboxes = questionItem.querySelectorAll('.correct-answer-cb[data-required-group="' + questionIndex + '"]');
+                        
+                        if (checkboxes.length > 0) {
+                            if (!checkboxGroups[questionIndex]) checkboxGroups[questionIndex] = [];
+                            checkboxes.forEach(cb => checkboxGroups[questionIndex].push(cb));
                         }
+                    }
+                });
+                
+                // Validate each checkbox question group
+                for (const groupId in checkboxGroups) {
+                    const checked = checkboxGroups[groupId].some(cb => cb.checked);
+                    if (!checked) {
+                        e.preventDefault();
+                        alert('Please select at least one correct answer for checkbox questions.');
+                        return false;
                     }
                 }
             });
@@ -933,6 +939,67 @@
         
         // Initialize first question on page load
         initializeQuestionOptions(0);
+        
+        // Function to calculate and display sum of question marks
+        function updateTotalMarksValidation() {
+            const totalMarksInput = document.getElementById('total_marks');
+            const questionsContainer = document.getElementById('questionsContainer');
+            
+            if (!totalMarksInput || !questionsContainer) return;
+            
+            let sumOfMarks = 0;
+            const markInputs = questionsContainer.querySelectorAll('input[name*="[marks]"]');
+            
+            markInputs.forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                sumOfMarks += value;
+            });
+            
+            // Round to 2 decimal places
+            sumOfMarks = Math.round(sumOfMarks * 100) / 100;
+            const totalMarks = parseFloat(totalMarksInput.value) || 0;
+            
+            // Remove existing validation message
+            const existingMsg = document.getElementById('total-marks-validation');
+            if (existingMsg) {
+                existingMsg.remove();
+            }
+            
+            // Show validation message if they don't match
+            if (totalMarks > 0 && Math.abs(sumOfMarks - totalMarks) > 0.01) {
+                const validationMsg = document.createElement('div');
+                validationMsg.id = 'total-marks-validation';
+                validationMsg.className = 'text-danger mt-1';
+                validationMsg.style.fontSize = '0.875em';
+                validationMsg.textContent = `Warning: Total marks (${totalMarks}) does not match sum of question marks (${sumOfMarks.toFixed(2)}).`;
+                
+                // Insert after total_marks input
+                totalMarksInput.parentElement.appendChild(validationMsg);
+                
+                // Add border-danger class
+                totalMarksInput.classList.add('border-danger');
+            } else {
+                // Remove border-danger if they match
+                totalMarksInput.classList.remove('border-danger');
+            }
+        }
+        
+        // Add event listeners for total marks and question marks
+        const totalMarksInput = document.getElementById('total_marks');
+        if (totalMarksInput) {
+            totalMarksInput.addEventListener('input', updateTotalMarksValidation);
+            totalMarksInput.addEventListener('blur', updateTotalMarksValidation);
+        }
+        
+        // Monitor question marks changes
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.name && e.target.name.includes('[marks]')) {
+                updateTotalMarksValidation();
+            }
+        });
+        
+        // Initial validation check
+        setTimeout(updateTotalMarksValidation, 500);
 
         // Add Question
         const addQuestionBtn = document.getElementById('addQuestion');
@@ -1047,7 +1114,10 @@
             document.querySelectorAll('.remove-question').forEach(btn => btn.style.display = 'block');
         }
         
-                if (typeof feather !== 'undefined') feather.replace();
+        // Update total marks validation after adding question
+        setTimeout(updateTotalMarksValidation, 100);
+        
+        if (typeof feather !== 'undefined') feather.replace();
             });
         }
 
@@ -1066,6 +1136,9 @@
             if (container.children.length <= 1) {
                 document.querySelectorAll('.remove-question').forEach(btn => btn.style.display = 'none');
                 }
+            
+            // Update total marks validation after removing question
+            setTimeout(updateTotalMarksValidation, 100);
             }
         });
 
