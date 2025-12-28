@@ -6,35 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#712cf9">
 
-    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('devstarit.app_name') }} - {{ config('devstarit.app_desc') }}</title>
-
-    <!-- ✅ Fix relative path issue for /login /admin etc -->
-    <base href="{{ url('/') }}/">
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
-    <!-- ✅ Bootstrap / Laravel Vite -->
+    <!-- ✅ Laravel Vite -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
-    <!-- ✅ Your dashboard styles (in public/css) -->
-    <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/sidebar-theme.css') }}" rel="stylesheet">
+    <!-- ✅ Your dashboard styles -->
+    <link href="{{ asset('build/css/dashboard.css') }}?v={{ time() }}" rel="stylesheet">
+    <link href="{{ asset('build/css/custom.css') }}?v={{ time() }}" rel="stylesheet">
+    <link href="{{ asset('build/css/sidebar-theme.css') }}?v={{ time() }}" rel="stylesheet">
+
+    <!-- ✅ Color mode JS -->
+    <script src="{{ asset('build/js/color-modes.js') }}?v={{ time() }}"></script>
 
     @yield('styles')
-
-    <!-- ✅ Color modes JS -->
-    <script src="{{ asset('js/color-modes.js') }}"></script>
 </head>
 
 <body>
 
-    <!-- ✅ Page Loader -->
+    <!-- Page Loader -->
     <div id="page-loader" class="page-loader">
         <img src="{{ asset('assets/loader.gif') }}" alt="Loading...">
         <div class="page-loader-text">Loading...</div>
@@ -89,7 +85,7 @@
     </style>
 
     <script>
-        window.addEventListener('load', function () {
+        window.addEventListener('load', function() {
             const loader = document.getElementById('page-loader');
             if (loader) {
                 loader.classList.add('hidden');
@@ -98,10 +94,8 @@
         });
     </script>
 
-
     <!-- Navbar -->
     @include('admin.includes.navbar')
-    <!-- /.navbar -->
 
     <div class="container-fluid">
         <div class="row">
@@ -109,16 +103,12 @@
                 $routeName = Route::currentRouteName();
             @endphp
 
-            @if (
-                Str::startsWith($routeName, 'modules-') ||
-                Str::startsWith($routeName, 'materials-')
-            )
+            @if (Str::startsWith($routeName, 'modules-') || Str::startsWith($routeName, 'materials-'))
                 @include('admin.includes.subject')
             @else
                 @include('admin.includes.sidebar')
             @endif
 
-            <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 position-relative">
                 @include('admin.includes.breadcrumb')
                 @include('admin.includes.flash')
@@ -128,11 +118,10 @@
         </div>
     </div>
 
-
-    <!-- ✅ Feather icons -->
+    <!-- Feather icons -->
     <script src="https://unpkg.com/feather-icons"></script>
     <script>
-        feather.replace();
+        feather.replace()
     </script>
 
     @yield('scripts')
