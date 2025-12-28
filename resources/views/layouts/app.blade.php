@@ -16,6 +16,14 @@
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+
+    <link rel="stylesheet" href="{{ asset('assets/plugins/bootstrap/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/plugins/themify-icons/themify-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/plugins/slick/slick.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/plugins/Venobox/venobox.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/plugins/aos/aos.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+
 </head>
 
 <body>
@@ -74,6 +82,15 @@
             @yield('content')
         </main>
     </div>
+
+
+    <script src="{{ asset('assets/plugins/jQuery/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/bootstrap/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/slick/slick.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/Venobox/venobox.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/aos/aos.js') }}"></script>
+    <script src="{{ asset('assets/js/script.js') }}"></script>
+
 </body>
 
 </html>
