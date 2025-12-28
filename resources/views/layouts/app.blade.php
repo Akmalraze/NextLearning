@@ -12,10 +12,10 @@
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
-    <!-- ✅ Laravel Vite -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <!-- ✅ Bootstrap from public/assets -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/bootstrap/bootstrap.min.css') }}">
 
-    <!-- ✅ Optional: Add your Theme style to login/register if you want -->
+    <!-- Optional: your theme main css -->
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}?v={{ time() }}">
 
 </head>
@@ -73,6 +73,10 @@
             @yield('content')
         </main>
     </div>
+
+    <!-- ✅ Bootstrap JS -->
+    <script src="{{ asset('assets/plugins/bootstrap/bootstrap.min.js') }}"></script>
+
 </body>
 
 </html>

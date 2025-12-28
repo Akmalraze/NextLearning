@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#712cf9">
-
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('devstarit.app_name') }} - {{ config('devstarit.app_desc') }}</title>
@@ -14,15 +13,15 @@
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
-    <!-- ✅ Laravel Vite -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <!-- ✅ Bootstrap CSS (manual) -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/bootstrap/bootstrap.min.css') }}">
 
-    <!-- ✅ Your dashboard styles -->
+    <!-- ✅ Your custom admin styles -->
     <link href="{{ asset('build/css/dashboard.css') }}?v={{ time() }}" rel="stylesheet">
     <link href="{{ asset('build/css/custom.css') }}?v={{ time() }}" rel="stylesheet">
     <link href="{{ asset('build/css/sidebar-theme.css') }}?v={{ time() }}" rel="stylesheet">
 
-    <!-- ✅ Color mode JS -->
+    <!-- ✅ Color modes JS -->
     <script src="{{ asset('build/js/color-modes.js') }}?v={{ time() }}"></script>
 
     @yield('styles')
@@ -94,6 +93,7 @@
         });
     </script>
 
+
     <!-- Navbar -->
     @include('admin.includes.navbar')
 
@@ -112,11 +112,13 @@
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 position-relative">
                 @include('admin.includes.breadcrumb')
                 @include('admin.includes.flash')
-
                 @yield('content')
             </main>
         </div>
     </div>
+
+    <!-- ✅ Bootstrap JS -->
+    <script src="{{ asset('assets/plugins/bootstrap/bootstrap.min.js') }}"></script>
 
     <!-- Feather icons -->
     <script src="https://unpkg.com/feather-icons"></script>
