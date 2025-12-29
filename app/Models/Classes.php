@@ -14,11 +14,6 @@ class Classes extends Model
      */
     public const FORM_LEVELS = [1, 2, 3, 4, 5];
 
-    /**
-     * Common class names
-     */
-    public const CLASS_NAMES = ['Raya', 'Perkasa', 'Gemilang', 'Bestari', 'Cemerlang', 'Setia'];
-
     protected $fillable = [
         'form_level',
         'name',

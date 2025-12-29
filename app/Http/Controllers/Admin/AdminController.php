@@ -134,15 +134,14 @@ class AdminController extends Controller
             ->first();
 
         // Get subjects for the student's class
-        $enrolledSubjects = collect([]);
+        $enrolledSubjects = [];
         if ($activeClass) {
-            $subjects = $activeClass->subjects;
-            $enrolledSubjects = $subjects ? collect($subjects) : collect([]);
+            $enrolledSubjects = $activeClass->subjects;
         }
 
         // Student stats
         $studentStats = [
-            'subjectsEnrolled' => $enrolledSubjects->count(),
+            'subjectsEnrolled' => count($enrolledSubjects),
             'className' => $activeClass ? ($activeClass->form_level . ' ' . ($activeClass->name ?? $activeClass->class_name)) : 'Not Assigned',
         ];
 

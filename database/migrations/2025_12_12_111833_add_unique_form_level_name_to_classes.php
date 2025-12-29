@@ -12,14 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Change form_level to unsigned tiny integer using a raw statement to avoid
-        // Doctrine DBAL type issues with "tinyinteger" when using ->change().
-        if (Schema::hasColumn('classes', 'form_level')) {
-            // This is MySQL-specific, which matches the current project setup.
-            \Illuminate\Support\Facades\DB::statement(
-                'ALTER TABLE classes MODIFY form_level TINYINT UNSIGNED NULL'
-            );
-        }
+        Schema::table('classes', function (Blueprint $table) {
+            // Change form_level to integer (1-5)
+            $table->unsignedTinyInteger('form_level')->nullable()->change();
+        });
 
         // Add unique constraint on form_level + name
         Schema::table('classes', function (Blueprint $table) {

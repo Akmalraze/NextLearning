@@ -25,6 +25,5 @@ class DatabaseSeeder extends Seeder
         $this->call(FakeSubjectsSeeder::class);
         $this->call(FakeClassesSeeder::class);
         $this->call(FakeSubjectClassTeacherSeeder::class);
-        $this->call(FakeAssessmentsSeeder::class);
     }
 }
