@@ -107,7 +107,7 @@ class TeacherReportController extends Controller
             ];
         }
 
-        return view('pages.ManageReport.teacherreport', compact(
+        return view('pages.ManageReport.teacherReport', compact(
             'teacher',
             'classReports',
             'allSessions',
