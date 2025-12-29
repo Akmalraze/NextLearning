@@ -53,7 +53,7 @@
 }
 
 [data-bs-theme="light"] .sidebar .nav-link.active {
-    color: #0d6efd;
+    color: #E1E2F6;
     background-color: rgba(13, 110, 253, 0.15);
     border-left-color: #0d6efd;
     font-weight: 500;

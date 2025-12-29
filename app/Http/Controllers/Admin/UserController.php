@@ -102,6 +102,7 @@ class UserController extends Controller
             ClassStudent::create([
                 'class_id' => $validatedData['class_id'],
                 'student_id' => $user->id,
+                'enrollment_date' => now(),
                 'status' => 'active',
             ]);
         }
@@ -167,6 +168,7 @@ class UserController extends Controller
             ClassStudent::create([
                 'class_id' => $validatedData['class_id'],
                 'student_id' => $user->id,
+                'enrollment_date' => now(),
                 'status' => 'active',
             ]);
         }
@@ -302,6 +304,7 @@ class UserController extends Controller
                 ClassStudent::create([
                     'class_id' => $classId,
                     'student_id' => $user->id,
+                    'enrollment_date' => now(),
                     'status' => 'active',
                 ]);
             }

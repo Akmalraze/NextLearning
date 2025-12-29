@@ -288,9 +288,10 @@ class AssessmentController extends Controller
             'type' => 'required|in:quiz,test,homework',
             'class_id' => 'required|exists:classes,id',
             'subject_id' => 'required|exists:subjects,id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'total_marks' => 'required|numeric|min:0|max:1000',
+            'time_limit' => 'nullable|integer|min:1|required_if:type,quiz',
             'max_attempts' => 'nullable|integer|min:1',
             'show_marks' => 'boolean',
             'is_published' => 'boolean',
@@ -312,6 +313,38 @@ class AssessmentController extends Controller
             'materials' => 'required_if:type,homework,test|array|min:1',
             'materials.*.file' => 'required_if:type,homework,test|file|max:10240',
             'materials.*.description' => 'nullable|string',
+        ], [
+            'title.required' => 'The assessment title field is required. Please fill in the title.',
+            'type.required' => 'The assessment type field is required. Please select a type.',
+            'type.in' => 'Please select a valid assessment type (Quiz, Test, or Homework).',
+            'class_id.required' => 'The class field is required. Please select a class.',
+            'class_id.exists' => 'The selected class is invalid. Please select a valid class.',
+            'subject_id.required' => 'The subject field is required. Please select a subject.',
+            'subject_id.exists' => 'The selected subject is invalid. Please select a valid subject.',
+            'start_date.required' => 'The start date field is required. Please select a start date and time.',
+            'start_date.date' => 'The start date must be a valid date and time.',
+            'end_date.required' => 'The end date field is required. Please select an end date and time.',
+            'end_date.date' => 'The end date must be a valid date and time.',
+            'total_marks.required' => 'The total marks field is required. Please enter the total marks.',
+            'total_marks.numeric' => 'The total marks must be a number.',
+            'total_marks.min' => 'The total marks must be at least 0.',
+            'total_marks.max' => 'The total marks cannot exceed 1000.',
+            'time_limit.required_if' => 'The time limit field is required for quiz assessments. Please enter the time limit in minutes.',
+            'time_limit.integer' => 'The time limit must be a whole number.',
+            'time_limit.min' => 'The time limit must be at least 1 minute.',
+            'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
+            'questions.required_if' => 'At least one question is required for quiz assessments. Please add questions.',
+            'questions.min' => 'At least one question is required for quiz assessments. Please add questions.',
+            'questions.*.question.required_with' => 'The question text is required. Please fill in the question.',
+            'questions.*.question_type.required_with' => 'The question type is required. Please select a question type.',
+            'questions.*.marks.required_with' => 'The marks field is required for each question. Please enter marks.',
+            'questions.*.marks.numeric' => 'The marks must be a number.',
+            'questions.*.marks.min' => 'The marks must be at least 0.',
+            'materials.required_if' => 'At least one material file is required for homework/test assessments. Please upload materials.',
+            'materials.min' => 'At least one material file is required for homework/test assessments. Please upload materials.',
+            'materials.*.file.required_if' => 'The material file is required. Please upload a file.',
+            'materials.*.file.file' => 'The uploaded file must be a valid file.',
+            'materials.*.file.max' => 'The file size cannot exceed 10MB.',
         ]);
 
         // Verify teacher is assigned to this class and subject
@@ -325,16 +358,32 @@ class AssessmentController extends Controller
             return back()->withErrors(['class_id' => 'You are not assigned to teach this subject in this class.'])->withInput();
         }
 
+        // Validate that total_marks equals sum of question marks for quiz assessments
+        if ($validated['type'] === 'quiz' && $request->has('questions') && !empty($request->input('questions'))) {
+            $sumOfQuestionMarks = 0;
+            foreach ($request->input('questions') as $questionData) {
+                if (isset($questionData['marks']) && is_numeric($questionData['marks'])) {
+                    $sumOfQuestionMarks += (float) $questionData['marks'];
+                }
+            }
+            
+            // Round to 2 decimal places for comparison
+            $sumOfQuestionMarks = round($sumOfQuestionMarks, 2);
+            $totalMarks = round((float) $validated['total_marks'], 2);
+            
+            if (abs($sumOfQuestionMarks - $totalMarks) > 0.01) { // Allow for floating point precision
+                return back()->withErrors([
+                    'total_marks' => "The total marks ({$totalMarks}) must equal the sum of all question marks ({$sumOfQuestionMarks}). Please adjust the total marks or individual question marks."
+                ])->withInput();
+            }
+        }
+
         $validated['teacher_id'] = auth()->id();
         $validated['is_published'] = $request->has('is_published') ? 1 : 0;
         
         // Convert datetime-local format (Y-m-d\TH:i) to datetime format (Y-m-d H:i:s)
-        if (!empty($validated['start_date'])) {
-            $validated['start_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['start_date'])));
-        }
-        if (!empty($validated['end_date'])) {
-            $validated['end_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['end_date'])));
-        }
+        $validated['start_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['start_date'])));
+        $validated['end_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['end_date'])));
 
         // Create the assessment
         $assessment = Assessments::create($validated);
@@ -524,44 +573,64 @@ class AssessmentController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        $validated = $request->validate(
-            [
-                'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'type' => 'required|in:quiz,test,homework',
-                'class_id' => 'required|exists:classes,id',
-                'subject_id' => 'required|exists:subjects,id',
-                'start_date' => 'nullable|date',
-                'end_date' => 'nullable|date|after_or_equal:start_date',
-                'total_marks' => 'required|numeric|min:0|max:1000',
-                'time_limit' => 'nullable|integer|min:1|required_if:type,quiz',
-                'max_attempts' => 'nullable|integer|min:1',
-                'show_marks' => 'boolean',
-                'is_published' => 'boolean',
-            ],
-            [
-                'title.required' => 'The assessment title field is required. Please fill in the title.',
-                'type.required' => 'The assessment type field is required. Please select a type.',
-                'type.in' => 'Please select a valid assessment type (Quiz, Test, or Homework).',
-                'class_id.required' => 'The class field is required. Please select a class.',
-                'class_id.exists' => 'The selected class is invalid. Please select a valid class.',
-                'subject_id.required' => 'The subject field is required. Please select a subject.',
-                'subject_id.exists' => 'The selected subject is invalid. Please select a valid subject.',
-                'start_date.required' => 'The start date field is required. Please select a start date and time.',
-                'start_date.date' => 'The start date must be a valid date and time.',
-                'end_date.required' => 'The end date field is required. Please select an end date and time.',
-                'end_date.date' => 'The end date must be a valid date and time.',
-                'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
-                'total_marks.required' => 'The total marks field is required. Please enter the total marks.',
-                'total_marks.numeric' => 'The total marks must be a number.',
-                'total_marks.min' => 'The total marks must be at least 0.',
-                'total_marks.max' => 'The total marks cannot exceed 1000.',
-                'time_limit.required_if' => 'The time limit field is required for quiz assessments. Please enter the time limit in minutes.',
-                'time_limit.integer' => 'The time limit must be a whole number.',
-                'time_limit.min' => 'The time limit must be at least 1 minute.',
-            ]
-        );
+        $validationRules = [
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'type' => 'required|in:quiz,test,homework',
+            'class_id' => 'required|exists:classes,id',
+            'subject_id' => 'required|exists:subjects,id',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'total_marks' => 'required|numeric|min:0|max:1000',
+            'time_limit' => 'nullable|integer|min:1|required_if:type,quiz',
+            'max_attempts' => 'nullable|integer|min:1',
+            'show_marks' => 'boolean',
+            'is_published' => 'boolean',
+        ];
         
+        $customMessages = [
+            'title.required' => 'The assessment title field is required. Please fill in the title.',
+            'type.required' => 'The assessment type field is required. Please select a type.',
+            'type.in' => 'Please select a valid assessment type (Quiz, Test, or Homework).',
+            'class_id.required' => 'The class field is required. Please select a class.',
+            'class_id.exists' => 'The selected class is invalid. Please select a valid class.',
+            'subject_id.required' => 'The subject field is required. Please select a subject.',
+            'subject_id.exists' => 'The selected subject is invalid. Please select a valid subject.',
+            'start_date.required' => 'The start date field is required. Please select a start date and time.',
+            'start_date.date' => 'The start date must be a valid date and time.',
+            'end_date.required' => 'The end date field is required. Please select an end date and time.',
+            'end_date.date' => 'The end date must be a valid date and time.',
+            'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
+            'total_marks.required' => 'The total marks field is required. Please enter the total marks.',
+            'total_marks.numeric' => 'The total marks must be a number.',
+            'total_marks.min' => 'The total marks must be at least 0.',
+            'total_marks.max' => 'The total marks cannot exceed 1000.',
+            'time_limit.required_if' => 'The time limit field is required for quiz assessments. Please enter the time limit in minutes.',
+            'time_limit.integer' => 'The time limit must be a whole number.',
+            'time_limit.min' => 'The time limit must be at least 1 minute.',
+        ];
+        
+        // Add validation rules for questions if it's a quiz
+        $assessmentType = $request->input('type') ?: $assessment->type;
+        if ($assessmentType === 'quiz') {
+            $validationRules['questions'] = 'nullable|array';
+            $validationRules['questions.*.question'] = 'required_with:questions|string';
+            $validationRules['questions.*.question_type'] = 'required_with:questions|in:multiple_choice,checkboxes,short_answer';
+            $validationRules['questions.*.marks'] = 'required_with:questions|numeric|min:0';
+            $validationRules['questions.*.options'] = 'nullable|array';
+            $validationRules['questions.*.options.*'] = 'nullable|string';
+            $validationRules['questions.*.correct_answer'] = 'nullable|string';
+            $validationRules['questions.*.correct_answers'] = 'nullable|array';
+            
+            $customMessages['questions.*.question.required_with'] = 'The question text is required. Please fill in the question.';
+            $customMessages['questions.*.question_type.required_with'] = 'The question type is required. Please select a question type.';
+            $customMessages['questions.*.marks.required_with'] = 'The marks field is required for each question. Please enter marks.';
+            $customMessages['questions.*.marks.numeric'] = 'The marks must be a number.';
+            $customMessages['questions.*.marks.min'] = 'The marks must be at least 0.';
+        }
+
+        $validated = $request->validate($validationRules, $customMessages);
+
         // Verify teacher is assigned to this class and subject
         $teacher = auth()->user();
         $assignment = $teacher->teachingAssignments()
@@ -573,17 +642,107 @@ class AssessmentController extends Controller
             return back()->withErrors(['class_id' => 'You are not assigned to teach this subject in this class.'])->withInput();
         }
 
+        // Validate that total_marks equals sum of question marks for quiz assessments
+        if ($assessment->type === 'quiz' && $request->has('questions') && !empty($request->input('questions'))) {
+            $sumOfQuestionMarks = 0;
+            foreach ($request->input('questions') as $questionData) {
+                // Skip questions marked for deletion
+                if (isset($questionData['id']) && in_array($questionData['id'], $request->input('questions_to_delete', []))) {
+                    continue;
+                }
+                if (isset($questionData['marks']) && is_numeric($questionData['marks'])) {
+                    $sumOfQuestionMarks += (float) $questionData['marks'];
+                }
+            }
+            
+            // Round to 2 decimal places for comparison
+            $sumOfQuestionMarks = round($sumOfQuestionMarks, 2);
+            $totalMarks = round((float) $validated['total_marks'], 2);
+            
+            if (abs($sumOfQuestionMarks - $totalMarks) > 0.01) { // Allow for floating point precision
+                return back()->withErrors([
+                    'total_marks' => "The total marks ({$totalMarks}) must equal the sum of all question marks ({$sumOfQuestionMarks}). Please adjust the total marks or individual question marks."
+                ])->withInput();
+            }
+        }
+
         $validated['is_published'] = $request->has('is_published') ? 1 : 0;
         
         // Convert datetime-local format (Y-m-d\TH:i) to datetime format (Y-m-d H:i:s)
-        if (!empty($validated['start_date'])) {
-            $validated['start_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['start_date'])));
-        }
-        if (!empty($validated['end_date'])) {
-            $validated['end_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['end_date'])));
-        }
+        $validated['start_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['start_date'])));
+        $validated['end_date'] = date('Y-m-d H:i:s', strtotime(str_replace('T', ' ', $validated['end_date'])));
 
         $assessment->update($validated);
+
+        // Handle questions for quiz assessments
+        if ($assessment->type === 'quiz' && $request->has('questions') && !empty($request->input('questions'))) {
+            // Get IDs of questions to delete
+            $questionsToDelete = $request->input('questions_to_delete', []);
+            if (!empty($questionsToDelete)) {
+                AssessmentQuestion::whereIn('id', $questionsToDelete)
+                    ->where('assessment_id', $assessment->id)
+                    ->delete();
+            }
+            
+            // Get existing question IDs
+            $existingQuestionIds = AssessmentQuestion::where('assessment_id', $assessment->id)
+                ->pluck('id')
+                ->toArray();
+            
+            $order = 1;
+            foreach ($request->input('questions') as $questionData) {
+                // Skip questions marked for deletion (hidden inputs)
+                if (isset($questionData['id']) && in_array($questionData['id'], $questionsToDelete)) {
+                    continue;
+                }
+                
+                $questionType = $questionData['question_type'] ?? 'multiple_choice';
+                
+                // Handle options
+                $options = [];
+                if (isset($questionData['options']) && is_array($questionData['options'])) {
+                    $options = array_values(array_filter($questionData['options'], function($opt) {
+                        return !empty(trim($opt));
+                    }));
+                }
+                
+                // Handle correct answer based on question type
+                $correctAnswer = null;
+                if ($questionType === 'checkboxes' && isset($questionData['correct_answers']) && is_array($questionData['correct_answers'])) {
+                    $correctAnswer = implode(',', $questionData['correct_answers']);
+                } else {
+                    $correctAnswer = $questionData['correct_answer'] ?? null;
+                }
+                
+                $questionDataArray = [
+                    'assessment_id' => $assessment->id,
+                    'question' => $questionData['question'],
+                    'question_type' => $questionType,
+                    'options' => $options,
+                    'option_a' => $options[0] ?? null,
+                    'option_b' => $options[1] ?? null,
+                    'option_c' => $options[2] ?? null,
+                    'option_d' => $options[3] ?? null,
+                    'correct_answer' => $correctAnswer,
+                    'shuffle_options' => isset($questionData['shuffle_options']) && $questionData['shuffle_options'] == '1',
+                    'marks' => $questionData['marks'],
+                    'order' => $order++,
+                ];
+                
+                // Update existing question or create new one
+                if (isset($questionData['id']) && in_array($questionData['id'], $existingQuestionIds)) {
+                    AssessmentQuestion::where('id', $questionData['id'])
+                        ->where('assessment_id', $assessment->id)
+                        ->update($questionDataArray);
+                } else {
+                    AssessmentQuestion::create($questionDataArray);
+                }
+            }
+            
+            // Update total_marks to match sum of all question marks
+            $totalMarks = AssessmentQuestion::where('assessment_id', $assessment->id)->sum('marks');
+            $assessment->update(['total_marks' => $totalMarks]);
+        }
 
         flash()->addSuccess('Assessment updated successfully.');
         return redirect()->route('assessments.show', $assessment->id);

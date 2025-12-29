@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Classes;
+use App\Models\SubjectClassTeacher;
 use App\Models\Subjects;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -110,6 +111,12 @@ class AdminController extends Controller
         // Simple teacher dashboard - show classes where user is homeroom teacher
         $teacherClasses = Classes::where('homeroom_teacher_id', $user->id)->get();
 
+        // Classes & subjects the teacher is teaching
+        $teachingClasses = SubjectClassTeacher::with(['class', 'subject'])
+            ->where('teacher_id', $user->id)
+            ->get()
+            ->groupBy('class_id');
+
         // Calculate total students
         $totalStudents = 0;
         foreach ($teacherClasses as $class) {
@@ -123,28 +130,30 @@ class AdminController extends Controller
             'totalSubjects' => 0, // Simplified for now
         ];
 
-        return view('component.dashboard.index', compact('teacherStats', 'teacherClasses'));
+        return view('component.dashboard.index', compact('teacherStats', 'teacherClasses' , 'teachingClasses'));
     }
 
-    private function studentDashboard($user)
-    {
-        // Get student's enrolled class
-        $activeClass = $user->belongsToMany(Classes::class, 'class_students', 'student_id', 'class_id')
-            ->wherePivot('status', 'active')
-            ->first();
+   private function studentDashboard($user)
+{
+    // Get student's enrolled class
+    $activeClass = $user->belongsToMany(Classes::class, 'class_students', 'student_id', 'class_id')
+        ->wherePivot('status', 'active')
+        ->first();
 
-        // Get subjects for the student's class
-        $enrolledSubjects = [];
-        if ($activeClass) {
-            $enrolledSubjects = $activeClass->subjects;
-        }
+    // Get subjects for the student's class (null-safe)
+    $enrolledSubjects = $activeClass ? $activeClass->assignedSubjects()->get() : collect();
 
-        // Student stats
-        $studentStats = [
-            'subjectsEnrolled' => count($enrolledSubjects),
-            'className' => $activeClass ? ($activeClass->form_level . ' ' . ($activeClass->name ?? $activeClass->class_name)) : 'Not Assigned',
-        ];
+    // Student stats
+    $studentStats = [
+        'subjectsEnrolled' => count($enrolledSubjects),
+        'className' => $activeClass ? ($activeClass->form_level . ' ' . ($activeClass->name ?? $activeClass->class_name)) : 'Not Assigned',
+    ];
 
-        return view('component.dashboard.index', compact('studentStats', 'enrolledSubjects', 'activeClass'));
-    }
+    // Pass subject IDs for route usage
+    $subjectIds = $enrolledSubjects->pluck('id')->toArray();
+
+    return view('component.dashboard.index', compact('studentStats', 'enrolledSubjects', 'activeClass', 'subjectIds'));
+}
+
+
 }
