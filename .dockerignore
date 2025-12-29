@@ -1,11 +1,23 @@
+# Node / Vite
 node_modules
 .vite
 public/build
+
+# Laravel runtime
 vendor
 storage
 bootstrap/cache
+
+# Git + IDE
 .git
 .idea
 .vscode
+
+# Env + logs
 .env
+.env.*
 *.log
+
+# OS files
+.DS_Store
+Thumbs.db
