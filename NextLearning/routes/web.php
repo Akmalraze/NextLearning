@@ -67,9 +67,27 @@ Route::middleware(['auth', 'role:Admin'])
     ->get('/admin/report', [ReportController::class, 'adminReport'])
     ->name('admin.report');
 
+<<<<<<< HEAD
 Route::middleware(['auth', 'role:Teacher'])
     ->get('/teacher/report', [ReportController::class, 'teacherReport'])
     ->name('teacher.report');
+=======
+Route::middleware(['auth', 'role:Admin'])
+    ->get('/admin/report', [ReportController::class, 'adminReport'])
+    ->name('admin.report');
+
+Route::get('/admin/report/export', [ReportController::class, 'adminReportExport'])
+    ->name('admin.report.export');
+
+Route::middleware(['auth', 'role:Teacher'])
+    ->get('/teacher/report', [ReportController::class, 'teacherReport'])
+    ->name('teacher.report');
+
+Route::get('/teacher/report/export', [ReportController::class, 'teacherReportExport'])
+    ->name('teacher.report.export')
+    ->middleware('auth', 'role:Teacher');
+
+>>>>>>> parent of 694f6f0 (update)
 
 <<<<<<< HEAD
     Route::get('/teacher/report/export', [ReportController::class, 'teacherReportExport'])

@@ -10,6 +10,7 @@
     <div class="card-body">
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         {{-- Tabs --}}
         <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">
             <li class="nav-item" role="presentation">
@@ -20,6 +21,30 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="classAssignment-tab" data-bs-toggle="tab" data-bs-target="#classAssignmentReport" type="button" role="tab">Class Subject Report</button>
+=======
+        {{-- Tabs --}}
+        <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link {{ request('tab', 'roleReport') == 'roleReport' ? 'active' : '' }}" 
+                        data-bs-toggle="tab"
+                        data-bs-target="#roleReport" type="button">
+                    User & Role Distribution
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link {{ request('tab') == 'workloadReport' ? 'active' : '' }}" 
+                        data-bs-toggle="tab"
+                        data-bs-target="#workloadReport" type="button">
+                    Teacher Assignment Overview
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link {{ request('tab') == 'classAssignmentReport' ? 'active' : '' }}" 
+                        data-bs-toggle="tab"
+                        data-bs-target="#classAssignmentReport" type="button">
+                    Class Subject Report
+                </button>
+>>>>>>> parent of 694f6f0 (update)
             </li>
         </ul>
 =======
@@ -33,6 +58,7 @@
         </div>
 >>>>>>> parent of 1071ee9 (update)
 
+<<<<<<< HEAD
         {{-- User & Role Distribution --}}
         <div id="roleReport">
             <div class="row mb-4">
@@ -41,6 +67,36 @@
                         <div class="card-body">
                             <h5>Total Students</h5>
                             <h3>{{ $totalStudents ?? 0 }}</h3>
+=======
+        <div class="tab-content">
+
+            {{-- ================= USER & ROLE DISTRIBUTION ================= --}}
+            <div class="tab-pane fade {{ request('tab', 'roleReport') == 'roleReport' ? 'show active' : '' }}" 
+                 id="roleReport">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h5>Total Students</h5>
+                                <h3>{{ $totalStudents }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h5>Total Teachers</h5>
+                                <h3>{{ $totalTeachers }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h5>Total Admins</h5>
+                                <h3>{{ $totalAdmins }}</h3>
+                            </div>
+>>>>>>> parent of 694f6f0 (update)
                         </div>
                     </div>
                 </div>
@@ -63,9 +119,32 @@
             </div>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             {{-- Teacher Workload --}}
             <div class="tab-pane fade" id="workloadReport" role="tabpanel">
                 <table class="table table-bordered table-striped">
+=======
+            {{-- ================= TEACHER WORKLOAD ================= --}}
+            <div class="tab-pane fade {{ request('tab') == 'workloadReport' ? 'show active' : '' }}" 
+                 id="workloadReport">
+
+                <div class="d-flex justify-content-between mb-3">
+                    <form method="GET" class="d-flex w-50">
+                        <input type="text" name="search" class="form-control"
+                               placeholder="Search teacher..."
+                               value="{{ request('search') }}">
+                        <input type="hidden" name="tab" value="workloadReport">
+                        <button type="submit" class="btn btn-primary ms-2">Search</button>
+                    </form>
+
+                    <a href="{{ route('admin.report.export', ['type' => 'workload', 'search' => request('search')]) }}"
+                       class="btn btn-success">
+                        Export CSV
+                    </a>
+                </div>
+
+                <table class="table table-bordered table-striped" id="workloadTable">
+>>>>>>> parent of 694f6f0 (update)
                     <thead>
                         <tr>
                             <th>Teacher</th>
@@ -94,6 +173,7 @@
 >>>>>>> parent of 1071ee9 (update)
             </div>
 
+<<<<<<< HEAD
             {{-- Teacher Staffing Notes --}}
             @php
                 $totalClasses = \App\Models\Classes::count();
@@ -105,6 +185,55 @@
                 @else
                     Teacher staffing is sufficient.
                 @endif
+=======
+            {{-- ================= CLASS SUBJECT ASSIGNMENT ================= --}}
+            <div class="tab-pane fade {{ request('tab') == 'classAssignmentReport' ? 'show active' : '' }}" 
+                 id="classAssignmentReport">
+
+                <div class="d-flex justify-content-between mb-3">
+                    <form method="GET" class="d-flex w-50">
+                        <input type="text" name="search" class="form-control"
+                               placeholder="Search class / subject / teacher..."
+                               value="{{ request('search') }}">
+                        <input type="hidden" name="tab" value="classAssignmentReport">
+                        <button type="submit" class="btn btn-primary ms-2">Search</button>
+                    </form>
+
+                    <a href="{{ route('admin.report.export', ['type' => 'class-subject', 'search' => request('search')]) }}"
+                       class="btn btn-success">
+                        Export CSV
+                    </a>
+                </div>
+
+                <table class="table table-bordered table-striped" id="classAssignmentTable">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Subject</th>
+                            <th>Assigned Teacher</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($classSubjectAssignment as $class)
+                            @foreach($class['subjects'] as $sub)
+                            <tr>
+                                <td>{{ $class['class_name'] }}</td>
+                                <td>{{ $sub->subject_name }}</td>
+                                <td>{{ $sub->teacher_name }}</td>
+                                <td>
+                                    @if(empty($sub->teacher_name))
+                                        <span class="badge bg-danger">Unassigned</span>
+                                    @else
+                                        <span class="badge bg-success">Assigned</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        @endforeach
+                    </tbody>
+                </table>
+>>>>>>> parent of 694f6f0 (update)
             </div>
         </div>
 
@@ -161,6 +290,7 @@
         }
     });
 
+<<<<<<< HEAD
     // Role Distribution Pie Chart
     const ctx = document.getElementById('roleDistributionChart').getContext('2d');
     const roleDistributionChart = new Chart(ctx, {
@@ -182,5 +312,21 @@
             maintainAspectRatio: false
         }
     });
+=======
+/* Optional: Frontend table search without reload (uncomment if needed) */
+
+function filterTable(input, tableId) {
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    if (table.closest('.tab-pane').classList.contains('show', 'active')) {
+        table.querySelectorAll('tbody tr').forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(filter) ? '' : 'none';
+        });
+    }
+}
+
+>>>>>>> parent of 694f6f0 (update)
 </script>
 @endsection
