@@ -60,7 +60,21 @@ Route::middleware(['auth', 'active', 'role:Admin'])->controller(ClassController:
 // Route::get('/report', function () {
 //     return view('pages.ManageReport.adminreport');
 // })->name('report');
+<<<<<<< HEAD
 Route::middleware(['auth', 'role:Admin'])->get('/report', [ReportController::class, 'adminReport'])->name('report');
+=======
+Route::middleware(['auth', 'role:Admin'])
+    ->get('/admin/report', [ReportController::class, 'adminReport'])
+    ->name('admin.report');
+
+Route::middleware(['auth', 'role:Teacher'])
+    ->get('/teacher/report', [ReportController::class, 'teacherReport'])
+    ->name('teacher.report');
+
+    Route::get('/teacher/report/export', [ReportController::class, 'teacherReportExport'])
+    ->name('teacher.report.export')
+    ->middleware('auth', 'role:Teacher');
+>>>>>>> parent of 71ddf72 (update)
 
 Route::get('/subject', function () {
     return view('pages.ManageSubject.index');
