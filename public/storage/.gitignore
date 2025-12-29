@@ -1,2 +1,10 @@
 *
 !.gitignore
+/vendor
+/node_modules
+/public/build
+/storage/*.key
+/storage/logs
+/.idea
+/.vscode
+.env
