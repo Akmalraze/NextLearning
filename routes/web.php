@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\AssessmentController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -64,6 +65,39 @@ Route::get('/subject', function () {
     return view('pages.ManageSubject.index');
 })->name('subject');
 
+// Assessment Routes
+Route::middleware(['auth', 'active'])->controller(AssessmentController::class)
+    ->prefix('assessments')
+    ->name('assessments.')
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/store', 'store')->name('store');
+        Route::get('/{id}', 'show')->name('show');
+        Route::get('/{id}/edit', 'edit')->name('edit');
+        Route::put('/{id}', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+        
+        // Question management (Teacher only)
+        Route::post('/{id}/questions', 'storeQuestion')->name('questions.store');
+        Route::delete('/{id}/questions/{questionId}', 'deleteQuestion')->name('questions.delete');
+        
+        // Material management (Teacher only)
+        Route::post('/{id}/materials', 'uploadMaterial')->name('materials.upload');
+        Route::delete('/{id}/materials/{materialId}', 'deleteMaterial')->name('materials.delete');
+        
+        // Student actions
+        Route::post('/{id}/start-quiz', 'startQuiz')->name('start-quiz');
+        Route::post('/{id}/submit-quiz', 'submitQuiz')->name('submit-quiz');
+        Route::post('/{id}/submit-homework', 'submitHomework')->name('submit-homework');
+        Route::delete('/{id}/remove-submission', 'removeSubmission')->name('remove-submission');
+        
+        // Teacher actions - view and grade submissions
+        Route::get('/{id}/submissions', 'viewSubmissions')->name('submissions');
+        Route::put('/{id}/submissions/{submissionId}/mark', 'updateSubmissionMark')->name('submissions.update-mark');
+    });
+
+// Legacy route for backward compatibility
 Route::get('/assessment', function () {
-    return view('pages.ManageAssessment.index');
+    return redirect()->route('assessments.index');
 })->name('assessment');
