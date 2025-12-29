@@ -71,11 +71,14 @@ Route::middleware(['auth', 'role:Teacher'])
     ->get('/teacher/report', [ReportController::class, 'teacherReport'])
     ->name('teacher.report');
 
+<<<<<<< HEAD
     Route::get('/teacher/report/export', [ReportController::class, 'teacherReportExport'])
     ->name('teacher.report.export')
     ->middleware('auth', 'role:Teacher');
 >>>>>>> parent of 71ddf72 (update)
 
+=======
+>>>>>>> parent of 42a1092 (teacher report update)
 Route::get('/subject', function () {
     return view('pages.ManageSubject.index');
 })->name('subject');
