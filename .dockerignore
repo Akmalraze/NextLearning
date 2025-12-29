@@ -1,0 +1,11 @@
+node_modules
+.vite
+public/build
+vendor
+storage
+bootstrap/cache
+.git
+.idea
+.vscode
+.env
+*.log
