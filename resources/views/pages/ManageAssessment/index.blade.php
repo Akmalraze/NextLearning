@@ -3,7 +3,7 @@
 
 <div class="card">
     <div class="card-header">
-        Assessment
+        Assessment Management
     </div>
 
     <div class="card-body">
