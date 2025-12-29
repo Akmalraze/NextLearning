@@ -253,9 +253,32 @@ class AssessmentController extends Controller
         // Get classes and subjects from teacher's assignments
         $assignments = $teacher->teachingAssignments()->with(['class', 'subject'])->get();
         
-        // Get unique classes and subjects
-        $classes = $assignments->pluck('class')->unique('id')->filter()->values();
-        $subjects = $assignments->pluck('subject')->unique('id')->filter()->values();
+        // Check if teacher has any assignments
+        if ($assignments->isEmpty()) {
+            return redirect()->route('assessments.index')
+                ->with('error', 'You do not have any teaching assignments. Please contact the administrator to assign you to classes and subjects.');
+        }
+        
+        // Get unique classes and subjects, filtering out null relationships
+        $classes = $assignments->pluck('class')
+            ->filter(function ($class) {
+                return $class !== null;
+            })
+            ->unique('id')
+            ->values();
+        
+        $subjects = $assignments->pluck('subject')
+            ->filter(function ($subject) {
+                return $subject !== null;
+            })
+            ->unique('id')
+            ->values();
+
+        // If no valid classes or subjects found, show error
+        if ($classes->isEmpty() || $subjects->isEmpty()) {
+            return redirect()->route('assessments.index')
+                ->with('error', 'Your teaching assignments have invalid class or subject references. Please contact the administrator.');
+        }
 
         // If class and subject are pre-selected, verify teacher is assigned
         if ($preSelectedClassId && $preSelectedSubjectId) {
