@@ -12,13 +12,10 @@ class ClassStudent extends Model
     protected $fillable = [
         'class_id',
         'student_id',
-        'enrollment_date',
         'status',
     ];
 
-    protected $casts = [
-        'enrollment_date' => 'date',
-    ];
+
 
     /**
      * Get the class for this enrollment.

@@ -54,8 +54,6 @@
                 </li>
                 @endcan
                 <li class="nav-item">
-<<<<<<< HEAD:resources/views/admin/includes/sidebar.blade.php
-=======
                     <a class="nav-link {{ (request()->is('ManageModules*')) ? 'active' : '' }}" aria-current="page"
                         href="{{ route('modules-index') }}">
                         <span data-feather="book" class="align-text-bottom"></span>
@@ -64,7 +62,6 @@
                 </li>
 
                 <li class="nav-item">
->>>>>>> parent of a8544fa (Merge branch 'main' of https://github.com/Akmalraze/NextLearning into steve):NextLearning/resources/views/admin/includes/sidebar.blade.php
                     <a class="nav-link {{ (request()->is('assessment')) ? 'active' : '' }}" aria-current="page"
                         href="{{ route('assessment') }}">
                         <span data-feather="home" class="align-text-bottom"></span>
