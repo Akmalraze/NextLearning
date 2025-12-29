@@ -524,44 +524,44 @@ class AssessmentController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'required|in:quiz,test,homework',
-            'class_id' => 'required|exists:classes,id',
-            'subject_id' => 'required|exists:subjects,id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'total_marks' => 'required|numeric|min:0|max:1000',
-            'time_limit' => 'nullable|integer|min:1|required_if:type,quiz',
-            'max_attempts' => 'nullable|integer|min:1',
-            'show_marks' => 'boolean',
-            'is_published' => 'boolean',
-<<<<<<< HEAD:app/Http/Controllers/AssessmentController.php
-=======
-        ], [
-            'title.required' => 'The assessment title field is required. Please fill in the title.',
-            'type.required' => 'The assessment type field is required. Please select a type.',
-            'type.in' => 'Please select a valid assessment type (Quiz, Test, or Homework).',
-            'class_id.required' => 'The class field is required. Please select a class.',
-            'class_id.exists' => 'The selected class is invalid. Please select a valid class.',
-            'subject_id.required' => 'The subject field is required. Please select a subject.',
-            'subject_id.exists' => 'The selected subject is invalid. Please select a valid subject.',
-            'start_date.required' => 'The start date field is required. Please select a start date and time.',
-            'start_date.date' => 'The start date must be a valid date and time.',
-            'end_date.required' => 'The end date field is required. Please select an end date and time.',
-            'end_date.date' => 'The end date must be a valid date and time.',
-            'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
-            'total_marks.required' => 'The total marks field is required. Please enter the total marks.',
-            'total_marks.numeric' => 'The total marks must be a number.',
-            'total_marks.min' => 'The total marks must be at least 0.',
-            'total_marks.max' => 'The total marks cannot exceed 1000.',
-            'time_limit.required_if' => 'The time limit field is required for quiz assessments. Please enter the time limit in minutes.',
-            'time_limit.integer' => 'The time limit must be a whole number.',
-            'time_limit.min' => 'The time limit must be at least 1 minute.',
->>>>>>> parent of 93d3f29 (update):NextLearning/app/Http/Controllers/AssessmentController.php
-        ]);
-
+        $validated = $request->validate(
+            [
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'type' => 'required|in:quiz,test,homework',
+                'class_id' => 'required|exists:classes,id',
+                'subject_id' => 'required|exists:subjects,id',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+                'total_marks' => 'required|numeric|min:0|max:1000',
+                'time_limit' => 'nullable|integer|min:1|required_if:type,quiz',
+                'max_attempts' => 'nullable|integer|min:1',
+                'show_marks' => 'boolean',
+                'is_published' => 'boolean',
+            ],
+            [
+                'title.required' => 'The assessment title field is required. Please fill in the title.',
+                'type.required' => 'The assessment type field is required. Please select a type.',
+                'type.in' => 'Please select a valid assessment type (Quiz, Test, or Homework).',
+                'class_id.required' => 'The class field is required. Please select a class.',
+                'class_id.exists' => 'The selected class is invalid. Please select a valid class.',
+                'subject_id.required' => 'The subject field is required. Please select a subject.',
+                'subject_id.exists' => 'The selected subject is invalid. Please select a valid subject.',
+                'start_date.required' => 'The start date field is required. Please select a start date and time.',
+                'start_date.date' => 'The start date must be a valid date and time.',
+                'end_date.required' => 'The end date field is required. Please select an end date and time.',
+                'end_date.date' => 'The end date must be a valid date and time.',
+                'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
+                'total_marks.required' => 'The total marks field is required. Please enter the total marks.',
+                'total_marks.numeric' => 'The total marks must be a number.',
+                'total_marks.min' => 'The total marks must be at least 0.',
+                'total_marks.max' => 'The total marks cannot exceed 1000.',
+                'time_limit.required_if' => 'The time limit field is required for quiz assessments. Please enter the time limit in minutes.',
+                'time_limit.integer' => 'The time limit must be a whole number.',
+                'time_limit.min' => 'The time limit must be at least 1 minute.',
+            ]
+        );
+        
         // Verify teacher is assigned to this class and subject
         $teacher = auth()->user();
         $assignment = $teacher->teachingAssignments()
