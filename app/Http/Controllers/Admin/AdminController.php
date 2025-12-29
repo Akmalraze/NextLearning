@@ -126,27 +126,26 @@ class AdminController extends Controller
         return view('component.dashboard.index', compact('teacherStats', 'teacherClasses'));
     }
 
-   private function studentDashboard($user)
-{
-    // Get student's enrolled class
-    $activeClass = $user->belongsToMany(Classes::class, 'class_students', 'student_id', 'class_id')
-        ->wherePivot('status', 'active')
-        ->first();
+    private function studentDashboard($user)
+    {
+        // Get student's enrolled class
+        $activeClass = $user->belongsToMany(Classes::class, 'class_students', 'student_id', 'class_id')
+            ->wherePivot('status', 'active')
+            ->first();
 
-    // Get subjects for the student's class (null-safe)
-    $enrolledSubjects = $activeClass ? $activeClass->assignedSubjects()->get() : collect();
+        // Get subjects for the student's class
+        $enrolledSubjects = collect([]);
+        if ($activeClass) {
+            $subjects = $activeClass->subjects;
+            $enrolledSubjects = $subjects ? collect($subjects) : collect([]);
+        }
 
-    // Student stats
-    $studentStats = [
-        'subjectsEnrolled' => count($enrolledSubjects),
-        'className' => $activeClass ? ($activeClass->form_level . ' ' . ($activeClass->name ?? $activeClass->class_name)) : 'Not Assigned',
-    ];
+        // Student stats
+        $studentStats = [
+            'subjectsEnrolled' => $enrolledSubjects->count(),
+            'className' => $activeClass ? ($activeClass->form_level . ' ' . ($activeClass->name ?? $activeClass->class_name)) : 'Not Assigned',
+        ];
 
-    // Pass subject IDs for route usage
-    $subjectIds = $enrolledSubjects->pluck('id')->toArray();
-
-    return view('component.dashboard.index', compact('studentStats', 'enrolledSubjects', 'activeClass', 'subjectIds'));
-}
-
-
+        return view('component.dashboard.index', compact('studentStats', 'enrolledSubjects', 'activeClass'));
+    }
 }

@@ -224,26 +224,27 @@
     @include('admin.includes.navbar')
     <!-- /.navbar -->
 
-   <div class="container-fluid">
+    <div class="container-fluid">
         <div class="row">
-            @php
-                $routeName = Route::currentRouteName();
-            @endphp
-
-            @if (
-                Str::startsWith($routeName, 'modules-') ||
-                Str::startsWith($routeName, 'materials-')
-            )
-                @include('admin.includes.subject')
-            @else
-                @include('admin.includes.sidebar')
-            @endif
-             <!-- Main Content -->
+            @if (Route::currentRouteName() == 'modules-list')
+            @include('admin.includes.subject')
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 position-relative">
                 @include('admin.includes.breadcrumb')
                 @include('admin.includes.flash')
                 @yield('content')
             </main>
+            @else
+            @include('admin.includes.sidebar')
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 position-relative">
+                @include('admin.includes.breadcrumb')
+                @include('admin.includes.flash')
+                @yield('content')
+            </main>
+            @endif
+
+
+
+
         </div>
     </div>
 

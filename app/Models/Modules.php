@@ -8,11 +8,11 @@ use App\Models\Assessments;
 use App\Models\Classes;
 use App\Models\Materials;
 
-
 class Modules extends Model
 {
     use HasFactory;
 
+    // Define which attributes can be mass-assigned
     protected $fillable = [
         'modules_name',
         'modules_description',
@@ -25,14 +25,9 @@ class Modules extends Model
         return $this->belongsTo(Subjects::class, 'subject_id');
     }
 
-    // Relationship with Materials (One-to-many)
-    // In Modules.php model
-// In the Modules Model
-public function materials()
-{
-    return $this->hasMany(Material::class, 'module_id');
+    // Relationship with Assessments (Many-to-many)
+    public function assessments()
+    {
+        return $this->belongsToMany(Assessments::class, 'assessment_module', 'module_id', 'assessment_id');
+    }
 }
-
-
-}
-

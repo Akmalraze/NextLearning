@@ -81,7 +81,7 @@
                                 {{ $class->activeStudents()->count() }} Students
                             </span>
                         </p>
-                        <a href="{{ route('modules-index', $class->id) }}"
+                        <a href="{{ route('admin.classes.show', $class->id) }}"
                             class="btn btn-sm btn-outline-primary mt-2">
                             <i data-feather="eye" style="width: 14px; height: 14px;"></i> View Class
                         </a>

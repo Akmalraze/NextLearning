@@ -22,7 +22,7 @@ class FakeClassesSeeder extends Seeder
 
         // Use form levels and class names from the model
         $formLevels = Classes::FORM_LEVELS;
-        $classNames = ['Raya', 'Perkasa', 'Gemilang', 'Bestari', 'Cemerlang', 'Setia'];
+        $classNames = Classes::CLASS_NAMES;
         $academicSessions = ['2023/2024', '2024/2025', '2025/2026'];
 
         $usedTeachers = [];
