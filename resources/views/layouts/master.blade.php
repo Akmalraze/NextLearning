@@ -249,7 +249,11 @@
     </div>
 
     <!-- Scripts -->
+<<<<<<< HEAD:resources/views/layouts/master.blade.php
     
+=======
+    <script src="{{ asset('js/app.js') }}"></script>
+>>>>>>> parent of 93d3f29 (update):NextLearning/resources/views/layouts/master.blade.php
     <script src="https://unpkg.com/feather-icons"></script>
     <script>
         feather.replace()
