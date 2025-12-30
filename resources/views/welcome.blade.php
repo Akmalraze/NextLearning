@@ -296,7 +296,7 @@
           <div class="team-member">
             <div class="d-flex mb-4">
               <div class="mr-3">
-                <img class="rounded-circle img-fluid" src="assets/images/team/akmal.png" alt="team-member">
+                <img src="assets/images/team/akmal.png" alt="team-member">
               </div>
               <div class="align-self-center">
                 <h4>Akmal Razelan</h4>
@@ -310,7 +310,7 @@
           <div class="team-member">
             <div class="d-flex mb-4">
               <div class="mr-3">
-                <img class="rounded-circle img-fluid" src="assets/images/team/steve.jpeg" alt="team-member">
+                <img src="assets/images/team/steve.jpeg" alt="team-member">
               </div>
               <div class="align-self-center">
                 <h4>Steve Demius</h4>
@@ -324,7 +324,7 @@
           <div class="team-member">
             <div class="d-flex mb-4">
               <div class="mr-3">
-                <img class="rounded-circle img-fluid" src="assets/images/team/tay.jpeg" alt="team-member">
+                <img src="assets/images/team/tay.jpeg" alt="team-member">
               </div>
               <div class="align-self-center">
                 <h4>Tay Shon Da</h4>
@@ -338,7 +338,7 @@
           <div class="team-member">
             <div class="d-flex mb-4">
               <div class="mr-3">
-                <img class="rounded-circle img-fluid" src="assets/images/team/azleen.jpeg" alt="team-member">
+                <img src="assets/images/team/azleen.jpeg" alt="team-member">
               </div>
               <div class="align-self-center">
                 <h4>Azleen Farisya</h4>
