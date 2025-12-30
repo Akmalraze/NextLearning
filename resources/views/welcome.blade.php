@@ -303,8 +303,7 @@
                 <h6 class="text-color">web designer</h6>
               </div>
             </div>
-            <p>Responsible for Learning Material Module.Responsible for user interface design and layout structure. Focused on usability,
-  reliability, and responsive design to ensure a positive user experience.</p>
+            <p>Responsible for Learning Material Module.</p>
           </div>
           <!-- team-member -->
           <div class="team-member">
@@ -317,8 +316,7 @@
                 <h6 class="text-color">web developer</h6>
               </div>
             </div>
-            <p>Responsible for Report Module. Involved in front-end and back-end development, implementing core system
-  functionalities and ensuring smooth interaction between system components.</p>
+            <p>Responsible for Report Module.</p>
           </div>
           <!-- team-member -->
           <div class="team-member">
@@ -331,8 +329,7 @@
                 <h6 class="text-color">Programmer</h6>
               </div>
             </div>
-            <p>Responsible for User Module.Assisted in system development and logic implementation, contributing to feature
-  functionality and supporting debugging and testing activities.</p>
+            <p>Responsible for User Module.</p>
           </div>
           <!-- team-member -->
           <div class="team-member">
@@ -345,8 +342,7 @@
                 <h6 class="text-color">Programmer</h6>
               </div>
             </div>
-            <p>Responsible for Assessment Module.Participated in coding, system testing, and validation to ensure the application
-  meets functional and non-functional requirements.</p>
+            <p>Responsible for Assessment Module.</p>
           </div>
           
         </div>
