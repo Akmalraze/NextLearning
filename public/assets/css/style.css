@@ -777,14 +777,6 @@ a:hover {
     display: none;
   }
 }
-/* FIX TEAM IMAGE SIZE */
-.team-member img {
-  width: 110px;
-  height: 110px;
-  object-fit: cover;
-  border-radius: 50%;
-  flex-shrink: 0; /* elak image mengecil bila flex */
-}
 
 .pricing {
   position: relative;
