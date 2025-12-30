@@ -57,6 +57,8 @@ class MaterialController extends Controller
             'subject_id' => $module->subject_id,
         ]);
 
+        flash()->addSuccess('Material uploaded successfully!');
+        
         return redirect()
             ->route('modules-view', $module->id)
             ->with('success', 'Material uploaded successfully!');

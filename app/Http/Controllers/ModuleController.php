@@ -80,6 +80,8 @@ class ModuleController extends Controller
     // Create a new module under the selected subject
     Modules::create($validated);
 
+    flash()->addSuccess('Module created successfully.');
+
     // Redirect back with a success message
     return redirect()->route('modules-index', ['subject_id' => $validated['subject_id']])
                      ->with('success', 'Module created successfully.');
@@ -137,6 +139,8 @@ public function list(Subjects $subject)
         ->where('is_active', true)
         ->get();
 
+       
+
     return view(
         'pages.ManageModule.edit',
         compact('module', 'subjects', 'subjectId', 'currentModuleId')
@@ -163,6 +167,8 @@ public function list(Subjects $subject)
     // Update the module
     $module->update($validated);
 
+    flash()->addSuccess('Module updated successfully.');
+
     // Redirect back with success message
     return redirect()->route('modules-index')->with('success', 'Module updated successfully.');
 }
@@ -178,6 +184,7 @@ public function list(Subjects $subject)
         $module = Modules::findOrFail($id);
         $module->delete();
 
+        flash()->addSuccess('Module deleted successfully.');
         return redirect()->route('modules-index')->with('success', 'Module deleted successfully.');
     }
 }
