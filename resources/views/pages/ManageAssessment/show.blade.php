@@ -853,24 +853,53 @@
                         // Reset bypass flag
                         bypassValidation = false;
                         
-                        // Load answers from localStorage into form
+                        // IMPORTANT: Show all question cards before loading answers
+                        // This ensures all form inputs are accessible for form submission
+                        const allQuestionCards = document.querySelectorAll('.question-card');
+                        allQuestionCards.forEach(card => {
+                            card.style.display = 'block';
+                        });
+                        
+                        // Load answers from localStorage into form BEFORE submission
+                        // This ensures all answers are in the form, even if question cards were hidden
                         const saved = localStorage.getItem(storageKey);
                         if (saved) {
                             try {
                                 const answers = JSON.parse(saved);
                                 Object.keys(answers).forEach(questionId => {
                                     const value = answers[questionId];
-                                    const inputs = document.querySelectorAll(`[name*="[${questionId}]"][data-question-id="${questionId}"]`);
+                                    // Use exact name pattern matching for reliable selection
+                                    const namePattern = `answers[${questionId}]`;
                                     
-                                    inputs.forEach(input => {
-                                        if (input.type === 'checkbox') {
-                                            input.checked = Array.isArray(value) && value.includes(input.value);
-                                        } else if (input.type === 'radio') {
-                                            input.checked = input.value == value;
-                                        } else {
+                                    // Handle radio buttons (multiple choice)
+                                    const radioInputs = document.querySelectorAll(`input[type="radio"][name="${namePattern}"]`);
+                                    if (radioInputs.length > 0) {
+                                        radioInputs.forEach(input => {
+                                            // Use strict comparison with string conversion
+                                            if (String(input.value) === String(value)) {
+                                                input.checked = true;
+                                            } else {
+                                                input.checked = false;
+                                            }
+                                        });
+                                    }
+                                    
+                                    // Handle checkboxes (multiple answers)
+                                    const checkboxInputs = document.querySelectorAll(`input[type="checkbox"][name="${namePattern}[]"]`);
+                                    if (checkboxInputs.length > 0) {
+                                        const valueArray = Array.isArray(value) ? value : [value];
+                                        checkboxInputs.forEach(input => {
+                                            input.checked = valueArray.includes(input.value);
+                                        });
+                                    }
+                                    
+                                    // Handle text inputs (short answer)
+                                    const textInputs = document.querySelectorAll(`input[type="text"][name="${namePattern}"], textarea[name="${namePattern}"]`);
+                                    if (textInputs.length > 0) {
+                                        textInputs.forEach(input => {
                                             input.value = value || '';
-                                        }
-                                    });
+                                        });
+                                    }
                                 });
                             } catch (e) {
                                 console.error('Error loading answers for submit:', e);
@@ -879,6 +908,8 @@
                         
                         // Clear localStorage after submit
                         localStorage.removeItem(storageKey);
+                        
+                        // Form will submit naturally with all answers now in the form
                     });
                 }
                 
