@@ -788,7 +788,8 @@ a:hover {
 .team-img {
   width: 80px;
   height: 80px;
-  object-fit: cover;     /* crops nicely */
+  object-fit: cover;
+  object-position: center 15%;     /* crops nicely */
   border-radius: 50%;    /* makes it circular */
   border: 2px solid #eee;
 }
