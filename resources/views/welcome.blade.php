@@ -153,8 +153,11 @@
       <div class="row">
         <div class="col-lg-12 text-center">
           <h2 class="section-title">Awesome Features of NextLearning</h2>
-          <p class="mb-100">A learning platform designed to bridge the gap between traditional education and digital
-            tools. Experience personalized, engaging, and efficient learning with NextLearning.</p>
+          <p class="mb-100">
+            NextLearning is designed with a strong focus on
+            key software quality attributes such as usability, reliability, maintainability, and responsiveness.
+            Each feature is carefully evaluated to ensure a stable, user-centered, and efficient learning experience.
+          </p>
         </div>
         <!-- feature item -->
         <div class="col-md-6 mb-80">
@@ -164,7 +167,10 @@
             </div>
             <div>
               <h4>Intuitive Design</h4>
-              <p>Designed to be simple and user-friendly, ensuring students and teachers can navigate easily.</p>
+              <p>
+                Designed with usability in mind, ensuring students and teachers can navigate the system easily
+                with minimal learning effort.
+              </p>
             </div>
           </div>
         </div>
@@ -176,7 +182,8 @@
             </div>
             <div>
               <h4>Flexible Customization</h4>
-              <p>Allows teachers to upload and modify content easily, creating a personalized learning experience.</p>
+              <p>Supports easy content updates and modifications by educators, enhancing system maintainability
+  and adaptability to changing learning needs.</p>
 
             </div>
           </div>
@@ -189,8 +196,8 @@
             </div>
             <div>
               <h4>Reliable Platform</h4>
-              <p>Built with a bug-free code to provide a seamless, stable learning experience for students and teachers
-                alike.</p>
+              <p>Developed following Quality Assurance practices to ensure system stability, error prevention,
+  and consistent performance during usage.</p>
 
             </div>
           </div>
@@ -203,8 +210,8 @@
             </div>
             <div>
               <h4>Streamlined Layout</h4>
-              <p>Organized layouts that make it easy for users to interact with materials, assessments, and progress
-                tracking.</p>
+              <p>Structured layouts improve efficiency by allowing users to access learning materials, assessments,
+  and progress tracking quickly and clearly.</p>
 
             </div>
           </div>
@@ -227,7 +234,7 @@
         </div>
         <div class="col-md-5">
           <h2 class="section-title">A Complete Digital Learning Experience</h2>
-          <p>NextLearning offers an intuitive and dynamic learning platform that helps secondary school students develop
+          <p>NextLearning offers an intuitive and dynamic learning platform that helps students develop
             essential digital skills, preparing them for higher education and future careers.</p>
 
         </div>
@@ -249,12 +256,13 @@
       <div class="row justify-content-between">
         <div class="col-md-5 order-2 order-md-1">
           <h2 class="section-title">Empowering Teachers and Students with Digital Tools</h2>
-          <p>NextLearning provides educators with effective tools to manage content, assess student performance, and
-            track progress in real-time, helping create a personalized learning experience.</p>
+          <p>NextLearning provides educators with effective tools to manage learning materials, assess student performance,
+            and track progress in real time. As part of the Quality Assurance assessment, the system is designed to ensure
+            high usability, reliability, and efficiency in supporting a personalized learning experience.</p>
 
-          <li> Responsive on any device</li>
-          <li> Very easy to customize</li>
-          <li> Effective support</li>
+          <li>Fully responsive across multiple devices and screen sizes</li>
+          <li>Easy to customize and maintain for different teaching needs</li>
+          <li>Well tested to ensure system stability and reliability</li>
           </ul>
         </div>
         <div class="col-md-7 order-1 order-md-2">
@@ -288,72 +296,59 @@
           <div class="team-member">
             <div class="d-flex mb-4">
               <div class="mr-3">
-                <img class="rounded-circle img-fluid" src="assets/images/team/team-1.jpg" alt="team-member">
+                <img class="rounded-circle img-fluid" src="assets/images/team/akmal.png" alt="team-member">
               </div>
               <div class="align-self-center">
-                <h4>Becroft</h4>
+                <h4>Akmal Razelan</h4>
                 <h6 class="text-color">web designer</h6>
               </div>
             </div>
-            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the
-              blind texts. S eparated they</p>
+            <p>Responsible for Learning Material Module.Responsible for user interface design and layout structure. Focused on usability,
+  reliability, and responsive design to ensure a positive user experience.</p>
           </div>
           <!-- team-member -->
           <div class="team-member">
             <div class="d-flex mb-4">
               <div class="mr-3">
-                <img class="rounded-circle img-fluid" src="assets/images/team/team-2.jpg" alt="team-member">
+                <img class="rounded-circle img-fluid" src="assets/images/team/steve.jpeg" alt="team-member">
               </div>
               <div class="align-self-center">
-                <h4>John Doe</h4>
+                <h4>Steve Demius</h4>
                 <h6 class="text-color">web developer</h6>
               </div>
             </div>
-            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the
-              blind texts. S eparated they</p>
+            <p>Responsible for Report Module. Involved in front-end and back-end development, implementing core system
+  functionalities and ensuring smooth interaction between system components.</p>
           </div>
           <!-- team-member -->
           <div class="team-member">
             <div class="d-flex mb-4">
               <div class="mr-3">
-                <img class="rounded-circle img-fluid" src="assets/images/team/team-3.jpg" alt="team-member">
+                <img class="rounded-circle img-fluid" src="assets/images/team/tay.jpeg" alt="team-member">
               </div>
               <div class="align-self-center">
-                <h4>Erik Ligas</h4>
+                <h4>Tay Shon Da</h4>
                 <h6 class="text-color">Programmer</h6>
               </div>
             </div>
-            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live
-              the blind texts. S eparated they</p>
+            <p>Responsible for User Module.Assisted in system development and logic implementation, contributing to feature
+  functionality and supporting debugging and testing activities.</p>
           </div>
           <!-- team-member -->
           <div class="team-member">
             <div class="d-flex mb-4">
               <div class="mr-3">
-                <img class="rounded-circle img-fluid" src="assets/images/team/team-1.jpg" alt="team-member">
+                <img class="rounded-circle img-fluid" src="assets/images/team/azleen.jpeg" alt="team-member">
               </div>
               <div class="align-self-center">
-                <h4>Erik Ligas</h4>
+                <h4>Azleen Farisya</h4>
                 <h6 class="text-color">Programmer</h6>
               </div>
             </div>
-            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live
-              the blind texts. S eparated they</p>
+            <p>Responsible for Assessment Module.Participated in coding, system testing, and validation to ensure the application
+  meets functional and non-functional requirements.</p>
           </div>
-          <!-- team-member -->
-          <div class="team-member">
-            <div class="d-flex mb-4">
-              <div class="mr-3">
-                <img class="rounded-circle img-fluid" src="assets/images/team/team-2.jpg" alt="team-member">
-              </div>
-              <div class="align-self-center">
-                <h4>John Doe</h4>
-                <h6 class="text-color">web developer</h6>
-              </div>
-            </div>
-            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the
-              blind texts. S eparated they</p>
-          </div>
+          
         </div>
       </div>
     </div>
@@ -372,7 +367,7 @@
   <!-- /team -->
 
 
-  <!-- client logo slider -->
+  {{-- <!-- client logo slider -->
   <section class="section">
     <div class="container">
       <div class="client-logo-slider align-self-center">
@@ -399,7 +394,7 @@
       </div>
     </div>
   </section>
-  <!-- /client logo slider -->
+  <!-- /client logo slider --> --}}
 
 
   <!-- footer -->
@@ -415,7 +410,7 @@
         <!-- footer menu -->
         <nav class="col-lg-8 align-self-center mb-5">
           <ul class="list-inline text-lg-right text-center footer-menu">
-            <li class="list-inline-item active"><a href="index.html">Home</a></li>
+            <li class="list-inline-item active"><a href="#home">Home</a></li>
             <li class="list-inline-item"><a class="page-scroll" href="#feature">Feature</a></li>
             <li class="list-inline-item"><a href="about.html">About</a></li>
             <li class="list-inline-item"><a class="page-scroll" href="#team">Team</a></li>
