@@ -779,18 +779,12 @@ a:hover {
 }
 /* FIX TEAM IMAGE SIZE */
 .team-member img {
-  width: 120px;
-  height: 120px;
+  width: 110px;
+  height: 110px;
   object-fit: cover;
   border-radius: 50%;
   flex-shrink: 0; /* elak image mengecil bila flex */
 }
-
-/* Align image & text nicely */
-.team-member .d-flex {
-  align-items: center;
-}
-
 
 .pricing {
   position: relative;
