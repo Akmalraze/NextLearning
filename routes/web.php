@@ -1,8 +1,10 @@
 <?php
 
-use App\Http\Controllers\ClassController;
+// use App\Http\Controllers\Admin\ClassController; // Commented out - route group is disabled
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\AssessmentController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\MaterialController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +23,24 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes(['register' => false]);
+// Public course catalog
+Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+Route::get('/courses/{subject}', [CourseController::class, 'show'])->name('courses.show');
+Route::post('/courses/{subject}/enroll', [CourseController::class, 'enroll'])
+    ->middleware(['auth', 'active', 'role:Learner'])
+    ->name('courses.enroll');
+
+// My Courses (enrolled courses for learners)
+Route::get('/my-courses', [CourseController::class, 'myCourses'])
+    ->middleware(['auth', 'active', 'role:Learner'])
+    ->name('courses.my-courses');
+
+// Unenroll from a course
+Route::post('/courses/{subject}/unenroll', [CourseController::class, 'unenroll'])
+    ->middleware(['auth', 'active', 'role:Learner'])
+    ->name('courses.unenroll');
+
+Auth::routes(['register' => true]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
@@ -31,7 +50,7 @@ Route::middleware(['auth', 'active'])->controller(ModuleController::class)
     ->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/list', 'list')->name('list');
-        Route::get('/create', 'create')->name('create');
+        Route::get('/create/{subjectId}', 'create')->name('create');
         Route::post('/store', 'store')->name('store');
         Route::get('{modules}/edit', 'edit')->name('edit');
         Route::put('{modules}', 'update')->name('update');
@@ -39,19 +58,32 @@ Route::middleware(['auth', 'active'])->controller(ModuleController::class)
         Route::delete('{modules}', 'destroy')->name('destroy');
     });
 
-
-Route::middleware(['auth', 'active', 'role:Admin'])->controller(ClassController::class)
-    ->prefix('ManageClasses')
-    ->name('classes-')
+// Material Routes
+Route::middleware(['auth', 'active'])->controller(MaterialController::class)
+    ->prefix('materials')
+    ->name('materials-')
     ->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('create', 'create')->name('create');
+        Route::get('/create/{id}', 'create')->name('create');
         Route::post('/store', 'store')->name('store');
-        Route::get('{classes}/edit', 'edit')->name('edit');
-        Route::put('{classes}', 'update')->name('update');
-        Route::get('{classes}', 'view')->name('view');
-        Route::delete('{classes}', 'destroy')->name('destroy');
+        Route::get('/{id}/edit', 'edit')->name('edit');
+        Route::put('/{id}', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('destroy');
     });
+
+
+// Commented out - ClassController doesn't exist, using Admin\ClassController via educator routes instead
+// Route::middleware(['auth', 'active', 'role:Educator'])->controller(ClassController::class)
+//     ->prefix('ManageClasses')
+//     ->name('classes-')
+//     ->group(function () {
+//         Route::get('/', 'index')->name('index');
+//         Route::get('create', 'create')->name('create');
+//         Route::post('/store', 'store')->name('store');
+//         Route::get('{classes}/edit', 'edit')->name('edit');
+//         Route::put('{classes}', 'update')->name('update');
+//         Route::get('{classes}', 'view')->name('view');
+//         Route::delete('{classes}', 'destroy')->name('destroy');
+//     });
 
 
 
@@ -101,3 +133,14 @@ Route::middleware(['auth', 'active'])->controller(AssessmentController::class)
 Route::get('/assessment', function () {
     return redirect()->route('assessments.index');
 })->name('assessment');
+
+// Material file download route (for Windows/Laragon compatibility)
+Route::get('/storage/materials/{filename}', function ($filename) {
+    $path = storage_path('app/public/materials/' . $filename);
+    
+    if (!file_exists($path)) {
+        abort(404, 'File not found');
+    }
+    
+    return response()->file($path);
+})->where('filename', '.*')->name('materials.show');

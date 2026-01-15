@@ -12,16 +12,22 @@
     <title>{{ config('devstarit.app_name') }} - {{ config('devstarit.app_desc') }}</title>
 
     <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Scripts -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    @vite(['resources/sass/app.scss', 'resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Styles -->
     <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/sidebar-theme.css') }}" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 
     @yield('styles')
 </head>
@@ -220,33 +226,47 @@
         </symbol>
     </svg>
 
-    <!-- Navbar -->
-    @include('admin.includes.navbar')
-    <!-- /.navbar -->
-
-    <div class="container-fluid">
-        <div class="row">
-            @if (Route::currentRouteName() == 'modules-list')
-            @include('admin.includes.subject')
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 position-relative">
-                @include('admin.includes.breadcrumb')
-                @include('admin.includes.flash')
-                @yield('content')
-            </main>
+    <div style="display: flex; min-height: 100vh;">
+        {{-- Sidebar: different for Educator vs Learner --}}
+        @auth
+            @if(auth()->user()->hasRole('Educator'))
+                @include('teacher.includes.sidebar')
+            @elseif(auth()->user()->hasRole('Learner'))
+                @include('learner.includes.sidebar')
             @else
-            @include('admin.includes.sidebar')
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 position-relative">
-                @include('admin.includes.breadcrumb')
-                @include('admin.includes.flash')
+                @include('teacher.includes.sidebar')
+            @endif
+        @else
+            @include('teacher.includes.sidebar')
+        @endauth
+
+        <!-- Content column (to the right of the sidebar) -->
+        <div style="flex: 1; margin-left: 280px; display: flex; flex-direction: column; background: #f8fafc; min-height: 100vh; transition: margin-left 0.3s;">
+            <!-- Navbar (top header, starts next to sidebar) -->
+            @include('teacher.includes.navbar')
+
+            <!-- Main content -->
+            <main style="flex: 1; padding: 2rem;">
+                @include('teacher.includes.breadcrumb')
+                @include('teacher.includes.flash')
                 @yield('content')
             </main>
-            @endif
-
-
-
-
         </div>
     </div>
+    
+    <style>
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .sidebar + div {
+                margin-left: 0 !important;
+            }
+        }
+    </style>
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>

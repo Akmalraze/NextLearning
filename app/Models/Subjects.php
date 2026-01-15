@@ -14,11 +14,32 @@ class Subjects extends Model
         'code',
         'description',
         'is_active',
+        'is_published',
+        'educator_id',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_published' => 'boolean',
     ];
+
+    /**
+     * Educator who owns/publishes this course.
+     */
+    public function educator()
+    {
+        return $this->belongsTo(User::class, 'educator_id');
+    }
+
+    /**
+     * Learners enrolled in this course.
+     */
+    public function learners()
+    {
+        return $this->belongsToMany(User::class, 'course_enrollments', 'subject_id', 'learner_id')
+            ->withTimestamps()
+            ->withPivot('status');
+    }
 
     // Class-Teacher assignments (master schedule)
     public function classAssignments()
@@ -45,7 +66,13 @@ class Subjects extends Model
     // Relationship with Modules (One-to-many)
     public function modules()
     {
-        return $this->hasMany(Modules::class, 'subject_id', 'subjects_id');
+        return $this->hasMany(Modules::class, 'subject_id');
+    }
+
+    // Relationship with SectionTitles (One-to-many)
+    public function sectionTitles()
+    {
+        return $this->hasMany(SectionTitle::class, 'subject_id')->orderBy('order');
     }
 
     // Relationship with Assessments (Many-to-many)

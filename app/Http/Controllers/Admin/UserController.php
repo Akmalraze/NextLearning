@@ -28,13 +28,10 @@ class UserController extends Controller
         // Filter by role based on tab
         switch ($tab) {
             case 'teachers':
-                $query->role('Teacher');
-                break;
-            case 'admins':
-                $query->role('Admin');
+                $query->role('Educator');
                 break;
             default:
-                $query->role('Student');
+                $query->role('Learner');
                 break;
         }
 
@@ -55,7 +52,7 @@ class UserController extends Controller
         $users = $query->orderBy('id_number', 'asc')->paginate(15)->withQueryString();
         $classes = Classes::all();
 
-        return view('admin.users.index', compact('users', 'tab', 'search', 'status', 'classes'));
+        return view('teacher.users.index', compact('users', 'tab', 'search', 'status', 'classes'));
     }
 
     /**
@@ -68,7 +65,7 @@ class UserController extends Controller
         $roles = Role::all();
         $classes = Classes::all();
 
-        return view('admin.users.create', compact('roles', 'classes'));
+        return view('teacher.users.create', compact('roles', 'classes'));
     }
 
     /**
@@ -107,7 +104,7 @@ class UserController extends Controller
         }
 
         flash()->addSuccess('User created successfully.');
-        return redirect()->route('admin.users.index');
+        return redirect()->route('teacher.users.index');
     }
 
     /**
@@ -122,7 +119,7 @@ class UserController extends Controller
         $classes = Classes::all();
         $currentClass = $user->activeClass()->first();
 
-        return view('admin.users.edit', compact('user', 'roles', 'classes', 'currentClass'));
+        return view('teacher.users.edit', compact('user', 'roles', 'classes', 'currentClass'));
     }
 
     /**
@@ -156,8 +153,8 @@ class UserController extends Controller
         // Sync role
         $user->syncRoles([$validatedData['role']]);
 
-        // Handle class enrollment for students
-        if ($validatedData['role'] === 'Student' && !empty($validatedData['class_id'])) {
+        // Handle class enrollment for learners
+        if ($validatedData['role'] === 'Learner' && !empty($validatedData['class_id'])) {
             // Mark old enrollment as transferred
             ClassStudent::where('student_id', $user->id)
                 ->where('status', 'active')
@@ -172,7 +169,7 @@ class UserController extends Controller
         }
 
         flash()->addSuccess('User updated successfully.');
-        return redirect()->route('admin.users.index');
+        return redirect()->route('teacher.users.index');
     }
 
     /**
@@ -186,7 +183,7 @@ class UserController extends Controller
         $user->update(['status' => 0]);
 
         flash()->addSuccess('User deactivated successfully.');
-        return redirect()->route('admin.users.index');
+        return redirect()->route('teacher.users.index');
     }
 
     /**
@@ -194,7 +191,7 @@ class UserController extends Controller
      */
     public function toggleStatus(Request $request, $id)
     {
-        abort_if(!auth()->user()->hasRole('Admin'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(!auth()->user()->hasRole('Educator'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $request->validate([
             'status' => 'required|in:0,1',
@@ -222,7 +219,7 @@ class UserController extends Controller
         $roles = Role::all();
         $classes = Classes::all();
 
-        return view('admin.users.bulk-create', compact('roles', 'classes'));
+        return view('teacher.users.bulk-create', compact('roles', 'classes'));
     }
 
     /**
@@ -298,7 +295,7 @@ class UserController extends Controller
 
             $user->assignRole($role);
 
-            if ($role === 'Student' && !empty($classId)) {
+            if ($role === 'Learner' && !empty($classId)) {
                 ClassStudent::create([
                     'class_id' => $classId,
                     'student_id' => $user->id,
@@ -315,6 +312,6 @@ class UserController extends Controller
         }
 
         flash()->addSuccess("{$createdCount} users created successfully.");
-        return redirect()->route('admin.users.index');
+        return redirect()->route('teacher.users.index');
     }
 }

@@ -1,18 +1,32 @@
 @extends('layouts.master')
 @section('content')
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Create Assessment</h5>
-        <a href="{{ route('assessments.index', ['class_id' => $preSelectedClassId ?? '', 'subject_id' => $preSelectedSubjectId ?? '']) }}" class="btn btn-secondary btn-sm">
-            <span data-feather="arrow-left"></span> Back
-        </a>
-    </div>
-    <form action="{{ route('assessments.store') }}" method="POST" enctype="multipart/form-data" id="assessmentForm">
-        @csrf
-        <div class="card-body">
+<div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+    <div style="background: white; border-radius: 0.75rem; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid #f1f5f9;">
+            <div>
+                <h2 style="font-size: 1.75rem; font-weight: 700; color: #1e293b; margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-feather="clipboard" style="width: 28px; height: 28px; color: #6366f1;"></i>
+                    Create Assessment
+                </h2>
+                <p style="color: #64748b; margin: 0; font-size: 0.95rem;">Fill in the details below to create a new assessment for your students.</p>
+            </div>
+            @php
+                $backUrl = $preSelectedSubjectId ? route('teacher.subjects.show', $preSelectedSubjectId) : route('assessments.index', ['class_id' => $preSelectedClassId ?? '', 'subject_id' => $preSelectedSubjectId ?? '']);
+            @endphp
+            <a href="{{ $backUrl }}" style="background: #f1f5f9; color: #475569; padding: 0.625rem 1.25rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; border: 1px solid #e2e8f0;">
+                <i data-feather="arrow-left" style="width: 18px; height: 18px;"></i>
+                Back
+            </a>
+        </div>
+        <form action="{{ route('assessments.store') }}" method="POST" enctype="multipart/form-data" id="assessmentForm">
+            @csrf
             @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <i data-feather="alert-circle" style="width: 20px; height: 20px; color: #ef4444;"></i>
+                    <strong style="color: #991b1b;">Please fix the following errors:</strong>
+                </div>
+                <ul style="margin: 0; padding-left: 1.5rem; color: #991b1b;">
                     @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                     @endforeach
@@ -22,25 +36,27 @@
 
             <!-- Step 1: Choose Assessment Type -->
             <div id="step1" class="assessment-step">
-                <div class="mb-4">
-                    <h6 class="mb-3">Step 1: Choose Assessment Type</h6>
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="type" class="form-label">Assessment Type*</label>
-                            <select id="type" name="type" class="form-select @error('type') is-invalid @enderror" required>
-                                <option value="">Select Type</option>
-                                <option value="quiz" {{ old('type') === 'quiz' ? 'selected' : '' }}>Quiz</option>
-                                <option value="homework" {{ old('type') === 'homework' ? 'selected' : '' }}>Homework</option>
-                                <option value="test" {{ old('type') === 'test' ? 'selected' : '' }}>Test</option>
-                            </select>
-                            @error('type')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
+                <div style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #6366f1;">
+                    <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="background: #6366f1; color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem;">1</span>
+                        Choose Assessment Type
+                    </h3>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="type" style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem;">Assessment Type*</label>
+                        <select id="type" name="type" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.2s; @error('type') border-color: #ef4444; @enderror" required onchange="this.style.borderColor = this.value ? '#6366f1' : '#e2e8f0'">
+                            <option value="">Select Assessment Type</option>
+                            <option value="quiz" {{ old('type') === 'quiz' ? 'selected' : '' }}>Quiz - Multiple choice questions with time limit</option>
+                            <option value="homework" {{ old('type') === 'homework' ? 'selected' : '' }}>Homework - File submission assignment</option>
+                            <option value="test" {{ old('type') === 'test' ? 'selected' : '' }}>Test - Comprehensive examination</option>
+                        </select>
+                        @error('type')
+                        <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
+                        @enderror
                     </div>
-                    <div class="mt-3">
-                        <button type="button" class="btn btn-primary" id="nextToStep2" disabled>
-                            Next <span data-feather="arrow-right"></span>
+                    <div>
+                        <button type="button" id="nextToStep2" disabled style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            Next Step
+                            <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>
                         </button>
                     </div>
                 </div>
@@ -48,151 +64,156 @@
 
             <!-- Step 2: Assessment Details -->
             <div id="step2" class="assessment-step" style="display: none;">
-                <div class="mb-4">
-                    <h6 class="mb-3">Step 2: Assessment Details</h6>
+                <div style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #10b981;">
+                    <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="background: #10b981; color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem;">2</span>
+                        Assessment Details
+                    </h3>
                     
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Assessment Title*</label>
-                        <input type="text" id="title" name="title" class="form-control @error('title') is-invalid @enderror"
-                            value="{{ old('title') }}" required aria-label="Assessment title" placeholder="Enter assessment title">
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="title" style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem;">Assessment Title*</label>
+                        <input type="text" id="title" name="title" 
+                            style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.2s; @error('title') border-color: #ef4444; @enderror"
+                            value="{{ old('title') }}" required placeholder="Enter assessment title">
                         @error('title')
-                        <span class="invalid-feedback">{{ $message }}</span>
+                        <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                         @enderror
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="description" style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem;">Description <span style="color: #94a3b8; font-weight: 400;">(Optional)</span></label>
                         <textarea id="description" name="description"
-                            class="form-control @error('description') is-invalid @enderror"
-                            rows="4" placeholder="Enter assessment description (optional)" aria-label="Assessment description">{{ old('description') }}</textarea>
+                            style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.2s; resize: vertical; min-height: 100px; @error('description') border-color: #ef4444; @enderror"
+                            rows="4" placeholder="Enter assessment description (optional)">{{ old('description') }}</textarea>
                         @error('description')
-                        <span class="invalid-feedback">{{ $message }}</span>
+                        <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                         @enderror
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="class_id" class="form-label">Class*</label>
-                            <select id="class_id" name="class_id" class="form-select @error('class_id') is-invalid @enderror" required>
-                                <option value="">Select Class</option>
-                                @foreach($classes as $class)
-                                <option value="{{ $class->id }}" {{ old('class_id', $preSelectedClassId ?? '') == $class->id ? 'selected' : '' }}>
-                                    {{ $class->form_level }} {{ $class->name }} ({{ $class->academic_session }})
-                                </option>
-                                @endforeach
-                            </select>
-                            @error('class_id')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                            @if($classes->isEmpty())
-                            <small class="text-danger">No classes assigned. Please contact administrator to assign you to classes.</small>
-                            @endif
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="subject_id" class="form-label">Subject*</label>
-                            <select id="subject_id" name="subject_id" class="form-select @error('subject_id') is-invalid @enderror" required>
-                                <option value="">Select Subject</option>
-                                @foreach($subjects as $subject)
-                                <option value="{{ $subject->id }}" {{ old('subject_id', $preSelectedSubjectId ?? '') == $subject->id ? 'selected' : '' }}>
-                                    {{ $subject->name }} ({{ $subject->code }})
-                                </option>
-                                @endforeach
-                            </select>
-                            @error('subject_id')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                            @if($subjects->isEmpty())
-                            <small class="text-danger">No subjects assigned. Please contact administrator to assign you to subjects.</small>
-                            @endif
-                        </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="subject_id" style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem;">Subject*</label>
+                        <select id="subject_id" name="subject_id" 
+                            style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.2s; @error('subject_id') border-color: #ef4444; @enderror" required>
+                            <option value="">Select Subject</option>
+                            @foreach($subjects as $subject)
+                            <option value="{{ $subject->id }}" {{ old('subject_id', $preSelectedSubjectId ?? '') == $subject->id ? 'selected' : '' }}>
+                                {{ $subject->name }} ({{ $subject->code }})
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('subject_id')
+                        <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
+                        @enderror
+                        @if($subjects->isEmpty())
+                        <small style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">No subjects assigned. Please contact administrator to assign you to subjects.</small>
+                        @endif
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="start_date" class="form-label">Start Date & Time</label>
+                    <!-- Hidden field for class_id if needed by backend, but not shown to user -->
+                    <input type="hidden" name="class_id" value="{{ old('class_id', $preSelectedClassId ?? '') }}">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <label for="start_date" style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem;">Start Date & Time</label>
                             <input type="datetime-local" id="start_date" name="start_date"
-                                class="form-control @error('start_date') is-invalid @enderror"
-                                value="{{ old('start_date') }}" min="{{ date('Y-m-d\TH:i') }}" aria-label="Start date and time">
+                                style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.2s; @error('start_date') border-color: #ef4444; @enderror"
+                                value="{{ old('start_date') }}" min="{{ date('Y-m-d\TH:i') }}">
                             @error('start_date')
-                            <span class="invalid-feedback">{{ $message }}</span>
+                            <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="end_date" class="form-label">End Date & Time</label>
+                        <div>
+                            <label for="end_date" style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem;">End Date & Time</label>
                             <input type="datetime-local" id="end_date" name="end_date"
-                                class="form-control @error('end_date') is-invalid @enderror"
-                                value="{{ old('end_date') }}" min="{{ date('Y-m-d\TH:i') }}" aria-label="End date and time">
+                                style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.2s; @error('end_date') border-color: #ef4444; @enderror"
+                                value="{{ old('end_date') }}" min="{{ date('Y-m-d\TH:i') }}">
                             @error('end_date')
-                            <span class="invalid-feedback">{{ $message }}</span>
+                            <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                             @enderror
                         </div>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="total_marks" class="form-label">Total Marks*</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <label for="total_marks" style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem;">Total Marks*</label>
                             <input type="number" id="total_marks" name="total_marks" step="0.01" min="0" max="1000"
-                                class="form-control @error('total_marks') is-invalid @enderror"
-                                value="{{ old('total_marks', 100) }}" required aria-label="Total marks" placeholder="Enter total marks">
+                                style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.2s; @error('total_marks') border-color: #ef4444; @enderror"
+                                value="{{ old('total_marks', 100) }}" required placeholder="Enter total marks">
                             @error('total_marks')
-                            <span class="invalid-feedback">{{ $message }}</span>
+                            <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                             @enderror
                         </div>
-                        <div class="col-md-4 mb-3" id="timeLimitField" style="display: none;">
-                            <label for="time_limit" class="form-label">Time Limit (minutes)*</label>
+                        <div id="timeLimitField" style="display: none;">
+                            <label for="time_limit" style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem;">Time Limit (minutes)*</label>
                             <input type="number" id="time_limit" name="time_limit" min="1" step="1"
-                                class="form-control @error('time_limit') is-invalid @enderror"
-                                value="{{ old('time_limit') }}" aria-label="Time limit in minutes" placeholder="Enter time limit">
+                                style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.2s; @error('time_limit') border-color: #ef4444; @enderror"
+                                value="{{ old('time_limit') }}" placeholder="Enter time limit">
                             @error('time_limit')
-                            <span class="invalid-feedback">{{ $message }}</span>
+                            <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                             @enderror
-                            <small class="text-muted">Required for quizzes</small>
+                            <small style="color: #94a3b8; font-size: 0.875rem; margin-top: 0.25rem; display: block;">Required for quizzes</small>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="form-check mt-4">
+                        <div style="display: flex; align-items: flex-end;">
+                            <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; width: 100%;">
                                 <input type="hidden" name="is_published" value="0">
-                                <input type="checkbox" class="form-check-input" id="is_published" name="is_published" value="1" {{
-                                    old('is_published') ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_published">
-                                    Publish Assessment (make visible to students)
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin: 0;">
+                                    <input type="checkbox" id="is_published" name="is_published" value="1" {{
+                                        old('is_published') ? 'checked' : '' }} style="width: 20px; height: 20px; cursor: pointer;">
+                                    <span style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">Publish Immediately</span>
                                 </label>
+                                <small style="color: #94a3b8; font-size: 0.875rem; margin-top: 0.5rem; display: block;">Make this assessment visible to students right away</small>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Quiz-specific options -->
-                    <div class="row" id="quizOptionsSection" style="display: none;">
-                        <div class="col-md-6 mb-3">
-                            <label for="max_attempts" class="form-label">Maximum Attempts</label>
-                            <input type="number" id="max_attempts" name="max_attempts" min="1" step="1"
-                                class="form-control @error('max_attempts') is-invalid @enderror"
-                                value="{{ old('max_attempts') }}" aria-label="Maximum attempts" placeholder="Leave empty for unlimited">
-                            @error('max_attempts')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                            <small class="text-muted">Leave empty for unlimited attempts. System will keep the highest score.</small>
+                    <div id="quizOptionsSection" style="display: none; margin-bottom: 1.5rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <div>
+                                <label for="max_attempts" style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; font-size: 0.95rem;">Maximum Attempts</label>
+                                <input type="number" id="max_attempts" name="max_attempts" min="1" step="1"
+                                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.2s; @error('max_attempts') border-color: #ef4444; @enderror"
+                                    value="{{ old('max_attempts') }}" placeholder="Leave empty for unlimited">
+                                @error('max_attempts')
+                                <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
+                                @enderror
+                                <small style="color: #94a3b8; font-size: 0.875rem; margin-top: 0.25rem; display: block;">Leave empty for unlimited attempts. System will keep the highest score.</small>
+                            </div>
+                    
+                    <!-- Show Marks option for all assessment types -->
+                    <div id="showMarksSection" style="margin-bottom: 1.5rem;">
+                        <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem;">
+                            <input type="hidden" name="show_marks" value="0">
+                            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin: 0;">
+                                <input type="checkbox" id="show_marks" name="show_marks" value="1" {{
+                                    old('show_marks', true) ? 'checked' : '' }} style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">Show Marks to Students</span>
+                            </label>
+                            <small style="color: #94a3b8; font-size: 0.875rem; margin-top: 0.5rem; display: block;">If unchecked, students won't see their scores.</small>
                         </div>
                     </div>
                     
-                    <!-- Show Marks option for all assessment types -->
-                    <div class="row" id="showMarksSection">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-check">
-                                <input type="hidden" name="show_marks" value="0">
-                                <input type="checkbox" class="form-check-input" id="show_marks" name="show_marks" value="1" {{
-                                    old('show_marks', true) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="show_marks">
-                                    Show Marks to Students
-                                </label>
-                            </div>
-                            <small class="text-muted">If unchecked, students won't see their scores.</small>
-                        </div>
+                    <div id="step2ButtonsContainer" style="display: flex !important; gap: 1rem; margin-top: 2rem; justify-content: space-between; visibility: visible !important;">
+                        <button type="button" id="backToStep1" style="background: #f1f5f9; color: #475569; padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: all 0.2s;">
+                            <i data-feather="arrow-left" style="width: 18px; height: 18px;"></i>
+                            Previous
+                        </button>
+                        <button type="button" id="nextToStep3" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; font-weight: 600; display: inline-flex !important; visibility: visible !important; opacity: 1 !important; align-items: center; gap: 0.5rem; cursor: pointer; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            Continue to Questions/Materials
+                            <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>
+                        </button>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Quiz Questions Section -->
-                    <div id="quizSection" style="display: none;">
-                        <hr class="my-4">
-                        <h6 class="mb-3">Quiz Questions</h6>
+            <!-- Step 3: Quiz Questions and Materials Section -->
+            <div id="quizSection" class="assessment-step" style="display: none;">
+                <!-- Quiz Questions Section -->
+                <div id="quizQuestionsContainer" style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #f59e0b;">
+                    <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="background: #f59e0b; color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem;">3</span>
+                        Quiz Questions
+                    </h3>
                         <div id="questionsContainer">
                             <div class="question-item card mb-3" data-question-index="0">
                                 <div class="card-body">
@@ -295,9 +316,11 @@
                     </div>
 
                     <!-- Materials Section for Homework/Test -->
-                    <div id="materialsSection" style="display: none;">
-                        <hr class="my-4">
-                        <h6 class="mb-3">Upload Materials</h6>
+                    <div id="materialsSection" style="display: none; background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #6366f1;">
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-feather="upload" style="width: 24px; height: 24px; color: #6366f1;"></i>
+                            Upload Materials
+                        </h3>
                         <div id="materialsContainer">
                             <div class="material-item card mb-3" data-material-index="0">
                                 <div class="card-body">
@@ -324,19 +347,50 @@
                         </button>
                     </div>
 
-                    <div class="mt-4">
-                        <button type="button" class="btn btn-outline-secondary" id="backToStep1">
-                            <span data-feather="arrow-left"></span> Back
+                <!-- Submit Button Section - Always visible when Step 3 is shown -->
+                <div id="submitButtonSection" style="background: white; border-radius: 0.75rem; padding: 1.5rem; margin-top: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: block !important;">
+                    <div style="display: flex; gap: 1rem; justify-content: space-between; align-items: center;">
+                        <button type="button" id="backToStep1FromFinal" style="background: #f1f5f9; color: #475569; padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: all 0.2s;">
+                            <i data-feather="arrow-left" style="width: 18px; height: 18px;"></i>
+                            Previous
                         </button>
-                        <button type="submit" class="btn btn-success" aria-label="Create assessment">
-                            <span data-feather="save"></span> Create Assessment
+                        <button type="submit" id="createAssessmentBtn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.75rem 2rem; border-radius: 0.5rem; border: none; font-weight: 600; display: inline-flex !important; align-items: center; gap: 0.5rem; cursor: pointer; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" aria-label="Create assessment">
+                            <i data-feather="save" style="width: 18px; height: 18px;"></i>
+                            Create Assessment
                         </button>
                     </div>
                 </div>
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
+
+<style>
+    /* Form input focus styles */
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="datetime-local"]:focus,
+    textarea:focus,
+    select:focus {
+        outline: none;
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    /* Button hover effects */
+    button[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+    }
+    
+    /* Responsive grid */
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+
 <script>
     // Wait for DOM to be fully loaded
     document.addEventListener('DOMContentLoaded', function() {
@@ -392,6 +446,21 @@
             const timeLimitInput = document.getElementById('time_limit');
             const quizOptionsSection = document.getElementById('quizOptionsSection');
             
+            // Always ensure the "Continue to Questions/Materials" button is visible in Step 2
+            const nextToStep3Btn = document.getElementById('nextToStep3');
+            if (nextToStep3Btn) {
+                nextToStep3Btn.style.display = 'inline-flex';
+                // Update button text based on assessment type
+                if (selectedType === 'quiz') {
+                    nextToStep3Btn.innerHTML = 'Continue to Questions <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>';
+                } else if (selectedType === 'homework' || selectedType === 'test') {
+                    nextToStep3Btn.innerHTML = 'Continue to Materials <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>';
+                } else {
+                    nextToStep3Btn.innerHTML = 'Continue to Questions/Materials <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>';
+                }
+                if (typeof feather !== 'undefined') feather.replace();
+            }
+            
             if (selectedType === 'quiz') {
                 // Show time limit field for quiz
                 if (timeLimitField) {
@@ -404,11 +473,13 @@
                 if (quizOptionsSection) {
                     quizOptionsSection.style.display = 'flex';
                 }
-                // Show quiz section, hide materials section
-                if (quizSection) {
-                    quizSection.style.display = 'block';
+                // Show quiz questions container, hide materials section
+                // Keep quizSection visible (it contains the submit button)
+                const quizQuestionsContainer = document.getElementById('quizQuestionsContainer');
+                if (quizQuestionsContainer) {
+                    quizQuestionsContainer.style.display = 'block';
                     // Restore name and required attributes for quiz inputs
-                    quizSection.querySelectorAll('input, select, textarea').forEach(input => {
+                    quizQuestionsContainer.querySelectorAll('input, select, textarea').forEach(input => {
                         if (input.hasAttribute('data-original-name')) {
                             input.setAttribute('name', input.getAttribute('data-original-name'));
                             input.removeAttribute('data-original-name');
@@ -435,12 +506,13 @@
                     });
                 }
             } else if (selectedType === 'homework' || selectedType === 'test') {
-                // Hide quiz section, show materials section
-                if (quizSection) {
-                    quizSection.style.display = 'none';
+                // Hide quiz questions container, show materials section
+                // But keep quizSection visible (it contains the submit button)
+                const quizQuestionsContainer = document.getElementById('quizQuestionsContainer');
+                if (quizQuestionsContainer) {
+                    quizQuestionsContainer.style.display = 'none';
                     // Remove name and required attributes from ALL quiz inputs so they won't be submitted
-                    // Use more comprehensive selectors to catch all elements
-                    const allQuizInputs = quizSection.querySelectorAll('input, select, textarea, [required]');
+                    const allQuizInputs = quizQuestionsContainer.querySelectorAll('input, select, textarea, [required]');
                     allQuizInputs.forEach(input => {
                         // Remove required attribute - this is critical!
                         input.removeAttribute('required');
@@ -473,17 +545,137 @@
                         }
                     });
                 }
+                
+                // Ensure submit button section is always visible
+                const submitButtonSection = document.getElementById('submitButtonSection');
+                if (submitButtonSection) {
+                    submitButtonSection.style.display = 'block';
+                }
+                const createBtn = document.getElementById('createAssessmentBtn');
+                if (createBtn) {
+                    createBtn.style.display = 'inline-flex';
+                }
+                
+                // Ensure "Continue to Materials" button is visible in Step 2
+                const nextToStep3Btn = document.getElementById('nextToStep3');
+                if (nextToStep3Btn) {
+                    nextToStep3Btn.style.display = 'inline-flex';
+                    // Update button text for homework/test
+                    nextToStep3Btn.innerHTML = 'Continue to Materials <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>';
+                    if (typeof feather !== 'undefined') feather.replace();
+                }
             }
         }
 
         if (nextToStep2Btn) {
             nextToStep2Btn.addEventListener('click', function() {
                 if (step1) step1.style.display = 'none';
-                if (step2) step2.style.display = 'block';
+                if (step2) {
+                    step2.style.display = 'block';
+                }
                 
                 // Show appropriate section based on type
                 const selectedType = typeSelect ? typeSelect.value : '';
                 handleTypeChange(selectedType);
+                
+                // CRITICAL: Force show the Continue button - multiple attempts to ensure it works
+                function forceShowButton() {
+                    const nextToStep3Btn = document.getElementById('nextToStep3');
+                    const buttonsContainer = document.getElementById('step2ButtonsContainer');
+                    const step2 = document.getElementById('step2');
+                    
+                    // Ensure Step 2 itself is visible
+                    if (step2) {
+                        step2.style.setProperty('display', 'block', 'important');
+                        step2.style.setProperty('visibility', 'visible', 'important');
+                        step2.style.setProperty('opacity', '1', 'important');
+                        console.log('Step 2 display:', step2.style.display, 'computed:', window.getComputedStyle(step2).display);
+                    }
+                    
+                    // Ensure button container is visible
+                    if (buttonsContainer) {
+                        buttonsContainer.style.setProperty('display', 'flex', 'important');
+                        buttonsContainer.style.setProperty('visibility', 'visible', 'important');
+                        buttonsContainer.style.setProperty('opacity', '1', 'important');
+                        buttonsContainer.style.setProperty('position', 'relative', 'important');
+                        console.log('Container display:', buttonsContainer.style.display, 'computed:', window.getComputedStyle(buttonsContainer).display);
+                    }
+                    
+                    if (nextToStep3Btn) {
+                        console.log('Button found, forcing visibility. Type:', selectedType);
+                        console.log('Button current display:', nextToStep3Btn.style.display);
+                        console.log('Button computed display:', window.getComputedStyle(nextToStep3Btn).display);
+                        console.log('Button computed visibility:', window.getComputedStyle(nextToStep3Btn).visibility);
+                        console.log('Button parent:', nextToStep3Btn.parentElement);
+                        console.log('Button offsetParent:', nextToStep3Btn.offsetParent);
+                        
+                        // Remove any inline styles that might hide it
+                        nextToStep3Btn.removeAttribute('hidden');
+                        nextToStep3Btn.removeAttribute('aria-hidden');
+                        
+                        // Force set visibility with !important via setProperty
+                        nextToStep3Btn.style.setProperty('display', 'inline-flex', 'important');
+                        nextToStep3Btn.style.setProperty('visibility', 'visible', 'important');
+                        nextToStep3Btn.style.setProperty('opacity', '1', 'important');
+                        nextToStep3Btn.style.setProperty('position', 'relative', 'important');
+                        nextToStep3Btn.style.setProperty('width', 'auto', 'important');
+                        nextToStep3Btn.style.setProperty('height', 'auto', 'important');
+                        nextToStep3Btn.style.setProperty('min-width', 'auto', 'important');
+                        nextToStep3Btn.style.setProperty('min-height', 'auto', 'important');
+                        
+                        // Update button text based on assessment type
+                        if (selectedType === 'quiz') {
+                            nextToStep3Btn.innerHTML = 'Continue to Questions <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>';
+                        } else if (selectedType === 'homework' || selectedType === 'test') {
+                            nextToStep3Btn.innerHTML = 'Continue to Materials <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>';
+                        } else {
+                            nextToStep3Btn.innerHTML = 'Continue to Questions/Materials <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>';
+                        }
+                        
+                        // Force re-render
+                        nextToStep3Btn.offsetHeight; // Trigger reflow
+                        
+                        const computedStyle = window.getComputedStyle(nextToStep3Btn);
+                        console.log('After setting - Button computed display:', computedStyle.display);
+                        console.log('After setting - Button computed visibility:', computedStyle.visibility);
+                        console.log('After setting - Button computed opacity:', computedStyle.opacity);
+                        console.log('After setting - Button width:', computedStyle.width);
+                        console.log('After setting - Button height:', computedStyle.height);
+                        console.log('After setting - Button position:', computedStyle.position);
+                        console.log('After setting - Button top:', computedStyle.top);
+                        console.log('After setting - Button left:', computedStyle.left);
+                        console.log('After setting - Button offsetWidth:', nextToStep3Btn.offsetWidth);
+                        console.log('After setting - Button offsetHeight:', nextToStep3Btn.offsetHeight);
+                        console.log('After setting - Button getBoundingClientRect:', nextToStep3Btn.getBoundingClientRect());
+                        
+                        // Check parent visibility
+                        let parent = nextToStep3Btn.parentElement;
+                        let level = 0;
+                        while (parent && level < 5) {
+                            const parentStyle = window.getComputedStyle(parent);
+                            console.log(`Parent level ${level} (${parent.tagName}${parent.id ? '#' + parent.id : ''}${parent.className ? '.' + parent.className : ''}):`, {
+                                display: parentStyle.display,
+                                visibility: parentStyle.visibility,
+                                opacity: parentStyle.opacity,
+                                height: parentStyle.height,
+                                width: parentStyle.width
+                            });
+                            parent = parent.parentElement;
+                            level++;
+                        }
+                    } else {
+                        console.error('Button #nextToStep3 not found in DOM!');
+                    }
+                }
+                
+                // Call immediately
+                forceShowButton();
+                
+                // Call after short delays to override any other code
+                setTimeout(forceShowButton, 10);
+                setTimeout(forceShowButton, 50);
+                setTimeout(forceShowButton, 100);
+                setTimeout(forceShowButton, 200);
                 
                 if (typeof feather !== 'undefined') feather.replace();
             });
@@ -494,12 +686,71 @@
             typeSelect.addEventListener('change', function() {
                 const selectedType = this.value;
                 handleTypeChange(selectedType);
+                
+                // Ensure the "Continue to Questions/Materials" button is always visible and update text
+                const nextToStep3Btn = document.getElementById('nextToStep3');
+                if (nextToStep3Btn) {
+                    nextToStep3Btn.style.display = 'inline-flex';
+                    // Update button text based on assessment type
+                    if (selectedType === 'quiz') {
+                        nextToStep3Btn.innerHTML = 'Continue to Questions <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>';
+                    } else if (selectedType === 'homework' || selectedType === 'test') {
+                        nextToStep3Btn.innerHTML = 'Continue to Materials <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>';
+                    } else {
+                        nextToStep3Btn.innerHTML = 'Continue to Questions/Materials <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>';
+                    }
+                    if (typeof feather !== 'undefined') feather.replace();
+                }
             });
         }
 
         const backToStep1Btn = document.getElementById('backToStep1');
         if (backToStep1Btn) {
             backToStep1Btn.addEventListener('click', function() {
+                if (step2) step2.style.display = 'none';
+                if (step1) step1.style.display = 'block';
+                if (typeof feather !== 'undefined') feather.replace();
+            });
+        }
+
+        const nextToStep3Btn = document.getElementById('nextToStep3');
+        if (nextToStep3Btn) {
+            nextToStep3Btn.addEventListener('click', function() {
+                if (step2) step2.style.display = 'none';
+                if (quizSection) {
+                    quizSection.style.display = 'block';
+                }
+                
+                // Ensure appropriate sections are shown based on type
+                const selectedType = typeSelect ? typeSelect.value : '';
+                
+                // Force show materials section if homework/test BEFORE calling handleTypeChange
+                if (selectedType === 'homework' || selectedType === 'test') {
+                    const materialsSection = document.getElementById('materialsSection');
+                    if (materialsSection) {
+                        materialsSection.style.display = 'block';
+                    }
+                }
+                
+                handleTypeChange(selectedType);
+                
+                // Always ensure submit button section is visible
+                const submitButtonSection = document.getElementById('submitButtonSection');
+                if (submitButtonSection) {
+                    submitButtonSection.style.display = 'block';
+                }
+                const createBtn = document.getElementById('createAssessmentBtn');
+                if (createBtn) {
+                    createBtn.style.display = 'inline-flex';
+                }
+                
+                if (typeof feather !== 'undefined') feather.replace();
+            });
+        }
+
+        const backToStep1FromFinalBtn = document.getElementById('backToStep1FromFinal');
+        if (backToStep1FromFinalBtn) {
+            backToStep1FromFinalBtn.addEventListener('click', function() {
                 if (step2) step2.style.display = 'none';
                 if (step1) step1.style.display = 'block';
                 if (typeof feather !== 'undefined') feather.replace();
@@ -720,9 +971,10 @@
                         handleTypeChange(selectedType);
                     }
                     
-                    // Extra safety: remove required from hidden quiz section
-                    if (quizSection && (quizSection.style.display === 'none' || selectedType !== 'quiz')) {
-                        const allElements = quizSection.querySelectorAll('input, select, textarea, [required]');
+                    // Extra safety: remove required from hidden quiz questions container
+                    const quizQuestionsContainer = document.getElementById('quizQuestionsContainer');
+                    if (quizQuestionsContainer && (quizQuestionsContainer.style.display === 'none' || selectedType !== 'quiz')) {
+                        const allElements = quizQuestionsContainer.querySelectorAll('input, select, textarea, [required]');
                         allElements.forEach(element => {
                             element.removeAttribute('required');
                             if (element.hasAttribute('name') && element.getAttribute('name').includes('questions')) {
@@ -761,9 +1013,10 @@
                 // Apply type change handling one more time before submission
                 handleTypeChange(selectedType);
                 
-                // Extra safety: Force remove required from hidden quiz section
-                if (quizSection && (quizSection.style.display === 'none' || selectedType !== 'quiz')) {
-                    quizSection.querySelectorAll('*').forEach(element => {
+                // Extra safety: Force remove required from hidden quiz questions container
+                const quizQuestionsContainer = document.getElementById('quizQuestionsContainer');
+                if (quizQuestionsContainer && (quizQuestionsContainer.style.display === 'none' || selectedType !== 'quiz')) {
+                    quizQuestionsContainer.querySelectorAll('*').forEach(element => {
                         element.removeAttribute('required');
                         if (element.hasAttribute('name') && element.getAttribute('name').includes('questions')) {
                             if (!element.hasAttribute('data-original-name')) {
@@ -1023,5 +1276,97 @@
         }
     });
     }); // End of DOMContentLoaded
+    
+    // Additional safety: Ensure button is always visible when Step 2 is shown
+    const observer = new MutationObserver(function(mutations) {
+        const step2 = document.getElementById('step2');
+        const nextToStep3Btn = document.getElementById('nextToStep3');
+        if (step2 && step2.style.display !== 'none' && nextToStep3Btn) {
+            nextToStep3Btn.style.display = 'inline-flex';
+            nextToStep3Btn.style.visibility = 'visible';
+            nextToStep3Btn.style.opacity = '1';
+        }
+    });
+    
+    const step2 = document.getElementById('step2');
+    if (step2) {
+        observer.observe(step2, { attributes: true, attributeFilter: ['style'] });
+    }
+</script>
+
+<style>
+    /* Ensure the Continue button is always visible - override any other styles */
+    #nextToStep3 {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+    }
+    
+    /* When Step 2 is visible, ensure the button is visible */
+    #step2[style*="display: block"] #nextToStep3,
+    #step2:not([style*="display: none"]) #nextToStep3,
+    #step2 #nextToStep3 {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Force visibility for all assessment types */
+    .assessment-step #nextToStep3,
+    div#step2 #nextToStep3 {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+</style>
+
+<script>
+    // Force button visibility on page load and whenever Step 2 is shown
+    document.addEventListener('DOMContentLoaded', function() {
+        function ensureButtonVisible() {
+            const nextToStep3Btn = document.getElementById('nextToStep3');
+            if (nextToStep3Btn) {
+                nextToStep3Btn.style.setProperty('display', 'inline-flex', 'important');
+                nextToStep3Btn.style.setProperty('visibility', 'visible', 'important');
+                nextToStep3Btn.style.setProperty('opacity', '1', 'important');
+            }
+        }
+        
+        // Run immediately
+        ensureButtonVisible();
+        
+        // Run after a short delay to ensure DOM is ready
+        setTimeout(ensureButtonVisible, 100);
+        setTimeout(ensureButtonVisible, 500);
+        
+        // Watch for Step 2 visibility changes
+        const step2 = document.getElementById('step2');
+        if (step2) {
+            const step2Observer = new MutationObserver(function() {
+                if (step2.style.display === 'block' || step2.style.display === '') {
+                    ensureButtonVisible();
+                }
+            });
+            step2Observer.observe(step2, { 
+                attributes: true, 
+                attributeFilter: ['style'],
+                childList: false,
+                subtree: false
+            });
+        }
+        
+        // Also watch the button itself
+        const nextToStep3Btn = document.getElementById('nextToStep3');
+        if (nextToStep3Btn) {
+            const buttonObserver = new MutationObserver(function() {
+                ensureButtonVisible();
+            });
+            buttonObserver.observe(nextToStep3Btn, { 
+                attributes: true, 
+                attributeFilter: ['style', 'class']
+            });
+        }
+    });
 </script>
 @endsection

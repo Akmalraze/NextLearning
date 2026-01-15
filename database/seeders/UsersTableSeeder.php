@@ -32,81 +32,55 @@ class UsersTableSeeder extends Seeder
         $materialDelete = Permission::firstOrCreate(['name' => 'delete materials']);
 
         // Creating Roles
-        $roleAdmin = Role::firstOrCreate(['name' => 'Admin']);
-        $roleTeacher = Role::firstOrCreate(['name' => 'Teacher']);
-        $roleStudent = Role::firstOrCreate(['name' => 'Student']);
+        $roleEducator = Role::firstOrCreate(['name' => 'Educator']);
+        $roleLearner = Role::firstOrCreate(['name' => 'Learner']);
 
         // Assigning Permissions to Roles
-        // Admin gets all permissions
-        $roleAdmin->givePermissionTo([
+        // Educator gets user management and material permissions
+        $roleEducator->givePermissionTo([
             $userAccess,
             $userView,
             $userEdit,
             $userCreate,
             $userDelete,
-            $roleAccess,
-            $categoryAccess,
-            $tagAccess,
             $materialView,
             $materialCreate,
             $materialEdit,
             $materialDelete
         ]);
 
-        // Teacher gets limited permissions
-        $roleTeacher->givePermissionTo([
-            $userView,
-            $materialView,
-            $materialCreate,
-            $materialEdit
-        ]);
-
-        // Student gets view-only permissions
-        $roleStudent->givePermissionTo([
+        // Learner gets view-only permissions
+        $roleLearner->givePermissionTo([
             $userView,
             $materialView
         ]);
 
-        // Creating Admin User
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@demo.com'],
+        // Creating Educator User
+        $educator = User::firstOrCreate(
+            ['email' => 'educator@demo.com'],
             [
-                'name' => 'Admin User',
-                'id_number' => 'AD001',
-                'password' => Hash::make('adminpassword'),
+                'name' => 'Educator User',
+                'id_number' => 'ED001',
+                'password' => Hash::make('educatorpassword'),
                 'status' => 1,
             ]
         );
-        if (!$admin->hasRole($roleAdmin)) {
-            $admin->assignRole($roleAdmin);
+        if (!$educator->hasRole($roleEducator)) {
+            $educator->assignRole($roleEducator);
         }
 
-        // Creating Teacher User
-        $teacher = User::firstOrCreate(
-            ['email' => 'teacher@demo.com'],
+        // Creating Learner User
+        $learner = User::firstOrCreate(
+            ['email' => 'learner@demo.com'],
             [
-                'name' => 'Teacher User',
-                'id_number' => 'TE001',
-                'password' => Hash::make('teacherpassword'),
+                'name' => 'Learner User',
+                'id_number' => 'LR001',
+                'password' => Hash::make('learnerpassword'),
                 'status' => 1,
             ]
         );
-        if (!$teacher->hasRole($roleTeacher)) {
-            $teacher->assignRole($roleTeacher);
-        }
-
-        // Creating Student User
-        $student = User::firstOrCreate(
-            ['email' => 'student@demo.com'],
-            [
-                'name' => 'Student User',
-                'id_number' => 'ST001',
-                'password' => Hash::make('studentpassword'),
-                'status' => 1,
-            ]
-        );
-        if (!$student->hasRole($roleStudent)) {
-            $student->assignRole($roleStudent);
+        if (!$learner->hasRole($roleLearner)) {
+            $learner->assignRole($roleLearner);
         }
     }
 }

@@ -4,7 +4,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Assessment Details</h5>
         <div>
-            @if(auth()->user()->hasRole('Teacher') && $assessment->teacher_id === auth()->id())
+            @if(auth()->user()->hasRole('Educator') && $assessment->teacher_id === auth()->id())
             <a href="{{ route('assessments.edit', $assessment->id) }}" class="btn btn-warning btn-sm">
                 <span data-feather="edit-2"></span> Edit
             </a>
@@ -93,7 +93,7 @@
             </div>
         </div>
 
-        @if(auth()->user()->hasRole('Teacher') && $assessment->teacher_id === auth()->id())
+        @if(auth()->user()->hasRole('Educator') && $assessment->teacher_id === auth()->id())
         <!-- Teacher Actions -->
         <div class="alert alert-info mt-4">
             <div class="d-flex justify-content-between align-items-center">
@@ -202,8 +202,8 @@
         </div>
         @endif
 
-        @elseif(auth()->user()->hasRole('Student'))
-        <!-- Student view -->
+        @elseif(auth()->user()->hasRole('Learner'))
+        <!-- Learner view -->
         @php
             $timeCheck = $timeCheck ?? ['within' => true, 'reason' => null, 'message' => null];
             $isWithinTime = $timeCheck['within'] ?? true;
@@ -1113,7 +1113,7 @@
 
         @endif
 
-        @if(auth()->user()->hasRole('Teacher') && $assessment->teacher_id === auth()->id())
+        @if(auth()->user()->hasRole('Educator') && $assessment->teacher_id === auth()->id())
         <div class="mt-4">
             <form action="{{ route('assessments.destroy', $assessment->id) }}" method="POST"
                 onsubmit="return confirm('Are you sure you want to delete this assessment? This action cannot be undone.')">

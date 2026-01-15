@@ -120,26 +120,29 @@ class User extends Authenticatable
     }
 
     /**
-     * Scope for students
+     * Scope for learners
      */
     public function scopeStudents($query)
     {
-        return $query->role('Student');
+        return $query->role('Learner');
     }
 
     /**
-     * Scope for teachers
+     * Scope for educators
      */
     public function scopeTeachers($query)
     {
-        return $query->role('Teacher');
+        return $query->role('Educator');
     }
 
     /**
-     * Scope for admins
+     * Get courses this learner has enrolled in
      */
-    public function scopeAdmins($query)
+    public function enrolledCourses()
     {
-        return $query->role('Admin');
+        return $this->belongsToMany(Subjects::class, 'course_enrollments', 'learner_id', 'subject_id')
+            ->wherePivot('status', 'active')
+            ->withTimestamps();
     }
+
 }

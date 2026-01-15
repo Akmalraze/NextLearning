@@ -17,6 +17,7 @@ class Material extends Model
         'materials_uploadDate',
         'materials_notes',
         'module_id',
+        'section_title_id',
         'subject_id'
     ];
 
@@ -24,6 +25,12 @@ class Material extends Model
     public function modules()
     {
         return $this->belongsTo(Modules::class);
+    }
+
+    // Relationship with SectionTitle (Many-to-one)
+    public function sectionTitle()
+    {
+        return $this->belongsTo(SectionTitle::class, 'section_title_id');
     }
 
     // Relationship with Subject (Many-to-one)

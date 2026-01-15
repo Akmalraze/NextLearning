@@ -30,7 +30,7 @@ class AssessmentController extends Controller
         $assessments = collect([]);
 
         // Get class-subject assignments for teacher
-        if (auth()->user()->hasRole('Teacher')) {
+        if (auth()->user()->hasRole('Educator')) {
             $teacher = auth()->user();
             $assignments = $teacher->teachingAssignments()->with(['class', 'subject'])->get();
             
@@ -113,8 +113,8 @@ class AssessmentController extends Controller
                 'search',
                 'type'
             ));
-        } elseif (auth()->user()->hasRole('Student')) {
-            // Students see only published assessments for their active class
+        } elseif (auth()->user()->hasRole('Learner')) {
+            // Learners see only published assessments for their active class
             $student = auth()->user();
             $studentClass = $student->activeClass()->first();
             
@@ -242,7 +242,7 @@ class AssessmentController extends Controller
     public function create(Request $request)
     {
         // Only teachers can create assessments
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can create assessments.');
         }
 
@@ -253,13 +253,50 @@ class AssessmentController extends Controller
         // Get classes and subjects from teacher's assignments
         $assignments = $teacher->teachingAssignments()->with(['class', 'subject'])->get();
         
-        // Check if teacher has any assignments
-        if ($assignments->isEmpty()) {
-            return redirect()->route('assessments.index')
-                ->with('error', 'You do not have any teaching assignments. Please contact the administrator to assign you to classes and subjects.');
+        // Get subjects from assignments first
+        $subjectsFromAssignments = $assignments->pluck('subject')
+            ->filter(function ($subject) {
+                return $subject !== null;
+            })
+            ->unique('id');
+        
+        // Get subjects the educator owns (created)
+        $ownedSubjects = Subjects::where('educator_id', $teacher->id)->get();
+        
+        // If a subject_id is provided, check if that subject exists and belongs to educator
+        // This handles cases where the subject might not be in the initial query
+        if ($preSelectedSubjectId) {
+            $subject = Subjects::find($preSelectedSubjectId);
+            if ($subject) {
+                // Check if educator owns it (by educator_id)
+                if ($subject->educator_id == $teacher->id) {
+                    // Add to owned subjects if not already there
+                    if (!$ownedSubjects->contains('id', $subject->id)) {
+                        $ownedSubjects->push($subject);
+                    }
+                }
+                // Also check if educator is assigned to teach it
+                $isAssigned = $assignments->contains(function ($assignment) use ($subject) {
+                    return $assignment->subject_id == $subject->id;
+                });
+                if ($isAssigned && !$subjectsFromAssignments->contains('id', $subject->id)) {
+                    $subjectsFromAssignments->push($subject);
+                }
+                
+                // If subject doesn't have educator_id set but user can view it, allow access
+                // This handles legacy subjects created before educator_id was added
+                // Check if it's not already in either list
+                $alreadyInList = $subjectsFromAssignments->contains('id', $subject->id) || 
+                                 $ownedSubjects->contains('id', $subject->id);
+                if ($subject->educator_id === null && !$alreadyInList) {
+                    // Check if user can view this subject (they're on the show page, so they have access)
+                    // Add it to the subjects list
+                    $subjectsFromAssignments->push($subject);
+                }
+            }
         }
         
-        // Get unique classes and subjects, filtering out null relationships
+        // Get unique classes from assignments
         $classes = $assignments->pluck('class')
             ->filter(function ($class) {
                 return $class !== null;
@@ -267,28 +304,55 @@ class AssessmentController extends Controller
             ->unique('id')
             ->values();
         
-        $subjects = $assignments->pluck('subject')
-            ->filter(function ($subject) {
-                return $subject !== null;
-            })
-            ->unique('id')
-            ->values();
+        // Merge assigned subjects with owned subjects
+        $subjects = $subjectsFromAssignments->merge($ownedSubjects)->unique('id')->values();
 
-        // If no valid classes or subjects found, show error
-        if ($classes->isEmpty() || $subjects->isEmpty()) {
-            return redirect()->route('assessments.index')
-                ->with('error', 'Your teaching assignments have invalid class or subject references. Please contact the administrator.');
+        // If a subject_id is provided but not found in the lists above, 
+        // check if the subject exists and allow access (user is viewing it, so they have permission)
+        if ($preSelectedSubjectId && $subjects->isEmpty()) {
+            $subject = Subjects::find($preSelectedSubjectId);
+            if ($subject) {
+                // If user can view the subject page, they should be able to create assessments
+                // This handles cases where educator_id might not be set
+                $subjects = collect([$subject]);
+            }
         }
 
-        // If class and subject are pre-selected, verify teacher is assigned
-        if ($preSelectedClassId && $preSelectedSubjectId) {
-            $assignment = $assignments->where('class_id', $preSelectedClassId)
-                ->where('subject_id', $preSelectedSubjectId)
-                ->first();
+        // Get all classes that are associated with the subjects (for owned subjects, get all classes)
+        if ($ownedSubjects->isNotEmpty()) {
+            $allClasses = Classes::all();
+            $classes = $classes->merge($allClasses)->unique('id')->values();
+        }
+
+        // If no subjects found, show error
+        if ($subjects->isEmpty()) {
+            return redirect()->route('assessments.index')
+                ->with('error', 'You do not have any teaching assignments or subjects. Please create a subject or contact an administrator to assign you to classes and subjects.');
+        }
+
+        // If no classes found but educator owns subjects, still allow (they can create assessments without class assignment)
+        // But show a warning if no classes exist at all
+        if ($classes->isEmpty()) {
+            // Allow to proceed but they'll need to create a class or get assigned
+            // The form will show an error if class is required
+        }
+
+        // If subject is pre-selected, verify teacher owns it or is assigned to it
+        if ($preSelectedSubjectId) {
+            $subject = $subjects->firstWhere('id', $preSelectedSubjectId);
             
-            if (!$assignment) {
+            if (!$subject) {
                 return redirect()->route('assessments.index')
-                    ->with('error', 'You are not assigned to teach this subject in this class.');
+                    ->with('error', 'You are not authorized to create assessments for this subject.');
+            }
+            
+            // If class is also pre-selected, verify it exists
+            if ($preSelectedClassId) {
+                $class = $classes->firstWhere('id', $preSelectedClassId);
+                if (!$class) {
+                    return redirect()->route('assessments.index')
+                        ->with('error', 'Invalid class selected.');
+                }
             }
         }
 
@@ -301,7 +365,7 @@ class AssessmentController extends Controller
     public function store(Request $request)
     {
         // Only teachers can create assessments
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can create assessments.');
         }
 
@@ -309,7 +373,7 @@ class AssessmentController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => 'required|in:quiz,test,homework',
-            'class_id' => 'required|exists:classes,id',
+            'class_id' => 'nullable|exists:classes,id',
             'subject_id' => 'required|exists:subjects,id',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
@@ -337,15 +401,35 @@ class AssessmentController extends Controller
             'materials.*.description' => 'nullable|string',
         ]);
 
-        // Verify teacher is assigned to this class and subject
+        // Verify teacher owns the subject or is assigned to teach it
         $teacher = auth()->user();
-        $assignment = $teacher->teachingAssignments()
-            ->where('class_id', $validated['class_id'])
-            ->where('subject_id', $validated['subject_id'])
-            ->first();
+        
+        // Check if teacher owns the subject
+        $subject = Subjects::find($validated['subject_id']);
+        $ownsSubject = $subject && $subject->educator_id == $teacher->id;
+        
+        // If class_id is provided, verify assignment
+        if (!empty($validated['class_id'])) {
+            $assignment = $teacher->teachingAssignments()
+                ->where('class_id', $validated['class_id'])
+                ->where('subject_id', $validated['subject_id'])
+                ->first();
 
-        if (!$assignment) {
-            return back()->withErrors(['class_id' => 'You are not assigned to teach this subject in this class.'])->withInput();
+            if (!$assignment && !$ownsSubject) {
+                return back()->withErrors(['class_id' => 'You are not assigned to teach this subject in this class.'])->withInput();
+            }
+        } else {
+            // If no class_id, verify teacher owns the subject
+            if (!$ownsSubject) {
+                // Check if teacher is assigned to teach this subject in any class
+                $hasAssignment = $teacher->teachingAssignments()
+                    ->where('subject_id', $validated['subject_id'])
+                    ->exists();
+                
+                if (!$hasAssignment) {
+                    return back()->withErrors(['subject_id' => 'You are not authorized to create assessments for this subject.'])->withInput();
+                }
+            }
         }
 
         $validated['teacher_id'] = auth()->id();
@@ -439,7 +523,11 @@ class AssessmentController extends Controller
         }
 
         flash()->addSuccess('Assessment created successfully.');
-        return redirect()->route('assessments.index', ['class_id' => $validated['class_id'], 'subject_id' => $validated['subject_id']]);
+        $redirectParams = ['subject_id' => $validated['subject_id']];
+        if (!empty($validated['class_id'])) {
+            $redirectParams['class_id'] = $validated['class_id'];
+        }
+        return redirect()->route('assessments.index', $redirectParams);
     }
 
     /**
@@ -455,12 +543,12 @@ class AssessmentController extends Controller
         $canAttemptAgain = false;
 
         // If user is a teacher, ensure they own this assessment
-        if (auth()->user()->hasRole('Teacher')) {
+        if (auth()->user()->hasRole('Educator')) {
             if ($assessment->teacher_id !== auth()->id()) {
                 abort(403, 'Unauthorized access.');
             }
-        } elseif (auth()->user()->hasRole('Student')) {
-            // Students can only view published assessments for their class
+        } elseif (auth()->user()->hasRole('Learner')) {
+            // Learners can only view published assessments for their class
             $student = auth()->user();
             $studentClass = $student->activeClass()->first();
             
@@ -507,7 +595,7 @@ class AssessmentController extends Controller
     public function edit($id)
     {
         // Only teachers can edit assessments
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can edit assessments.');
         }
 
@@ -536,7 +624,7 @@ class AssessmentController extends Controller
     public function update(Request $request, $id)
     {
         // Only teachers can update assessments
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can update assessments.');
         }
 
@@ -618,7 +706,7 @@ class AssessmentController extends Controller
     public function destroy($id)
     {
         // Only teachers can delete assessments
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can delete assessments.');
         }
 
@@ -643,7 +731,7 @@ class AssessmentController extends Controller
      */
     public function storeQuestion(Request $request, $id)
     {
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can add questions.');
         }
 
@@ -681,7 +769,7 @@ class AssessmentController extends Controller
      */
     public function deleteQuestion($id, $questionId)
     {
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can delete questions.');
         }
 
@@ -717,11 +805,11 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Student starts the quiz (records start time).
+     * Learner starts the quiz (records start time).
      */
     public function startQuiz($id)
     {
-        if (!auth()->user()->hasRole('Student')) {
+        if (!auth()->user()->hasRole('Learner')) {
             abort(403, 'Only students can start quizzes.');
         }
 
@@ -786,11 +874,11 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Student submits quiz answers.
+     * Learner submits quiz answers.
      */
     public function submitQuiz(Request $request, $id)
     {
-        if (!auth()->user()->hasRole('Student')) {
+        if (!auth()->user()->hasRole('Learner')) {
             abort(403, 'Only students can submit quiz answers.');
         }
 
@@ -925,11 +1013,11 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Student submits homework/test answer file.
+     * Learner submits homework/test answer file.
      */
     public function submitHomework(Request $request, $id)
     {
-        if (!auth()->user()->hasRole('Student')) {
+        if (!auth()->user()->hasRole('Learner')) {
             abort(403, 'Only students can submit homework or test answers.');
         }
 
@@ -974,7 +1062,7 @@ class AssessmentController extends Controller
      */
     public function removeSubmission($id)
     {
-        if (!auth()->user()->hasRole('Student')) {
+        if (!auth()->user()->hasRole('Learner')) {
             abort(403, 'Only students can remove their submissions.');
         }
 
@@ -1028,7 +1116,7 @@ class AssessmentController extends Controller
      */
     public function uploadMaterial(Request $request, $id)
     {
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can upload materials.');
         }
 
@@ -1069,7 +1157,7 @@ class AssessmentController extends Controller
      */
     public function deleteMaterial($id, $materialId)
     {
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can delete materials.');
         }
 
@@ -1093,11 +1181,11 @@ class AssessmentController extends Controller
     }
 
     /**
-     * View student submissions for an assessment (Teacher only)
+     * View learner submissions for an assessment (Educator only)
      */
     public function viewSubmissions($id)
     {
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can view student submissions.');
         }
 
@@ -1120,11 +1208,11 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Update mark for a submission (Teacher only)
+     * Update mark for a submission (Educator only)
      */
     public function updateSubmissionMark(Request $request, $id, $submissionId)
     {
-        if (!auth()->user()->hasRole('Teacher')) {
+        if (!auth()->user()->hasRole('Educator')) {
             abort(403, 'Only teachers can update marks.');
         }
 

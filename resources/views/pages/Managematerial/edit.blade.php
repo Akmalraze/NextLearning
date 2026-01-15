@@ -39,10 +39,17 @@
                 Update Material
             </button>
 
-            <a href="{{ route('modules-view', $material->module_id) }}"
-               class="btn btn-secondary">
-                Cancel
-            </a>
+            @if(isset($sectionTitleId) && $sectionTitleId)
+                <a href="{{ route('teacher.subjects.show', $subjectId) }}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+            @else
+                <a href="{{ route('modules-view', $material->module_id) }}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+            @endif
         </form>
     </div>
 </div>
