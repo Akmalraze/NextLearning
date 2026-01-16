@@ -40,9 +40,9 @@
                     <td>{{ $module->subject->name ?? 'N/A' }}</td>
                     <td>
                         <a href="{{ route('modules-view', $module->id) }}" class="btn btn-sm btn-info">View</a>
-                        <!-- Only show Edit and Delete buttons if the user is not a Learner -->
-                        <!-- Only show Edit and Delete buttons if the user is not a Learner -->
-                        @if(!auth()->user()->hasRole('Learner')) 
+                        <!-- Only show Edit and Delete buttons if the user is not a Student -->
+                        <!-- Only show Edit and Delete buttons if the user is not a Student -->
+                        @if(!auth()->user()->hasRole('Student')) 
                             <a href="{{ route('modules-edit', $module->id) }}" class="btn btn-sm btn-warning">Edit</a>
                             <form action="{{ route('modules-destroy', $module->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
                                 @csrf
@@ -65,7 +65,7 @@
         @endif
 
         @if($subjectId)
-        @if(!auth()->user()->hasRole('Learner')) 
+        @if(!auth()->user()->hasRole('Student')) 
             <a class="btn btn-primary"
             href="{{ route('modules-create', $subjectId) }}">
                 Add New Module

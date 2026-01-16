@@ -16,13 +16,18 @@ class AdminController extends Controller
     {
         $user = Auth::user();
 
-        // Educator Dashboard Data
-        if ($user->hasRole('Educator')) {
+        // Admin Dashboard Data
+        if ($user->hasRole('Admin')) {
+            return $this->adminDashboard();
+        }
+
+        // Teacher Dashboard Data
+        if ($user->hasRole('Teacher')) {
             return $this->teacherDashboard($user);
         }
 
-        // Learner Dashboard Data
-        if ($user->hasRole('Learner')) {
+        // Student Dashboard Data
+        if ($user->hasRole('Student')) {
             return $this->studentDashboard($user);
         }
 
@@ -36,21 +41,73 @@ class AdminController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->hasRole('Educator')) {
+        if ($user->hasRole('Admin')) {
+            return redirect()->route('admin.index');
+        }
+
+        if ($user->hasRole('Teacher')) {
             return redirect()->route('teacher.index');
         }
 
-        if ($user->hasRole('Learner')) {
+        if ($user->hasRole('Student')) {
             return redirect()->route('student.index');
         }
 
-        // Fallback to educator route
-        return redirect()->route('teacher.index');
+        // Fallback to admin route
+        return redirect()->route('admin.index');
+    }
+
+    private function adminDashboard()
+    {
+        // Get user counts by role using explicit queries
+        $studentCount = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Student');
+        })->count();
+
+        $teacherCount = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Teacher');
+        })->count();
+
+        $adminCount = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Admin');
+        })->count();
+
+        $totalUsers = User::count();
+
+        // Get active classes count
+        $activeClasses = Classes::count();
+
+        // Get active subjects count
+        $activeSubjects = Subjects::where('is_active', true)->count();
+
+        // Get enrollment distribution by form level
+        $enrollmentByForm = Classes::select('form_level', DB::raw('count(*) as class_count'))
+            ->groupBy('form_level')
+            ->pluck('class_count', 'form_level')
+            ->toArray();
+
+        // Get recent users (last 5 registered)
+        $recentUsers = User::with('roles')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Prepare stats array
+        $stats = [
+            'totalUsers' => $totalUsers,
+            'students' => $studentCount,
+            'teachers' => $teacherCount,
+            'admins' => $adminCount,
+            'activeClasses' => $activeClasses,
+            'activeSubjects' => $activeSubjects,
+        ];
+
+        return view('component.dashboard.index', compact('stats', 'enrollmentByForm', 'recentUsers'));
     }
 
     private function teacherDashboard($user)
     {
-        // Get classes where user is homeroom teacher
+        // Simple teacher dashboard - show classes where user is homeroom teacher
         $teacherClasses = Classes::where('homeroom_teacher_id', $user->id)->get();
 
         // Calculate total students
@@ -59,35 +116,14 @@ class AdminController extends Controller
             $totalStudents += $class->activeStudents()->count();
         }
 
-        // Get courses created by this educator
-        $myCourses = Subjects::where('educator_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(6)
-            ->get();
-
-        $totalCourses = Subjects::where('educator_id', $user->id)->count();
-        $publishedCourses = Subjects::where('educator_id', $user->id)
-            ->where('is_published', true)
-            ->count();
-        
-        // Calculate total learners enrolled in educator's courses
-        $totalEnrolledLearners = DB::table('course_enrollments')
-            ->join('subjects', 'course_enrollments.subject_id', '=', 'subjects.id')
-            ->where('subjects.educator_id', $user->id)
-            ->where('course_enrollments.status', 'active')
-            ->distinct('course_enrollments.learner_id')
-            ->count('course_enrollments.learner_id');
-
         // Teacher stats
         $teacherStats = [
             'totalStudents' => $totalStudents,
             'totalClasses' => $teacherClasses->count(),
-            'totalCourses' => $totalCourses,
-            'publishedCourses' => $publishedCourses,
-            'totalEnrolledLearners' => $totalEnrolledLearners,
+            'totalSubjects' => 0, // Simplified for now
         ];
 
-        return view('component.dashboard.index', compact('teacherStats', 'teacherClasses', 'myCourses'));
+        return view('component.dashboard.index', compact('teacherStats', 'teacherClasses'));
     }
 
     private function studentDashboard($user)
@@ -97,26 +133,18 @@ class AdminController extends Controller
             ->wherePivot('status', 'active')
             ->first();
 
-        // Get enrolled courses (from course_enrollments)
-        $enrolledCourses = $user->enrolledCourses()
-            ->where('is_active', true)
-            ->where('is_published', true)
-            ->with('educator')
-            ->orderBy('created_at', 'desc')
-            ->limit(6)
-            ->get();
-
-        $totalEnrolledCourses = $user->enrolledCourses()
-            ->where('is_active', true)
-            ->where('is_published', true)
-            ->count();
+        // Get subjects for the student's class
+        $enrolledSubjects = [];
+        if ($activeClass) {
+            $enrolledSubjects = $activeClass->subjects;
+        }
 
         // Student stats
         $studentStats = [
-            'coursesEnrolled' => $totalEnrolledCourses,
+            'subjectsEnrolled' => count($enrolledSubjects),
             'className' => $activeClass ? ($activeClass->form_level . ' ' . ($activeClass->name ?? $activeClass->class_name)) : 'Not Assigned',
         ];
 
-        return view('component.dashboard.index', compact('studentStats', 'enrolledCourses', 'activeClass'));
+        return view('component.dashboard.index', compact('studentStats', 'enrolledSubjects', 'activeClass'));
     }
 }

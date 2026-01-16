@@ -1,64 +1,17 @@
-# NextLearning - Learning Management System
+# Laravel Admin Dashboard with Bootstrap 5.3
 
-A comprehensive web-based Learning Management System built with Laravel 10, designed for educational institutions to manage classes, subjects, modules, materials, and assessments.
+## Features
 
-## Technology Stack
+The Laravel Admin Dashboard is a web-based application that serves as a starting point for an Admin Dashboard panel, complete with User Management and Roles Permissions.
 
-- **Laravel 10** - PHP Framework
-- **MySQL** - Database
-- **Bootstrap 5.3** - Frontend Framework
-- **Spatie Laravel Permission** - Role & Permission Management
-- **JavaScript/jQuery** - Frontend Interactivity
-
-## Key Features
-
-### User Management
-- Multi-role system (Admin, Teacher, Student)
-- User activation/deactivation
-- Bulk user creation
-- Role-based access control
-
-### Class & Subject Management
-- Class management (Form 1-5)
-- Subject catalog
-- Teacher-class-subject assignments
-- Student enrollment
-
-### Learning Content
-- Module organization
-- Material upload and management
-- Subject-based content organization
-
-### Assessment System
-- **Quizzes** - Multiple choice, checkboxes, short answer with auto-grading
-- **Tests** - File upload with manual grading
-- **Homework** - File upload with manual grading
-- Time limits and attempt controls
-- Real-time answer saving
-- Grade tracking and history
-
-### Student Features
-- View and access learning materials
-- Take quizzes with timer support
-- Submit tests and homework
-- View grades and performance history
-
-### Teacher Features
-- Create and manage assessments
-- Upload learning materials
-- Grade student submissions
-- View student progress
-- Manage assigned classes and subjects
-
-### Admin Features
-- Complete user management
-- Class and subject administration
-- Teacher assignments
-- System-wide analytics
-
-## Documentation
-
-For detailed system specification, see [SYSTEM_SPECIFICATION.md](SYSTEM_SPECIFICATION.md)
+- Constructed using Laravel 10
+- Incorporates Bootstrap 5.3
+- Features an Authentication System
+- Includes User Management with a Block/Unblock System
+- Equipped with a Roles Permissions System
+- Allows User Profile Viewing and Updating
+- Enables User Password Changes
+- More features to be added soon
 
 ## Contributing
 

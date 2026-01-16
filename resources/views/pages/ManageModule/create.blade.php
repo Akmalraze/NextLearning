@@ -3,7 +3,7 @@
 
 <div class="card">
     <div class="card-header">
-        Add Section Title
+        Create New Module
     </div>
 
     <div class="card-body">
@@ -13,12 +13,11 @@
             <!-- Hidden Subject ID -->
             <input type="hidden" name="subject_id" value="{{ $subject->id }}">
 
-            <!-- Section Title Input -->
+            <!-- Module Name Input -->
             <div class="mb-3">
-                <label for="modules_name">Section Title* <small class="text-muted">(e.g., Week 1, Chapter 1, Unit 1)</small></label>
+                <label for="modules_name">Module Name*</label>
                 <input type="text" id="modules_name" name="modules_name" value="{{ old('modules_name') }}"
-                    class="form-control @error('modules_name') is-invalid @enderror" 
-                    placeholder="Enter section title (e.g., Week 1, Chapter 1)" required>
+                    class="form-control @error('modules_name') is-invalid @enderror" required>
                 @error('modules_name')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
@@ -26,12 +25,11 @@
                 @enderror
             </div>
 
-            <!-- Section Description Input -->
+            <!-- Module Description Input -->
             <div class="mb-3">
-                <label for="modules_description">Section Description <small class="text-muted">(Optional)</small></label>
+                <label for="modules_description">Module Description</label>
                 <textarea id="modules_description" name="modules_description"
-                    class="form-control @error('modules_description') is-invalid @enderror"
-                    placeholder="Add a brief description for this section (optional)">{{ old('modules_description') }}</textarea>
+                    class="form-control @error('modules_description') is-invalid @enderror">{{ old('modules_description') }}</textarea>
                 @error('modules_description')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
@@ -40,7 +38,7 @@
             </div>
 
             <!-- Submit Button -->
-            <button class="btn btn-primary" type="submit">Create Section</button>
+            <button class="btn btn-primary" type="submit">Create Module</button>
         </form>
     </div>
 </div>

@@ -16,7 +16,7 @@ class ProfileController extends Controller
     {
         $profile = Auth::user();
 
-        return view('teacher.profile.edit', compact('profile'));
+        return view('admin.profile.edit', compact('profile'));
     }
 
     public function update(UpdateProfileRequest $request)
@@ -35,7 +35,7 @@ class ProfileController extends Controller
 
     public function password()
     {
-        return view('teacher.profile.change-password');
+        return view('admin.profile.change-password');
     }
 
     public function updatePassword(ChangePasswordRequest $request)

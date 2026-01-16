@@ -40,7 +40,7 @@ class ClassController extends Controller
         $formLevels = Classes::select('form_level')->distinct()->pluck('form_level');
         $academicSessions = Classes::select('academic_session')->distinct()->pluck('academic_session');
 
-        return view('teacher.classes.index', compact('classes', 'search', 'formLevel', 'academicSession', 'formLevels', 'academicSessions'));
+        return view('admin.classes.index', compact('classes', 'search', 'formLevel', 'academicSession', 'formLevels', 'academicSessions'));
     }
 
     public function create()
@@ -53,10 +53,10 @@ class ClassController extends Controller
             ->toArray();
 
         $teachers = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Educator');
+            $query->where('name', 'Teacher');
         })->whereNotIn('id', $assignedTeacherIds)->get();
 
-        return view('teacher.classes.create', compact('teachers'));
+        return view('admin.classes.create', compact('teachers'));
     }
 
     public function store(Request $request)
@@ -82,7 +82,7 @@ class ClassController extends Controller
         Classes::create($validated);
 
         flash()->addSuccess('Class created successfully.');
-        return redirect()->route('teacher.classes.index');
+        return redirect()->route('admin.classes.index');
     }
 
     public function show($id)
@@ -98,12 +98,12 @@ class ClassController extends Controller
         // Get all active subjects for assignment
         $subjects = \App\Models\Subjects::where('is_active', true)->get();
 
-        // Get all educators for assignment
+        // Get all teachers for assignment
         $teachers = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Educator');
+            $query->where('name', 'Teacher');
         })->get();
 
-        return view('teacher.classes.show', compact('class', 'students', 'assignments', 'subjects', 'teachers'));
+        return view('admin.classes.show', compact('class', 'students', 'assignments', 'subjects', 'teachers'));
     }
 
     public function edit($id)
@@ -119,10 +119,10 @@ class ClassController extends Controller
             ->toArray();
 
         $teachers = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Educator');
+            $query->where('name', 'Teacher');
         })->whereNotIn('id', $assignedTeacherIds)->get();
 
-        return view('teacher.classes.edit', compact('class', 'teachers'));
+        return view('admin.classes.edit', compact('class', 'teachers'));
     }
 
     public function update(Request $request, $id)
@@ -151,7 +151,7 @@ class ClassController extends Controller
         $class->update($validated);
 
         flash()->addSuccess('Class updated successfully.');
-        return redirect()->route('teacher.classes.index');
+        return redirect()->route('admin.classes.index');
     }
 
     public function destroy($id)
@@ -170,7 +170,7 @@ class ClassController extends Controller
         $class->delete();
 
         flash()->addSuccess('Class deleted successfully.');
-        return redirect()->route('teacher.classes.index');
+        return redirect()->route('admin.classes.index');
     }
 
     public function enrollments($id)
@@ -180,14 +180,14 @@ class ClassController extends Controller
         $class = Classes::findOrFail($id);
         $enrolledStudents = $class->activeStudents()->with('roles')->get();
 
-        // Get learners not enrolled in ANY class (with active status)
+        // Get students not enrolled in ANY class (with active status)
         $availableStudents = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Learner');
+            $query->where('name', 'Student');
         })->whereDoesntHave('classes', function ($query) {
             $query->where('class_students.status', 'active');
         })->get();
 
-        return view('teacher.classes.enrollments', compact('class', 'enrolledStudents', 'availableStudents'));
+        return view('admin.classes.enrollments', compact('class', 'enrolledStudents', 'availableStudents'));
     }
 
     public function enroll(Request $request, $id)
@@ -201,9 +201,9 @@ class ClassController extends Controller
         $class = Classes::findOrFail($id);
         $student = User::findOrFail($request->student_id);
 
-        // Check if learner has Learner role
-        if (!$student->hasRole('Learner')) {
-            flash()->addError('Selected user is not a learner.');
+        // Check if student has Student role
+        if (!$student->hasRole('Student')) {
+            flash()->addError('Selected user is not a student.');
             return back();
         }
 
@@ -213,14 +213,14 @@ class ClassController extends Controller
             return back();
         }
 
-        // Check if learner is enrolled in another active class
+        // Check if student is enrolled in another active class
         $existingEnrollment = $student->activeClass()->first();
         if ($existingEnrollment) {
             flash()->addError("Student is already enrolled in {$existingEnrollment->form_level} {$existingEnrollment->name}.");
             return back();
         }
 
-        // Enroll learner
+        // Enroll student
         $class->activeStudents()->attach($student->id, [
             'status' => 'active',
             'created_at' => now(),
@@ -238,17 +238,17 @@ class ClassController extends Controller
         $class = Classes::findOrFail($classId);
         $student = User::findOrFail($studentId);
 
-        // Check if learner is enrolled
+        // Check if student is enrolled
         if (!$class->activeStudents()->where('student_id', $studentId)->exists()) {
             flash()->addError('Student is not enrolled in this class.');
             return back();
         }
 
-        // Remove enrollment for learner
+        // Remove enrollment
         $class->activeStudents()->detach($studentId);
 
         flash()->addSuccess("{$student->name} has been removed from {$class->form_level} {$class->name}.");
-        return redirect()->route('teacher.classes.enrollments', $classId);
+        return redirect()->route('admin.classes.enrollments', $classId);
     }
 
     public function assignTeacher(Request $request, $id)
@@ -264,9 +264,9 @@ class ClassController extends Controller
         $subject = \App\Models\Subjects::findOrFail($request->subject_id);
         $teacher = User::findOrFail($request->teacher_id);
 
-        // Check if educator has Educator role
-        if (!$teacher->hasRole('Educator')) {
-            flash()->addError('Selected user is not an educator.');
+        // Check if teacher has Teacher role
+        if (!$teacher->hasRole('Teacher')) {
+            flash()->addError('Selected user is not a teacher.');
             return back();
         }
 

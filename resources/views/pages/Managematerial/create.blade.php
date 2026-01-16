@@ -3,7 +3,7 @@
 @section('content')
 <div class="card">
     <div class="card-header">
-        Add Material — {{ isset($sectionTitle) ? $sectionTitle->title : ($module->modules_name ?? 'N/A') }}
+        Add Material — {{ $module->module_name }}
     </div>
 
     <div class="card-body">
@@ -11,12 +11,7 @@
             @csrf
 
             {{-- REQUIRED --}}
-            @if(isset($sectionTitle))
-                <input type="hidden" name="section_title_id" value="{{ $sectionTitle->id }}">
-            @endif
-            @if(isset($module))
-                <input type="hidden" name="module_id" value="{{ $module->id }}">
-            @endif
+            <input type="hidden" name="module_id" value="{{ $module->id }}">
 
             <div class="mb-3">
                 <label for="materials_name">Material Name *</label>

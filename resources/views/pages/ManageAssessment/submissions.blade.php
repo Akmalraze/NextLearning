@@ -2,7 +2,7 @@
 @section('content')
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Learner Submissions - {{ $assessment->title }}</h5>
+        <h5 class="mb-0">Student Submissions - {{ $assessment->title }}</h5>
         <a href="{{ route('assessments.show', $assessment->id) }}" class="btn btn-secondary btn-sm">
             <span data-feather="arrow-left"></span> Back to Assessment
         </a>
@@ -43,7 +43,7 @@
                             <td>{{ $assessment->end_date ? $assessment->end_date->format('F d, Y h:i A') : 'Not set' }}</td>
                         </tr>
                         <tr>
-                            <th>Total Learners:</th>
+                            <th>Total Students:</th>
                             <td>{{ $students->count() }}</td>
                         </tr>
                     </tbody>
@@ -56,7 +56,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Learner Name</th>
+                        <th>Student Name</th>
                         <th>ID Number</th>
                         <th>Status</th>
                         @if($assessment->type === 'quiz')
@@ -187,7 +187,7 @@
                     <span data-feather="info"></span> Summary
                 </h6>
                 <p class="mb-0">
-                    <strong>Total Learners:</strong> {{ $students->count() }} | 
+                    <strong>Total Students:</strong> {{ $students->count() }} | 
                     <strong>Submitted:</strong> {{ $submissions->filter(function($s) { return $s->submitted_at !== null; })->count() }} | 
                     <strong>Not Submitted:</strong> {{ $students->count() - $submissions->filter(function($s) { return $s->submitted_at !== null; })->count() }}
                 </p>

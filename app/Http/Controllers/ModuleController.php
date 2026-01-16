@@ -64,11 +64,11 @@ class ModuleController extends Controller
         'subject_id' => 'required|exists:subjects,id',  // Ensure the subject exists in the database
     ]);
 
-    // Create a new section title under the selected subject
+    // Create a new module under the selected subject
     Modules::create($validated);
 
     // Redirect back with a success message
-    return redirect()->route('modules-index')->with('success', 'Section title created successfully.');
+    return redirect()->route('modules-index')->with('success', 'Module created successfully.');
 }
 
     // In the MaterialController
@@ -150,7 +150,7 @@ public function list(Subjects $subject)
     $module->update($validated);
 
     // Redirect back with success message
-    return redirect()->route('modules-index')->with('success', 'Section title updated successfully.');
+    return redirect()->route('modules-index')->with('success', 'Module updated successfully.');
 }
 
 
@@ -164,6 +164,6 @@ public function list(Subjects $subject)
         $module = Modules::findOrFail($id);
         $module->delete();
 
-        return redirect()->route('modules-index')->with('success', 'Section title deleted successfully.');
+        return redirect()->route('modules-index')->with('success', 'Module deleted successfully.');
     }
 }
