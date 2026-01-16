@@ -19,14 +19,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Health check endpoint for ELB (no database required)
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'timestamp' => now()->toIso8601String(),
-    ], 200);
-});
-
 Route::get('/', function () {
     return view('welcome');
 });
